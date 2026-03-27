@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>james.today — Design Brief v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --text: #e8e4dc;
+    --text-dim: #8a8578;
+    --text-bright: #f5f0e6;
+    --accent: #c4956a;
+    --accent-glow: #d4a574;
+    --line: rgba(196, 149, 106, 0.15);
+    --line-strong: rgba(196, 149, 106, 0.35);
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; background: var(--bg); }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.7;
+    font-size: 17px;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.03;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(196,149,106,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 400;
+    line-height: 1.05;
+    color: var(--text-bright);
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.4s forwards;
+  }
+
+  .hero-title em { font-style: italic; color: var(--accent); }
+
+  .hero-subtitle {
+    font-family: var(--serif);
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text-dim);
+    margin-top: 32px;
+    max-width: 620px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+
+  .hero-line {
+    width: 120px;
+    height: 1px;
+    background: var(--line-strong);
+    margin-top: 48px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.8s forwards;
+  }
+
+  /* ─── Sections ─── */
+  section {
+    padding: 100px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .section-heading {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.2;
+    margin-bottom: 40px;
+    max-width: 750px;
+  }
+
+  .section-heading em { font-style: italic; color: var(--accent); }
+
+  p { max-width: 640px; margin-bottom: 24px; color: var(--text); }
+
+  p.lead { font-size: 1.15rem; color: var(--text-dim); line-height: 1.8; }
+
+  .divider { max-width: 1200px; margin: 0 auto; padding: 0 60px; }
+
+  .divider-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--line-strong) 20%, var(--line-strong) 80%, transparent);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  /* ─── Paradox callout ─── */
+  .paradox {
+    padding: 64px 60px;
+    background: rgba(196,149,106,0.025);
+    border-left: 2px solid var(--line-strong);
+    margin: 60px 0;
+    position: relative;
+  }
+
+  .paradox-quote {
+    font-family: var(--serif);
+    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    font-style: italic;
+    color: var(--text-bright);
+    line-height: 1.55;
+    max-width: 700px;
+    margin-bottom: 24px;
+  }
+
+  .paradox p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  /* ─── Today meanings ─── */
+  .today-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .today-cell {
+    padding: 48px 36px;
+    border: 1px solid var(--line);
+    transition: all 0.4s ease;
+    position: relative;
+  }
+
+  .today-cell:hover {
+    border-color: var(--line-strong);
+    background: rgba(196,149,106,0.02);
+  }
+
+  .today-cell-label {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .today-cell h3 {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    margin-bottom: 14px;
+  }
+
+  .today-cell p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  /* ─── Pillar cards ─── */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 60px;
+  }
+
+  .pillar {
+    padding: 40px 32px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    transition: border-color 0.4s ease, background 0.4s ease;
+  }
+
+  .pillar:hover {
+    border-color: var(--line-strong);
+    background: rgba(196,149,106,0.02);
+  }
+
+  .pillar-number {
+    font-family: var(--serif);
+    font-size: 3rem;
+    color: rgba(196,149,106,0.12);
+    line-height: 1;
+    margin-bottom: 24px;
+  }
+
+  .pillar h3 {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    margin-bottom: 16px;
+  }
+
+  .pillar p { font-size: 0.92rem; color: var(--text-dim); line-height: 1.7; }
+
+  /* ─── Availability vision ─── */
+  .availability {
+    padding: 64px;
+    border: 1px solid var(--line);
+    margin-top: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .availability::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(196,149,106,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .availability h3 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .availability p {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .avail-features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 32px;
+  }
+
+  .avail-feature {
+    padding: 20px 24px;
+    background: rgba(196,149,106,0.03);
+    border-left: 2px solid var(--line);
+  }
+
+  .avail-feature strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 0.95rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .avail-feature span {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ─── Voice tone ─── */
+  .tone-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-top: 60px;
+  }
+
+  .tone-cell {
+    padding: 40px 28px;
+    background: rgba(196,149,106,0.03);
+    border: 1px solid var(--line);
+    text-align: center;
+    transition: all 0.4s ease;
+  }
+
+  .tone-cell:hover { background: rgba(196,149,106,0.06); }
+
+  .tone-word {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .tone-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.6; }
+
+  /* ─── Threads ─── */
+  .thread-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 32px;
+    padding: 40px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+
+  .thread-item:last-child { border-bottom: none; }
+
+  .thread-icon {
+    font-family: var(--serif);
+    font-size: 2.4rem;
+    color: rgba(196,149,106,0.2);
+    text-align: center;
+    line-height: 1;
+    padding-top: 4px;
+  }
+
+  .thread-content h3 {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    margin-bottom: 10px;
+  }
+
+  .thread-content p { font-size: 0.92rem; color: var(--text-dim); }
+
+  /* ─── Quote ─── */
+  .quote-block {
+    padding: 80px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  blockquote {
+    font-family: var(--serif);
+    font-size: clamp(1.4rem, 2.8vw, 2rem);
+    font-style: italic;
+    color: var(--text-bright);
+    line-height: 1.5;
+    max-width: 800px;
+    position: relative;
+    padding-left: 40px;
+    border-left: 2px solid var(--line-strong);
+  }
+
+  blockquote cite {
+    display: block;
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-style: normal;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-top: 24px;
+  }
+
+  /* ─── Closing ─── */
+  .closing {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 100px 60px;
+    position: relative;
+  }
+
+  .closing::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(196,149,106,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .closing-heading {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.2;
+    margin-bottom: 24px;
+  }
+
+  .closing-heading em { font-style: italic; color: var(--accent); }
+
+  .closing p {
+    max-width: 540px;
+    text-align: center;
+    color: var(--text-dim);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--line-strong);
+    padding: 8px 16px;
+    margin-top: 40px;
+    border-radius: 1px;
+  }
+
+  footer {
+    padding: 40px 60px;
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    opacity: 0.5;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 900px) {
+    .hero, section, .quote-block, .closing { padding-left: 32px; padding-right: 32px; }
+    .divider { padding: 0 32px; }
+    .two-col { grid-template-columns: 1fr; gap: 48px; }
+    .pillars, .today-grid { grid-template-columns: 1fr; }
+    .tone-grid { grid-template-columns: 1fr 1fr; }
+    .paradox { padding: 40px 32px; }
+    .availability { padding: 40px 32px; }
+    .avail-features { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .hero, section, .quote-block, .closing { padding-left: 20px; padding-right: 20px; }
+    .divider { padding: 0 20px; }
+    .tone-grid { grid-template-columns: 1fr; }
+    .thread-item { grid-template-columns: 1fr; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════ HERO ════════════════════════ -->
+<div class="hero">
+  <div class="hero-label">Design Brief v2 — Personal Brand</div>
+  <h1 class="hero-title">james<em>.today</em></h1>
+  <p class="hero-subtitle">A human node in an agentic world. A standing invitation to make contact — not next week, not eventually. Now.</p>
+  <div class="hero-line"></div>
+</div>
+
+<!-- ════════════════════════ THE PARADOX ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">01 — The Paradox</div>
+  <h2 class="section-heading">A personal brand for someone who doesn't believe in <em>the self.</em></h2>
+
+  <div class="paradox">
+    <div class="paradox-quote">"I don't want to bring attention to myself or focus on me. I don't even really believe that I exist as such. But in this time of rapid change and the proliferation of agentic systems and AI, we need more people, more humanness, more relationality — not experts or authorities, but points of contact and connection. And I know that I'm one of them."</div>
+    <p>This is the engine of the whole project. James isn't building a personal brand in the conventional sense — he's making a person findable, contactable, and available in an era when human presence itself is becoming scarce. The brand isn't about promoting a self. It's about offering a node.</p>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <p class="lead">The world is filling up with agentic systems, automated outreach, AI-generated content, and algorithmic relationships. What's genuinely rare now is a real human being who is reachable, grounded, embedded in rich networks of people and ideas, and willing to think with you about what's actually happening.</p>
+      <p>james.today is the simplest possible expression of that offer: here is a person. He's here today. You can reach him.</p>
+    </div>
+    <div>
+      <p>After 18 years of building things for other people — brands, websites, platforms, systems for consciousness-focused organizations — James is starting to get more public attention. Featured in magazines, invited onto podcasts. But the impulse isn't ego. It's that he's connected to many things and wants to connect more people to more things. The domain he's owned for a decade, bought originally for a clever email address, turns out to be the perfect articulation of the stance.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ WHAT TODAY MEANS ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">02 — What "Today" Means</div>
+  <h2 class="section-heading">Three registers of <em>now</em></h2>
+
+  <div class="today-grid">
+    <div class="today-cell">
+      <div class="today-cell-label">Functional</div>
+      <h3>Available today</h3>
+      <p>Not a static bio or a scheduling page that books you three weeks out. A live window: here's what James is working on today, here's what's on his mind, here are the open slots. The pace has changed — a single day with a client, especially in person, can produce what used to take weeks. The site should reflect that tempo.</p>
+    </div>
+    <div class="today-cell">
+      <div class="today-cell-label">Contemplative</div>
+      <h3>Present tense</h3>
+      <p>Today is the only tense that matters. Not a portfolio of past work, not a manifesto about the future. A practice of showing up in the present moment, making contact possible, and updating as the world shifts beneath us. The .today TLD isn't clever — it's philosophical.</p>
+    </div>
+    <div class="today-cell">
+      <div class="today-cell-label">Relational</div>
+      <h3>Reachable now</h3>
+      <p>Minimum friction between the visitor and actual contact. Not a funnel, not a lead-gen form, not a "let's schedule a call." A threshold. Real-time availability, dynamic booking, the ability to reach a human today — not as performance, but as genuine practice.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ IDENTITY ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">03 — The Person</div>
+  <h2 class="section-heading">Who is James, <em>exactly?</em></h2>
+  <div class="two-col">
+    <div>
+      <p class="lead">A designer who thinks in systems. A spatial thinker who sees in synesthesia. A bridge-builder between ancient pattern languages and living digital infrastructure. The root system beneath the studio.</p>
+      <p>James has spent his career at the edges — where parametric geometry meets web design, where Vedic philosophy meets UX, where sacred geometry meets JavaScript. He founded Iris Cocreative to serve consciousness-focused organizations, but the personal brand is something different: it's the person underneath the practice.</p>
+    </div>
+    <div>
+      <p>Key tensions that define the voice:</p>
+      <p><strong>Technical depth + philosophical breadth.</strong> He can talk about Grasshopper node graphs and the Samkhya tattvas in the same breath — and mean both equally.</p>
+      <p><strong>Craft devotion + systems vision.</strong> He cares about the kerning and the cosmology. The CSS variable and the consciousness research.</p>
+      <p><strong>Builder pragmatism + mystic sensibility.</strong> He ships things. He also meditates. The two are not in conflict.</p>
+      <p><strong>Public reluctance + relational necessity.</strong> He doesn't want attention on himself. He does want to connect people to things. The brand lives in this tension without resolving it.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ AVAILABILITY VISION ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">04 — The Living Surface</div>
+  <h2 class="section-heading">What it looks like to be <em>radically present</em></h2>
+
+  <p class="lead">The conventional personal site is a monument. This is a dashboard of aliveness — a real-time signal of what's happening, what's available, and how to make contact.</p>
+
+  <div class="availability">
+    <h3>What if james.today had his schedule today?</h3>
+    <p>Available slots people could book into. What he's thinking about right now. The project he's deep in. The article he just read. The client conversation that shifted something. Not a content calendar — a living letter to whoever finds it, timestamped by the day.</p>
+
+    <div class="avail-features">
+      <div class="avail-feature">
+        <strong>Today's availability</strong>
+        <span>Real open slots, dynamically pulled. Not "schedule a call in three weeks" but "I have two hours this afternoon."</span>
+      </div>
+      <div class="avail-feature">
+        <strong>What's alive</strong>
+        <span>The current project, the question on his mind, the thread he's pulling. Updated as it changes, not weekly — as it happens.</span>
+      </div>
+      <div class="avail-feature">
+        <strong>Recent thinking</strong>
+        <span>Short-form reflections, observations, half-formed thoughts. Not blog posts — dispatches from the present tense.</span>
+      </div>
+      <div class="avail-feature">
+        <strong>Connection graph</strong>
+        <span>The people, organizations, and ideas James is connected to. Not a LinkedIn list — a living map of the network he can connect you into.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ QUOTE ════════════════════════ -->
+<div class="quote-block fade-in">
+  <blockquote>
+    The eagle and the condor need to be flying in the digital spheres as well. That's what I'm here for — happy to be digital shaman.
+    <cite>James Bolden</cite>
+  </blockquote>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ CONTENT PILLARS ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">05 — Content Pillars</div>
+  <h2 class="section-heading">Three domains of <em>inquiry</em></h2>
+
+  <div class="pillars">
+    <div class="pillar">
+      <div class="pillar-number">I</div>
+      <h3>Design as Practice</h3>
+      <p>The craft of creating coherent digital spaces for transformative organizations. Parametric design, interface philosophy, sacred geometry in web systems. The ongoing experiment of moving communities from grid-based to radial, organic, biomimetic interfaces — and why that shift changes how groups think.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-number">II</div>
+      <h3>The MIST Framework</h3>
+      <p>Matter, Intelligence, Space, Time as irreducible dimensions of experienced reality. The Mater/Pater etymology. Dialogues with Samkhya, Plato's Timaeus, Fuller's synergetics, indigenous cosmologies. The book project, developed in public — thinking out loud, not performing expertise.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-number">III</div>
+      <h3>Collaborative Intelligence</h3>
+      <p>The frontier: how humans and AI co-create meaning. "The Fingerprints of Probability" as a frame for understanding AI-assisted work. The sensemaking project as lived practice. What it actually looks like to build tools for collective cognition rather than individual productivity.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ VOICE ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">06 — Voice & Tone</div>
+  <h2 class="section-heading">How this space <em>sounds</em></h2>
+
+  <p class="lead">The voice of james.today is warm but precise. It speaks from experience, not authority. It earns trust through specificity and vulnerability, not credentials and volume.</p>
+
+  <div class="tone-grid">
+    <div class="tone-cell">
+      <div class="tone-word">Grounded</div>
+      <div class="tone-desc">Rooted in practice. 18 years of doing, not theorizing.</div>
+    </div>
+    <div class="tone-cell">
+      <div class="tone-word">Curious</div>
+      <div class="tone-desc">"I'm noticing…" over "The truth is…"</div>
+    </div>
+    <div class="tone-cell">
+      <div class="tone-word">Generous</div>
+      <div class="tone-desc">Fellow traveler, not gatekeeper. Shares thinking openly.</div>
+    </div>
+    <div class="tone-cell">
+      <div class="tone-word">Present</div>
+      <div class="tone-desc">Timestamped. Responsive. Alive to what's happening now.</div>
+    </div>
+  </div>
+
+  <p style="margin-top: 48px;">The anti-patterns: never preachy, never guru-mode, never performatively humble. No "journey" language. No listicles. No hot takes. No content-as-performance. The writing should feel like talking with someone who's been thinking carefully about something and is genuinely glad you asked.</p>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ DESIGN LANGUAGE ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">07 — Design Language</div>
+  <h2 class="section-heading">Visual <em>grammar</em></h2>
+  <div class="two-col">
+    <div>
+      <p class="lead">The site should feel like the person: spare, warm, deeply considered. A well-lit workshop, not a gallery. A threshold, not a funnel. Alive with tools and materials, but not cluttered.</p>
+      <p>Typographically rich. Dark palette with warm accents. Generous whitespace. Occasional bursts of parametric or generative visual texture — subtle reminders that geometry is always underneath.</p>
+    </div>
+    <div>
+      <p>No hero sliders. No stock photography. No three-column feature grids with icons. Every visual element should be either generated (Grasshopper/p5.js), photographed by James, or hand-drawn. The aesthetic is the message: this was made by a person, with care, using real tools.</p>
+      <p>The site itself as a design artifact. Interactive elements that reward attention. A sense of time passing — what's here today won't be exactly here tomorrow. The medium carrying the message of presence.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ ACTIVE THREADS ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">08 — Active Threads</div>
+  <h2 class="section-heading">What's <em>alive</em> right now</h2>
+
+  <div class="thread-item">
+    <div class="thread-icon">◯</div>
+    <div class="thread-content">
+      <h3>The Fingerprints of Probability</h3>
+      <p>An article series on recognizing AI-generated writing patterns — and what that recognition teaches us about human creativity. Part craft guide, part philosophical inquiry. A second installment on the intersubjective "we" of human-AI authorship is in development.</p>
+    </div>
+  </div>
+
+  <div class="thread-item">
+    <div class="thread-icon">△</div>
+    <div class="thread-content">
+      <h3>MIST: The Book Project</h3>
+      <p>Matter, Intelligence, Space, Time — a tetrad of irreducible dimensions, tracing through Vedic Samkhya, Plato's Timaeus, Fuller's synergetics, Heidegger's ontology, indigenous cosmologies. In early research phase, developed in collaboration with Claude.</p>
+    </div>
+  </div>
+
+  <div class="thread-item">
+    <div class="thread-icon">◇</div>
+    <div class="thread-content">
+      <h3>Radial Interfaces</h3>
+      <p>Moving digital communities from linear feeds and grids into circular, organic, node-based spatial arrangements. Built with Grasshopper-to-JavaScript pipelines and embedded in Webflow. The hypothesis: how we see each other shapes how we relate.</p>
+    </div>
+  </div>
+
+  <div class="thread-item">
+    <div class="thread-icon">□</div>
+    <div class="thread-content">
+      <h3>The Sensemaking Project</h3>
+      <p>The collective counterpart to this personal practice. Where james.today is one voice thinking out loud, the sensemaking project invites many voices into shared inquiry about the present moment. These two projects are symbiotic — the personal site provides a place to stand, the collective space provides a place to move.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ OPEN QUESTIONS ════════════════════════ -->
+<section class="fade-in">
+  <div class="section-label">09 — Open Questions</div>
+  <h2 class="section-heading">What we don't <em>know yet</em></h2>
+  <div class="two-col">
+    <div>
+      <p>What does availability look like when it's genuine rather than performative? What's the right cadence for "today" — daily updates, live pulses, a sense of time passing on the page itself?</p>
+      <p>How does this connect to Iris Cocreative without being subsumed by it? When someone lands here, do they meet James-the-person or James-the-studio-founder? Both? Neither?</p>
+    </div>
+    <div>
+      <p>What's the relationship between this personal practice and the larger collective sensemaking work he's part of? Is james.today the proof of concept? The entry point? The anchor?</p>
+      <p>And the deepest question: how do you build a personal brand rooted in the conviction that the self is relational, not fixed — that you're a pattern that arises in connection, not a thing that exists independently?</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ════════════════════════ CLOSING ════════════════════════ -->
+<div class="closing fade-in">
+  <h2 class="closing-heading">Not a site to <em>launch.</em><br>A practice to <em>inhabit.</em></h2>
+  <p>james.today is a garden, not a monument. Start sparse, grow dense. Let the form follow the presence. Update it like you live in it — because you do.</p>
+  <span class="tag">Document 1 of 2 — See also: An Ethnography of the Present</span>
+</div>
+
+<footer>
+  james.today design brief v2 — March 26, 2026 — Prepared in collaboration with Claude
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
