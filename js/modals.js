@@ -83,8 +83,9 @@
     _currentModal = { overlay: overlay, modal: modal };
     _trackDirty(modal);
 
-    // Focus first input
+    // Trigger the open transition on next frame
     requestAnimationFrame(function () {
+      overlay.classList.add('open');
       var first = modal.querySelector('input, textarea, select');
       if (first) first.focus();
     });
