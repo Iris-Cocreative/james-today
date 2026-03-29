@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — james.today</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0b0a0f;
+    --surface: rgba(255, 255, 255, 0.02);
+    --surface-hover: rgba(255, 255, 255, 0.04);
+    --text: #e8e4dc;
+    --text-dim: #706b62;
+    --text-bright: #f5f0e6;
+    --accent: #c4956a;
+    --accent-hover: #d4a87d;
+    --line: rgba(196, 149, 106, 0.2);
+    --line-subtle: rgba(196, 149, 106, 0.08);
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    height: 100%;
+    background: var(--bg);
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    min-height: 100%;
+    position: relative;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  body.ready { opacity: 1; }
+
+  /* ─── Grain ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.03;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ─── Loading state ─── */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    z-index: 200;
+    transition: opacity 0.5s ease;
+  }
+
+  .loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.3;
+    animation: loadPulse 1.2s ease infinite;
+  }
+
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; margin: 0 8px; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes loadPulse {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50% { opacity: 0.8; transform: scale(1.2); }
+  }
+
+  /* ─── Header ─── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--line-subtle);
+  }
+
+  .header-brand {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .header-brand em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .header-brand:hover { color: var(--accent); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .user-email {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 300;
+  }
+
+  .sign-out-btn {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .sign-out-btn:hover {
+    border-color: var(--accent);
+    background: rgba(196, 149, 106, 0.08);
+  }
+
+  /* ─── Main ─── */
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 40px 120px;
+  }
+
+  .welcome {
+    margin-bottom: 48px;
+  }
+
+  .welcome h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.2;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.2s forwards;
+  }
+
+  .welcome h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .welcome p {
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: var(--text-dim);
+    margin-top: 12px;
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.4s forwards;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: var(--line);
+    margin: 48px 0;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.5s forwards;
+  }
+
+  /* ─── Module grid ─── */
+  .modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--line-subtle);
+    border-radius: 6px;
+    padding: 28px 24px;
+    transition: all 0.35s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .module-card:hover {
+    border-color: var(--line);
+    background: var(--surface-hover);
+    transform: translateY(-2px);
+  }
+
+  .module-card:hover::before {
+    opacity: 0.6;
+  }
+
+  .module-icon {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .module-title {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+  }
+
+  .module-desc {
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .module-badge {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    opacity: 0.6;
+  }
+
+  /* ─── Session info ─── */
+  .session-info {
+    margin-top: 60px;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line-subtle);
+    border-radius: 6px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.8s forwards;
+  }
+
+  .session-info h3 {
+    font-family: var(--serif);
+    font-size: 1rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+
+  .session-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line-subtle);
+    font-size: 0.78rem;
+  }
+
+  .session-row:last-child { border: none; }
+
+  .session-label {
+    font-weight: 400;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+  }
+
+  .session-value {
+    font-weight: 300;
+    color: var(--text);
+    font-family: 'DM Sans', monospace;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .header { padding: 16px 20px; }
+    .main { padding: 40px 20px 100px; }
+    .modules { grid-template-columns: 1fr; }
+    .header-right { gap: 12px; }
+    .user-email { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-dot"></div>
+  <div class="loading-dot"></div>
+  <div class="loading-dot"></div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <a href="/" class="header-brand">james<em>.today</em></a>
+  <div class="header-right">
+    <span class="user-email" id="userEmail"></span>
+    <button class="sign-out-btn" onclick="signOut()">Sign out</button>
+  </div>
+</header>
+
+<!-- Main content -->
+<main class="main" id="mainContent" style="display:none;">
+  <div class="welcome">
+    <h1>Welcome <em>back</em></h1>
+    <p>This is the protected member area. Below are placeholder modules you can build out for project management.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="modules">
+    <div class="module-card">
+      <span class="module-icon">◈</span>
+      <div class="module-title">Projects</div>
+      <div class="module-desc">Track active projects, milestones, and deliverables across the studio.</div>
+      <span class="module-badge">Coming soon</span>
+    </div>
+
+    <div class="module-card">
+      <span class="module-icon">◉</span>
+      <div class="module-title">Tasks</div>
+      <div class="module-desc">Manage action items, assignments, and status updates in one place.</div>
+      <span class="module-badge">Coming soon</span>
+    </div>
+
+    <div class="module-card">
+      <span class="module-icon">◇</span>
+      <div class="module-title">Time & Rhythm</div>
+      <div class="module-desc">Log time, set intentions, and track the rhythm of your creative practice.</div>
+      <span class="module-badge">Coming soon</span>
+    </div>
+
+    <div class="module-card">
+      <span class="module-icon">△</span>
+      <div class="module-title">Documents</div>
+      <div class="module-desc">Shared briefs, proposals, notes, and reference materials.</div>
+      <span class="module-badge">Coming soon</span>
+    </div>
+
+    <div class="module-card">
+      <span class="module-icon">○</span>
+      <div class="module-title">Connections</div>
+      <div class="module-desc">People, organizations, and the relationships between them.</div>
+      <span class="module-badge">Coming soon</span>
+    </div>
+
+    <div class="module-card">
+      <span class="module-icon">⬡</span>
+      <div class="module-title">Integrations</div>
+      <div class="module-desc">Airtable, n8n, Webflow, and other tools that power the studio.</div>
+      <span class="module-badge">Coming soon</span>
+    </div>
+  </div>
+
+  <!-- Session debug info -->
+  <div class="session-info">
+    <h3>Session</h3>
+    <div class="session-row">
+      <span class="session-label">User ID</span>
+      <span class="session-value" id="userId">—</span>
+    </div>
+    <div class="session-row">
+      <span class="session-label">Email</span>
+      <span class="session-value" id="sessionEmail">—</span>
+    </div>
+    <div class="session-row">
+      <span class="session-label">Last sign in</span>
+      <span class="session-value" id="lastSignIn">—</span>
+    </div>
+    <div class="session-row">
+      <span class="session-label">Token expires</span>
+      <span class="session-value" id="tokenExpiry">—</span>
+    </div>
+  </div>
+</main>
+
+<script>
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  CONFIGURATION — Must match login.html
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const SUPABASE_URL = 'https://reoliysifzxuzpskywtm.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_trmR_URy0KyDtDUfpgjOfg_owXvNPRI';
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  AUTH CHECK — Redirect if not logged in
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  (async () => {
+    const { data: { session }, error } = await sb.auth.getSession();
+
+    if (!session) {
+      window.location.href = './login.html';
+      return;
+    }
+
+    // Populate UI
+    const user = session.user;
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('userId').textContent = user.id.slice(0, 12) + '…';
+    document.getElementById('sessionEmail').textContent = user.email;
+    document.getElementById('lastSignIn').textContent = user.last_sign_in_at
+      ? new Date(user.last_sign_in_at).toLocaleString()
+      : '—';
+    document.getElementById('tokenExpiry').textContent = session.expires_at
+      ? new Date(session.expires_at * 1000).toLocaleString()
+      : '—';
+
+    // Show content
+    document.getElementById('loadingScreen').classList.add('hidden');
+    document.getElementById('mainContent').style.display = 'block';
+    document.body.classList.add('ready');
+  })();
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  SIGN OUT
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  async function signOut() {
+    await sb.auth.signOut();
+    window.location.href = './login.html';
+  }
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  LISTEN FOR SESSION CHANGES
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT' || !session) {
+      window.location.href = './login.html';
+    }
+  });
+</script>
+
+</body>
+</html>
