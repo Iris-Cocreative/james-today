@@ -89,7 +89,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;o
 .pc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
 .pc-name{font-family:var(--serif);font-size:1.05rem;color:var(--text-bright)}
 .pc-type{font-size:.55rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);padding:2px 8px;border:1px solid var(--line-subtle);border-radius:10px;white-space:nowrap}
+.pc-image{width:100%;height:100px;object-fit:cover;border-radius:3px;margin-bottom:10px;opacity:.85}
 .pc-desc{font-size:.75rem;font-weight:300;color:var(--text-dim);line-height:1.5;margin-top:10px}
+.color-picker-wrap{display:flex;align-items:center;gap:10px}
+.color-picker-wrap input[type="color"]{width:36px;height:36px;border:1px solid var(--line-subtle);border-radius:var(--radius);background:var(--bg-input);cursor:pointer;padding:2px}
+.color-picker-wrap input[type="color"]::-webkit-color-swatch-wrapper{padding:0}
+.color-picker-wrap input[type="color"]::-webkit-color-swatch{border:none;border-radius:3px}
+.color-picker-wrap .color-hex{font-size:.78rem;color:var(--text-dim);font-weight:300;font-family:var(--sans)}
 .pc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:12px;border-top:1px solid var(--line-subtle)}
 .pc-status{display:flex;align-items:center;gap:5px;font-size:.6rem;letter-spacing:1px;text-transform:uppercase}.pc-status .pip{width:6px;height:6px;border-radius:50%}
 .pc-stats{font-size:.65rem;color:var(--text-dim)}
@@ -195,6 +201,15 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;o
     <div class="modal-field"><label>Budget</label><input type="number" id="pf-budget" step="0.01" placeholder="0.00"></div>
     <div class="modal-field"><label>Hourly Rate</label><input type="number" id="pf-rate" step="0.01" placeholder="0.00"></div>
   </div>
+  <div class="modal-row">
+    <div class="modal-field"><label>Color</label>
+      <div class="color-picker-wrap">
+        <input type="color" id="pf-color" value="#c4956a">
+        <span class="color-hex" id="pf-color-hex">#c4956a</span>
+      </div>
+    </div>
+    <div class="modal-field"><label>Image URL</label><input type="url" id="pf-image" placeholder="https://..."></div>
+  </div>
   <div class="modal-actions">
     <button class="btn-delete" id="projectDeleteBtn" onclick="deleteProject()" style="display:none">Delete</button>
     <button class="btn-cancel" onclick="closeProjectModal()">Cancel</button>
@@ -202,7 +217,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:1000;o
   </div>
 </div></div>
 <script>
-const SUPABASE_URL = 'https://reoliysifzxuzpskywtm.supabase.co';
+const SUPABASE_URL='https://reoliysifzxuzpskywtm.supabase.co';
 const SUPABASE_KEY='sb_publishable_trmR_URy0KyDtDUfpgjOfg_owXvNPRI';
 const{createClient}=supabase;const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 const STATUSES=[{key:'idea',label:'Idea',color:'#add8e6'},{key:'planning',label:'Planning',color:'#ffd700'},{key:'scheduled',label:'Scheduled',color:'#ffa500'},{key:'building',label:'Building',color:'#32cd32'},{key:'done',label:'Done',color:'#1e90ff'},{key:'integrated',label:'Integrated',color:'#9370db'}];
@@ -349,7 +364,7 @@ function renderProjects(){
   const c=document.getElementById('projectsGrid');
   if(!projects.length){c.innerHTML='<div class="empty-state"><div class="empty-icon">&#9651;</div>No projects yet. Click + Project to create one.</div>';return}
   c.innerHTML=projects.map(p=>{const tc=tasks.filter(t=>t.project_id===p.id).length;const ac=tasks.filter(t=>t.project_id===p.id&&!['done','integrated'].includes(t.status)).length;const col=statusColor(p.status);
-    return`<div class="project-card" onclick="openProjectModal('${p.id}')"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${col};opacity:.5"></div><div class="pc-header"><div class="pc-name">${esc(p.name)}</div><div class="pc-type">${p.type||'other'}</div></div>${p.description?`<div class="pc-desc">${esc(p.description)}</div>`:''}<div class="pc-footer"><div class="pc-status"><span class="pip" style="background:${col}"></span>${STATUS_MAP[p.status]?.label||p.status}</div><div class="pc-stats">${ac} active &middot; ${tc} tasks</div></div></div>`;
+    return`<div class="project-card" onclick="openProjectModal('${p.id}')"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${p.color||col};opacity:.5"></div>${p.image_url?`<img class="pc-image" src="${esc(p.image_url)}" alt="" onerror="this.style.display='none'">`:''}<div class="pc-header"><div class="pc-name">${esc(p.name)}</div><div class="pc-type">${p.type||'other'}</div></div>${p.description?`<div class="pc-desc">${esc(p.description)}</div>`:''}<div class="pc-footer"><div class="pc-status"><span class="pip" style="background:${col}"></span>${STATUS_MAP[p.status]?.label||p.status}</div><div class="pc-stats">${ac} active &middot; ${tc} tasks</div></div></div>`;
   }).join('');
 }
 function openProjectModal(id){
@@ -360,10 +375,14 @@ function openProjectModal(id){
     document.getElementById('pf-type').value=p.type||'personal';document.getElementById('pf-status').value=p.status||'idea';
     document.getElementById('pf-start').value=p.start_date||'';document.getElementById('pf-target').value=p.target_date||'';
     document.getElementById('pf-budget').value=p.budget||'';document.getElementById('pf-rate').value=p.hourly_rate||'';
+    document.getElementById('pf-color').value=p.color||'#c4956a';document.getElementById('pf-color-hex').textContent=p.color||'#c4956a';
+    document.getElementById('pf-image').value=p.image_url||'';
   }else{document.getElementById('projectModalTitle').textContent='New Project';document.getElementById('projectDeleteBtn').style.display='none';
     ['pf-name','pf-desc'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('pf-type').value='personal';document.getElementById('pf-status').value='building';
     ['pf-start','pf-target','pf-budget','pf-rate'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('pf-color').value='#c4956a';document.getElementById('pf-color-hex').textContent='#c4956a';
+    document.getElementById('pf-image').value='';
   }
   document.getElementById('projectModal').classList.add('open');document.getElementById('pf-name').focus();
 }
@@ -374,12 +393,15 @@ async function saveProject(){
     status:document.getElementById('pf-status').value,start_date:document.getElementById('pf-start').value||null,
     target_date:document.getElementById('pf-target').value||null,budget:parseFloat(document.getElementById('pf-budget').value)||null,
     hourly_rate:parseFloat(document.getElementById('pf-rate').value)||null,
+    color:document.getElementById('pf-color').value||null,
+    image_url:document.getElementById('pf-image').value.trim()||null,
     completed_at:['done','integrated'].includes(document.getElementById('pf-status').value)?new Date().toISOString():null};
   if(editingProjectId)await sb.from('projects').update(p).eq('id',editingProjectId);else await sb.from('projects').insert(p);
   closeProjectModal();await loadAll();
 }
 async function deleteProject(){if(!editingProjectId||!confirm('Archive this project? Tasks will remain.'))return;await sb.from('projects').update({is_archived:true}).eq('id',editingProjectId);closeProjectModal();await loadAll()}
 document.getElementById('projectModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeProjectModal()});
+document.getElementById('pf-color').addEventListener('input',e=>{document.getElementById('pf-color-hex').textContent=e.target.value});
 
 function esc(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML}
 function getMonday(d){const dt=new Date(d);const day=dt.getDay();dt.setDate(dt.getDate()-day+(day===0?-6:1));dt.setHours(0,0,0,0);return dt}
