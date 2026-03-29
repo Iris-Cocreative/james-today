@@ -453,6 +453,8 @@
   /* ---- Events ---- */
 
   function bindEvents(container) {
+    container.removeEventListener('click', handleClick);
+    container.removeEventListener('change', handleChange);
     container.addEventListener('click', handleClick);
     container.addEventListener('change', handleChange);
   }
@@ -479,7 +481,10 @@
       case 'delete-time-entry':
         deleteTimeEntry(target.getAttribute('data-id'));
         break;
+      default:
+        return;
     }
+    e.stopPropagation();
   }
 
   function handleChange(e) {

@@ -304,6 +304,7 @@
   /* ---- Events ---- */
 
   function bindEvents(container) {
+    container.removeEventListener('click', handleClick);
     container.addEventListener('click', handleClick);
     setupDragDrop(container);
   }
@@ -331,7 +332,10 @@
       case 'archive-stale':
         archiveStale(target.getAttribute('data-type'), target.getAttribute('data-id'));
         break;
+      default:
+        return;
     }
+    e.stopPropagation();
   }
 
   function setupDragDrop(container) {

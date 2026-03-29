@@ -159,6 +159,7 @@
   /* ---- Events ---- */
 
   function bindEvents(container) {
+    container.removeEventListener('click', handleClick);
     container.addEventListener('click', handleClick);
   }
 
@@ -181,7 +182,10 @@
         var project = Data.state.projects.get(pid);
         if (project) Modals.projectModal(project);
         break;
+      default:
+        return; // Don't stop propagation for unhandled actions
     }
+    e.stopPropagation();
   }
 
   /* ---- Expose ---- */

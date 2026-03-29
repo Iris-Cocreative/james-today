@@ -311,6 +311,9 @@
   /* ---- Event binding ---- */
 
   function bindEvents(container) {
+    // Remove old listeners to prevent duplicates on re-render
+    container.removeEventListener('click', handleClick);
+    container.removeEventListener('keydown', handleKeydown);
     container.addEventListener('click', handleClick);
     container.addEventListener('keydown', handleKeydown);
   }
@@ -320,6 +323,7 @@
     if (!target) return;
 
     var action = target.getAttribute('data-action');
+    var handled = true;
 
     switch (action) {
       case 'toggle-status-filter':
@@ -358,7 +362,12 @@
       case 'toggle-collapse':
         toggleCollapse(target.getAttribute('data-target'));
         break;
+      default:
+        handled = false;
     }
+
+    // Stop propagation to prevent app.js body-level handler from also firing
+    if (handled) e.stopPropagation();
   }
 
   function handleKeydown(e) {
