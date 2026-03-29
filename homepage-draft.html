@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>james.today — James Bolden</title>
+<meta name="description" content="James Bolden — designer, builder, connector. Working at the intersection of design, consciousness, and collaborative intelligence.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0a0f;
+    --bg-card: #100f14;
+    --text: #e0dbd2;
+    --text-dim: #7a7568;
+    --text-bright: #f5f0e6;
+    --accent: #c4956a;
+    --accent-cool: #6a9ab4;
+    --line: rgba(196, 149, 106, 0.12);
+    --line-strong: rgba(196, 149, 106, 0.28);
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    background: var(--bg);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(196,149,106,0.15) transparent;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.7;
+    font-size: 17px;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.025;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+  a:hover { color: var(--text-bright); }
+
+  /* ─── Nav ─── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+    pointer-events: none;
+  }
+
+  nav * { pointer-events: auto; }
+
+  .nav-logo {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    color: var(--text-bright);
+  }
+
+  .nav-logo em { font-style: italic; color: var(--accent); }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ─── Hero ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -15%;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(196,149,106,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-greeting {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.2s forwards;
+  }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 400;
+    line-height: 1.08;
+    color: var(--text-bright);
+    max-width: 800px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.4s forwards;
+  }
+
+  .hero-title em { font-style: italic; color: var(--accent); }
+
+  .hero-intro {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    max-width: 560px;
+    margin-top: 32px;
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    gap: 24px;
+    margin-top: 40px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.8s forwards;
+  }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 14px 28px;
+    border: 1px solid var(--line-strong);
+    color: var(--accent);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn:hover {
+    background: rgba(196,149,106,0.06);
+    border-color: var(--accent);
+    color: var(--text-bright);
+  }
+
+  .btn-primary {
+    background: rgba(196,149,106,0.08);
+    border-color: var(--accent);
+  }
+
+  /* ─── Section basics ─── */
+  .section {
+    padding: 120px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 0.68rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .section-heading {
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.2;
+    margin-bottom: 32px;
+    max-width: 650px;
+  }
+
+  .section-heading em { font-style: italic; color: var(--accent); }
+
+  p.body { max-width: 600px; margin-bottom: 20px; color: var(--text); font-size: 0.95rem; line-height: 1.8; }
+
+  .divider { max-width: 1200px; margin: 0 auto; padding: 0 60px; }
+  .divider-line { height: 1px; background: linear-gradient(to right, transparent, var(--line-strong) 15%, var(--line-strong) 85%, transparent); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+
+  /* ─── About ─── */
+  .about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 48px;
+  }
+
+  .stat {
+    padding: 28px 24px;
+    border: 1px solid var(--line);
+    text-align: center;
+    transition: background 0.3s;
+  }
+
+  .stat:hover { background: rgba(196,149,106,0.02); }
+
+  .stat-number {
+    font-family: var(--serif);
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ─── Domains ─── */
+  .domains {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin-top: 48px;
+  }
+
+  .domain {
+    padding: 40px 36px;
+    border: 1px solid var(--line);
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .domain:hover {
+    border-color: var(--line-strong);
+    background: rgba(196,149,106,0.015);
+  }
+
+  .domain-icon {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    color: rgba(196,149,106,0.25);
+    margin-bottom: 16px;
+  }
+
+  .domain h3 {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    margin-bottom: 12px;
+  }
+
+  .domain p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  /* ─── Today feed ─── */
+  .today-feed {
+    margin-top: 48px;
+    border: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .today-header {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .today-date {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--accent);
+    font-size: 1rem;
+  }
+
+  .today-pulse {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .today-entries {
+    padding: 0;
+  }
+
+  .today-entry {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .today-entry:last-child { border-bottom: none; }
+
+  .today-time {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    padding-top: 2px;
+  }
+
+  .today-text {
+    font-size: 0.92rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .today-text strong {
+    color: var(--text-bright);
+    font-weight: 400;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  .today-note {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ─── Active threads ─── */
+  .threads {
+    margin-top: 48px;
+  }
+
+  .thread {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 24px;
+    padding: 32px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: start;
+  }
+
+  .thread:last-child { border-bottom: none; }
+
+  .thread-icon {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    color: rgba(196,149,106,0.2);
+    text-align: center;
+    padding-top: 2px;
+  }
+
+  .thread h3 {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    margin-bottom: 8px;
+  }
+
+  .thread-status {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--line);
+    padding: 3px 10px;
+    margin-bottom: 10px;
+    margin-left: 12px;
+    vertical-align: middle;
+  }
+
+  .thread p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 560px;
+  }
+
+  /* ─── Publications ─── */
+  .pubs {
+    margin-top: 48px;
+  }
+
+  .pub-group-label {
+    font-size: 0.68rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    margin-top: 40px;
+  }
+
+  .pub-group-label:first-child { margin-top: 0; }
+
+  .pub-item {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: baseline;
+  }
+
+  .pub-item:last-child { border-bottom: none; }
+
+  .pub-title {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    color: var(--text-bright);
+    font-weight: 400;
+  }
+
+  .pub-source {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .pub-type {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ─── Portfolio ─── */
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    margin-top: 48px;
+  }
+
+  .portfolio-item {
+    aspect-ratio: 4/3;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .portfolio-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(11,10,15,0.9) 0%, transparent 60%);
+    transition: opacity 0.4s;
+  }
+
+  .portfolio-item:hover {
+    border-color: var(--line-strong);
+  }
+
+  .portfolio-item:hover::before {
+    background: linear-gradient(to top, rgba(11,10,15,0.95) 0%, rgba(196,149,106,0.03) 100%);
+  }
+
+  .portfolio-tag {
+    position: relative;
+    z-index: 1;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .portfolio-name {
+    position: relative;
+    z-index: 1;
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    color: var(--text-bright);
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+
+  .portfolio-desc {
+    position: relative;
+    z-index: 1;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  /* ─── Booking ─── */
+  .booking-container {
+    margin-top: 48px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+
+  .booking-header {
+    padding: 32px 40px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .booking-header h3 {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    font-style: italic;
+  }
+
+  .booking-live {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .booking-body {
+    padding: 40px;
+  }
+
+  .booking-body p {
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 520px;
+    margin-bottom: 24px;
+  }
+
+  .booking-slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 28px;
+    max-width: 480px;
+  }
+
+  .slot {
+    padding: 16px 20px;
+    border: 1px solid var(--line);
+    text-align: center;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .slot:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(196,149,106,0.04);
+  }
+
+  .slot.taken {
+    opacity: 0.3;
+    cursor: default;
+    text-decoration: line-through;
+  }
+
+  .slot.taken:hover {
+    border-color: var(--line);
+    color: var(--text-dim);
+    background: transparent;
+  }
+
+  .booking-note {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 20px;
+  }
+
+  /* ─── Sensemaking connection ─── */
+  .sensemaking-block {
+    margin-top: 48px;
+    padding: 56px;
+    border: 1px solid rgba(106,154,180,0.15);
+    background: rgba(106,154,180,0.02);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sensemaking-block::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(106,154,180,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .sensemaking-label {
+    font-size: 0.68rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent-cool);
+    margin-bottom: 16px;
+  }
+
+  .sensemaking-block h3 {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    margin-bottom: 16px;
+  }
+
+  .sensemaking-block h3 em {
+    font-style: italic;
+    color: var(--accent-cool);
+  }
+
+  .sensemaking-block p {
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    max-width: 560px;
+    margin-bottom: 20px;
+  }
+
+  .sensemaking-block a.sm-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-cool);
+    margin-top: 8px;
+    transition: color 0.3s;
+  }
+
+  .sensemaking-block a.sm-link:hover { color: var(--text-bright); }
+
+  /* ─── Footer ─── */
+  footer {
+    padding: 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-left {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    color: var(--text-bright);
+  }
+
+  .footer-left em { font-style: italic; color: var(--accent); }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .footer-links a:hover { color: var(--accent); }
+
+  /* ─── Animations ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .hero, .section, footer { padding-left: 28px; padding-right: 28px; }
+    .divider { padding: 0 28px; }
+    .two-col { grid-template-columns: 1fr; gap: 40px; }
+    .domains { grid-template-columns: 1fr; }
+    .portfolio-grid { grid-template-columns: 1fr 1fr; }
+    .about-stats { grid-template-columns: 1fr 1fr 1fr; }
+    .booking-slots { grid-template-columns: 1fr 1fr; }
+    nav { padding: 16px 28px; }
+    .nav-links { display: none; }
+    .sensemaking-block { padding: 36px 28px; }
+  }
+
+  @media (max-width: 600px) {
+    .hero, .section, footer { padding-left: 20px; padding-right: 20px; }
+    .divider { padding: 0 20px; }
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .about-stats { grid-template-columns: 1fr; }
+    .booking-slots { grid-template-columns: 1fr; }
+    .today-entry { grid-template-columns: 1fr; gap: 4px; }
+    .thread { grid-template-columns: 1fr; gap: 8px; }
+    .thread-icon { display: none; }
+    .pub-item { grid-template-columns: 1fr; gap: 4px; }
+    footer { flex-direction: column; gap: 24px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nav-logo">james<em>.today</em></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#today">Today</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#writing">Writing</a></li>
+    <li><a href="#book">Book time</a></li>
+  </ul>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero">
+  <div class="hero-greeting">James Bolden</div>
+  <h1 class="hero-title">I design spaces where <em>people think together.</em></h1>
+  <p class="hero-intro">I'm a designer, builder, and connector working at the intersection of parametric geometry, web systems, and consciousness-focused communities. I run <a href="https://www.iriscocreative.com" target="_blank">Iris Cocreative</a>, a distributed design studio, and I'm building tools for collective intelligence.</p>
+  <div class="hero-cta">
+    <a href="#book" class="btn btn-primary">Book time today</a>
+    <a href="#about" class="btn">Learn more</a>
+  </div>
+</div>
+
+<!-- ═══ TODAY FEED ═══ -->
+<div class="section fade-in" id="today">
+  <div class="section-label">What's happening</div>
+  <h2 class="section-heading">Today</h2>
+
+  <div class="today-feed">
+    <div class="today-header">
+      <span class="today-date">Saturday, March 29, 2026</span>
+      <span class="today-pulse"><span class="pulse-dot"></span> Live</span>
+    </div>
+    <div class="today-entries">
+      <div class="today-entry">
+        <span class="today-time">AM</span>
+        <span class="today-text"><strong>The Sensemaking Project</strong> — Finalizing the design brief and coming-soon pages for sensemaking.today. Just bought the domain. Working through the content architecture with Claude.</span>
+      </div>
+      <div class="today-entry">
+        <span class="today-time">PM</span>
+        <span class="today-text"><strong>james.today</strong> — Building this site. First working draft of the full single-page scroll. Getting the content right matters more than getting it polished.</span>
+      </div>
+      <div class="today-entry">
+        <span class="today-time">Evening</span>
+        <span class="today-text"><strong>Evolutionary Leaders</strong> — Accepted an invitation to join the EL circle. Submitted my member profile and quote.</span>
+      </div>
+    </div>
+    <div class="today-note">This section updates as the day unfolds. Some days are busier than others.</div>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ ABOUT ═══ -->
+<div class="section fade-in" id="about">
+  <div class="section-label">About</div>
+  <h2 class="section-heading">I've spent 18 years building things for people who are trying to <em>change the world.</em></h2>
+
+  <div class="two-col">
+    <div>
+      <p class="body">I'm James Bolden — most people call me Jimbo. I'm based in Philadelphia, recently married to Emily, and we have three kittens named after states of liberation (Moksha, Samadhi, and Nirvana — they're chaos incarnate).</p>
+      <p class="body">I founded <a href="https://www.iriscocreative.com" target="_blank">Iris Cocreative</a> to serve consciousness-focused organizations, transformative communities, and purpose-driven businesses. My clients include the Holomovement, Source of Synergy Foundation, Evolutionary Leaders, and a growing network of organizations working on what actually matters.</p>
+      <p class="body">I think in systems, see in synesthesia, and work at the edges — where parametric geometry meets web design, where Vedic philosophy meets UX, where sacred geometry meets JavaScript. I studied architecture, fell in love with Grasshopper and Rhino, and spent the last 18 years figuring out how to bring that spatial thinking into the browser.</p>
+    </div>
+    <div>
+      <p class="body">The thing I care most about right now is moving communities out of linear, grid-based digital spaces and into circular, radial, organic, biomimetic interfaces. My hypothesis: the shape of the interface shapes the quality of the thinking. When groups see themselves arranged in circles instead of feeds, something changes in how they relate.</p>
+      <p class="body">I'm also deeply invested in the collaboration between humans and AI. Not AI as replacement or tool — AI as a different kind of thinking partner with a very different kind of memory. This site, and everything connected to it, was built in that spirit.</p>
+      <p class="body">I have ADHD, dyslexia, and synesthesia. I think nonlinearly, speak in systems, and care about precision in language while distrusting anyone who performs certainty. I'm not an expert or an authority. I'm a connector — and I'm working on getting better at being findable.</p>
+    </div>
+  </div>
+
+  <div class="about-stats">
+    <div class="stat">
+      <div class="stat-number">18</div>
+      <div class="stat-label">Years in practice</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">15+</div>
+      <div class="stat-label">Consciousness orgs served</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">∞</div>
+      <div class="stat-label">Grasshopper definitions</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ DOMAINS ═══ -->
+<div class="section fade-in" id="domains">
+  <div class="section-label">What I bring</div>
+  <h2 class="section-heading">Domains of <em>practice</em></h2>
+
+  <div class="domains">
+    <div class="domain">
+      <div class="domain-icon">◇</div>
+      <h3>Parametric & Sacred Geometry</h3>
+      <p>18 years with Grasshopper/Rhino. I create generative visual systems — logos, patterns, interface geometries, architectural forms — using parametric tools. Recently built a Grasshopper-to-JavaScript pipeline for embedding dynamic geometries directly in web interfaces.</p>
+    </div>
+    <div class="domain">
+      <div class="domain-icon">□</div>
+      <h3>Web Design & Development</h3>
+      <p>Full-stack web work with a deep Webflow specialization. Custom JavaScript, Webflow MCP for programmatic site management, Memberstack for membership platforms. I build the sites, the CMS structures, the interactive components — the whole stack.</p>
+    </div>
+    <div class="domain">
+      <div class="domain-icon">△</div>
+      <h3>Systems & Automation</h3>
+      <p>Airtable, Supabase, n8n, and custom webhook architectures. I build the connective tissue between platforms — CRM automations, meeting artifact creation, AI agent pipelines, data sync workflows. The invisible infrastructure that makes everything else work.</p>
+    </div>
+    <div class="domain">
+      <div class="domain-icon">◯</div>
+      <h3>AI Collaboration & Interface Design</h3>
+      <p>Claude API integration, AI-assisted sensemaking tools, assessment and matching systems, numerology calculators (seriously). I'm especially focused on building interfaces that help groups think together — radial layouts, node-based visualizations, living data displays.</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ ACTIVE THREADS ═══ -->
+<div class="section fade-in" id="threads">
+  <div class="section-label">Current work</div>
+  <h2 class="section-heading">What I'm <em>thinking about</em></h2>
+
+  <div class="threads">
+    <div class="thread">
+      <div class="thread-icon">◯</div>
+      <div>
+        <h3>The Sensemaking Project <span class="thread-status">New</span></h3>
+        <p>A collective inquiry into the present moment — distributed sensing, collaborative synthesis, and emergent understanding. We're building the infrastructure for thinking together about what's actually happening. Lives at <a href="https://sensemaking.today">sensemaking.today</a>.</p>
+      </div>
+    </div>
+    <div class="thread">
+      <div class="thread-icon">△</div>
+      <div>
+        <h3>MIST: The Book Project <span class="thread-status">In progress</span></h3>
+        <p>Matter, Intelligence, Space, Time — a philosophical framework exploring four irreducible dimensions of experienced reality. Tracing through Vedic Samkhya, Fuller's synergetics, Heidegger, indigenous cosmologies. Developed in collaboration with Claude.</p>
+      </div>
+    </div>
+    <div class="thread">
+      <div class="thread-icon">◇</div>
+      <div>
+        <h3>Radial Interface Research <span class="thread-status">Ongoing</span></h3>
+        <p>Moving digital communities from linear feeds into circular, organic, node-based spatial arrangements. Built with Grasshopper-to-JS pipelines, embedded in Webflow. Testing across Holomovement, Source of Synergy, and client communities.</p>
+      </div>
+    </div>
+    <div class="thread">
+      <div class="thread-icon">□</div>
+      <div>
+        <h3>The Fingerprints of Probability <span class="thread-status">Published</span></h3>
+        <p>An article series on recognizing AI writing patterns — and what that recognition teaches us about human creativity. Part craft guide, part philosophical inquiry. A second installment on the intersubjective "we" of human-AI authorship is in development.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ PUBLICATIONS ═══ -->
+<div class="section fade-in" id="writing">
+  <div class="section-label">Publications & Features</div>
+  <h2 class="section-heading">Writing, conversations, and <em>appearances</em></h2>
+
+  <div class="pubs">
+    <div class="pub-group-label">Writing</div>
+    <div class="pub-item">
+      <div>
+        <div class="pub-title">The Fingerprints of Probability</div>
+        <div class="pub-source">Iris Cocreative — Learning to see what the machine leaves behind</div>
+      </div>
+      <div class="pub-type">Article</div>
+    </div>
+    <div class="pub-item">
+      <div>
+        <div class="pub-title">MIST: Matter, Intelligence, Space, Time</div>
+        <div class="pub-source">In progress — Organizing the foundational domains of reality</div>
+      </div>
+      <div class="pub-type">Book (draft)</div>
+    </div>
+
+    <div class="pub-group-label">Featured in</div>
+    <div class="pub-item">
+      <div>
+        <div class="pub-title">Evolutionary Leaders Circle</div>
+        <div class="pub-source">Member — Source of Synergy Foundation</div>
+      </div>
+      <div class="pub-type">Network</div>
+    </div>
+    <div class="pub-item">
+      <div>
+        <div class="pub-title"><em>Additional features and podcasts — coming soon</em></div>
+        <div class="pub-source">This section will grow as publications land</div>
+      </div>
+      <div class="pub-type">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ PORTFOLIO ═══ -->
+<div class="section fade-in" id="work">
+  <div class="section-label">Selected Work</div>
+  <h2 class="section-heading">Things I've <em>built</em></h2>
+
+  <div class="portfolio-grid">
+    <a class="portfolio-item" href="https://www.iriscocreative.com" target="_blank">
+      <div class="portfolio-tag">Platform</div>
+      <div class="portfolio-name">Holomovement</div>
+      <div class="portfolio-desc">Member directory, interactive globe, assessment tools, AI-powered matching, video rooms, numerology calculator</div>
+    </a>
+    <a class="portfolio-item" href="https://www.iriscocreative.com" target="_blank">
+      <div class="portfolio-tag">Website</div>
+      <div class="portfolio-name">Source of Synergy</div>
+      <div class="portfolio-desc">Webflow site with mandala animation system, Synergy Circles, and community infrastructure</div>
+    </a>
+    <a class="portfolio-item" href="https://www.iriscocreative.com" target="_blank">
+      <div class="portfolio-tag">Interface</div>
+      <div class="portfolio-name">Member Wheel</div>
+      <div class="portfolio-desc">Radial canvas component for community visualization — Grasshopper-generated, JavaScript-rendered</div>
+    </a>
+    <a class="portfolio-item" href="https://www.iriscocreative.com" target="_blank">
+      <div class="portfolio-tag">Brand + Web</div>
+      <div class="portfolio-name">Light Creators</div>
+      <div class="portfolio-desc">Bilingual EN/DE landing funnel, founder assessment quiz, discovery call flow with n8n webhook integration</div>
+    </a>
+    <a class="portfolio-item" href="https://www.iriscocreative.com" target="_blank">
+      <div class="portfolio-tag">Tool</div>
+      <div class="portfolio-name">Numerology Calculator</div>
+      <div class="portfolio-desc">Full-stack numerology system with SVG mandala generation, n8n automation, and Webflow integration</div>
+    </a>
+    <a class="portfolio-item" href="https://www.iriscocreative.com" target="_blank">
+      <div class="portfolio-tag">Game</div>
+      <div class="portfolio-name">Laser Iris</div>
+      <div class="portfolio-desc">A kaleidoscope bullet hell game — because sometimes you just need to make something strange and beautiful</div>
+    </a>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ BOOKING ═══ -->
+<div class="section fade-in" id="book">
+  <div class="section-label">Connect</div>
+  <h2 class="section-heading">Book time <em>today</em></h2>
+
+  <div class="booking-container">
+    <div class="booking-header">
+      <h3>Available windows</h3>
+      <span class="booking-live"><span class="pulse-dot"></span> Today's availability</span>
+    </div>
+    <div class="booking-body">
+      <p>I'm experimenting with something: making real time available, today, for brief conversations. Not a sales call. Not a discovery session. Just a human being reachable in the present moment, willing to think with you about whatever you're working on.</p>
+      <p>A single day together — especially in person — can produce what used to take weeks. But even 20 minutes of the right conversation can shift how you see a problem.</p>
+
+      <div class="booking-slots">
+        <div class="slot taken">9:00 AM</div>
+        <div class="slot taken">10:00 AM</div>
+        <div class="slot">11:00 AM</div>
+        <div class="slot taken">1:00 PM</div>
+        <div class="slot">2:00 PM</div>
+        <div class="slot">3:30 PM</div>
+      </div>
+
+      <p class="booking-note">These slots are illustrative — a real scheduling widget is coming. For now, reach me at <a href="mailto:james@iriscocreative.com">james@iriscocreative.com</a>.</p>
+    </div>
+  </div>
+</div>
+
+<div class="divider"><div class="divider-line"></div></div>
+
+<!-- ═══ SENSEMAKING CONNECTION ═══ -->
+<div class="section fade-in">
+  <div class="section-label">The bigger picture</div>
+  <h2 class="section-heading">This site is one voice. The work is <em>collective.</em></h2>
+
+  <div class="sensemaking-block">
+    <div class="sensemaking-label">Companion Project</div>
+    <h3>The <em>Sensemaking</em> Project</h3>
+    <p>We're navigating a civilizational inflection point largely in the dark, each holding a flashlight pointed in a different direction. The Sensemaking Project is an attempt to build the spaces where we can see by each other's light — distributed sensing, collaborative synthesis, and emergent understanding about what's actually happening right now.</p>
+    <p>Where james.today is one person thinking out loud, sensemaking.today invites many voices into shared inquiry. The personal site gives me a place to stand. The collective work gives the thinking somewhere to land and be tested.</p>
+    <a href="https://sensemaking.today" class="sm-link" target="_blank">Visit sensemaking.today →</a>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-left">james<em>.today</em></div>
+  <div class="footer-links">
+    <a href="https://www.iriscocreative.com" target="_blank">Iris Cocreative</a>
+    <a href="https://sensemaking.today" target="_blank">Sensemaking</a>
+    <a href="mailto:james@iriscocreative.com">Email</a>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
