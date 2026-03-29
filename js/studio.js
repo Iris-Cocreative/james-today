@@ -109,7 +109,7 @@
     }
 
     return '' +
-      '<div class="' + cls + '" style="' + urgentBorder + '" data-feature-id="' + Utils.esc(feature.id) + '">' +
+      '<div class="' + cls + '" style="cursor:pointer;' + urgentBorder + '" data-feature-id="' + Utils.esc(feature.id) + '" data-action="open-feature-modal">' +
         '<div class="status-pip" style="' + pipStyle + '"></div>' +
         '<span class="feature-title">' + Utils.esc(feature.title) + '</span>' +
         taskBadge +
@@ -136,7 +136,7 @@
     }
 
     return '' +
-      '<div class="card-task" data-task-id="' + Utils.esc(task.id) + '">' +
+      '<div class="card-task" style="cursor:pointer;" data-task-id="' + Utils.esc(task.id) + '" data-action="open-task-modal">' +
         '<div class="status-pip" style="' + pipStyle + '"></div>' +
         '<span class="task-title">' + Utils.esc(task.title) + '</span>' +
         '<div class="task-meta">' + meta + '</div>' +
@@ -256,7 +256,8 @@
     html += '<button class="btn-chip' + (showTasks ? ' active' : '') + '" data-action="toggle-section" data-section="tasks">Tasks</button>';
     html += '</div>';
 
-    /* + Project button */
+    /* + Project / + Task buttons */
+    html += '<button class="btn-add" data-action="open-task-modal">+ Task</button>';
     html += '<button class="btn-add" data-action="open-project-modal">+ Project</button>';
 
     html += '</div>';
@@ -341,6 +342,17 @@
         if (featureId) {
           var feature = Data.state.features.get(featureId);
           Modals.featureModal(feature);
+        } else {
+          Modals.featureModal();
+        }
+        break;
+      case 'open-task-modal':
+        var taskId = target.getAttribute('data-task-id');
+        if (taskId) {
+          var task = Data.state.tasks.get(taskId);
+          Modals.taskModal(task);
+        } else {
+          Modals.taskModal();
         }
         break;
       case 'toggle-collapse':

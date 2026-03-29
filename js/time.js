@@ -386,7 +386,6 @@
       started_at:  timerStartedAt.toISOString(),
       ended_at:    new Date().toISOString(),
       project_id:  _selectedProjectId || null,
-      feature_id:  _selectedFeatureId || null,
       description: _description || null,
       is_billable: _billable,
     };

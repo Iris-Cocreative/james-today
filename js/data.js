@@ -92,7 +92,6 @@
       .from('tasks')
       .select('*')
       .eq('is_archived', false)
-      .order('sort_order')
       .order('created_at', { ascending: false });
     if (error) { console.error('loadTasks:', error); return; }
     state.tasks = new Map();

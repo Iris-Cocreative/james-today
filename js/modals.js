@@ -298,7 +298,7 @@
       status:      _getPickedStatus(modalEl),
       importance:  _getPickedImportance(modalEl),
       target_week: _getPickedWeek(modalEl),
-      flagged:     modalEl.querySelector('[name="flagged"]').checked,
+      is_flagged:  modalEl.querySelector('[name="flagged"]').checked,
     };
 
     var projectSelect = modalEl.querySelector('[name="project_id"]');
@@ -413,8 +413,12 @@
       due_date:    modalEl.querySelector('[name="due_date"]').value || null,
       target_week: _getPickedWeek(modalEl),
       project_id:  modalEl.querySelector('[name="project_id"]').value || null,
-      feature_id:  modalEl.querySelector('[name="feature_id"]').value || null,
     };
+
+    var featureSelect = modalEl.querySelector('[name="feature_id"]');
+    if (featureSelect && featureSelect.value) {
+      obj.feature_id = featureSelect.value;
+    }
 
     Data.saveTask(obj, existingId || undefined).then(function (saved) {
       if (saved) { App.toast(existingId ? 'Task updated' : 'Task created', 'success'); _forceClose(); }
