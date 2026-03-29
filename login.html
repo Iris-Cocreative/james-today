@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — james.today</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0b0a0f;
+    --text: #e8e4dc;
+    --text-dim: #706b62;
+    --text-bright: #f5f0e6;
+    --accent: #c4956a;
+    --accent-hover: #d4a87d;
+    --line: rgba(196, 149, 106, 0.2);
+    --error: #c46a6a;
+    --success: #6ac47a;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    overflow: hidden;
+  }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  /* ─── Grain ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.03;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ─── Sacred geometry — seed of life ─── */
+  .geometry {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .geometry svg {
+    width: 580px;
+    height: 580px;
+    opacity: 0;
+    animation: geometryIn 3s ease 0.5s forwards;
+  }
+
+  @keyframes geometryIn {
+    0% { opacity: 0; transform: scale(0.9) rotate(-30deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  .geometry svg circle {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 0.4;
+    opacity: 0.07;
+  }
+
+  /* ─── Content ─── */
+  .content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px;
+    max-width: 420px;
+    width: 100%;
+  }
+
+  .name {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 6vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 0.3s forwards;
+    cursor: default;
+  }
+
+  .name em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-top: 12px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.5s forwards;
+  }
+
+  .line {
+    width: 60px;
+    height: 1px;
+    background: var(--line);
+    margin: 32px auto;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+
+  /* ─── Form ─── */
+  .auth-form {
+    opacity: 0;
+    animation: fadeUp 1s ease 0.8s forwards;
+  }
+
+  .field {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--text-bright);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .field input::placeholder {
+    color: var(--text-dim);
+    opacity: 0.5;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    background: rgba(196, 149, 106, 0.03);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: var(--sans);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+
+  .submit-btn:hover {
+    color: var(--bg);
+  }
+
+  .submit-btn:hover::before {
+    opacity: 1;
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .submit-btn:disabled:hover::before {
+    opacity: 0;
+  }
+
+  .submit-btn:disabled:hover {
+    color: var(--accent);
+  }
+
+  /* ─── Messages ─── */
+  .message {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    font-weight: 300;
+    line-height: 1.5;
+    min-height: 24px;
+    transition: opacity 0.3s ease;
+  }
+
+  .message.error { color: var(--error); }
+  .message.success { color: var(--success); }
+
+  /* ─── Toggle ─── */
+  .toggle {
+    margin-top: 32px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 1s ease 1s forwards;
+  }
+
+  .toggle a {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    position: relative;
+  }
+
+  .toggle a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0;
+    transform: scaleX(0);
+    transition: all 0.3s ease;
+  }
+
+  .toggle a:hover { color: var(--text-bright); }
+  .toggle a:hover::after { opacity: 0.4; transform: scaleX(1); }
+
+  /* ─── Footer ─── */
+  .footer {
+    position: fixed;
+    bottom: 32px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    opacity: 0;
+    animation: fadeUp 1s ease 1.2s forwards;
+    z-index: 1;
+  }
+
+  .footer a {
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  .footer a:hover { color: var(--accent); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .loading { animation: pulse 1.2s ease infinite; }
+
+  @media (max-width: 600px) {
+    .geometry svg { width: 360px; height: 360px; }
+    .content { padding: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sacred geometry -->
+<div class="geometry">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="30"/>
+    <circle cx="100" cy="70" r="30"/>
+    <circle cx="125.98" cy="85" r="30"/>
+    <circle cx="125.98" cy="115" r="30"/>
+    <circle cx="100" cy="130" r="30"/>
+    <circle cx="74.02" cy="115" r="30"/>
+    <circle cx="74.02" cy="85" r="30"/>
+    <circle cx="100" cy="100" r="60" stroke-width="0.3" opacity="0.04"/>
+    <circle cx="100" cy="100" r="90" stroke-width="0.2" opacity="0.025"/>
+  </svg>
+</div>
+
+<div class="content">
+  <h1 class="name">james<em>.today</em></h1>
+  <p class="subtitle">Member area</p>
+  <div class="line"></div>
+
+  <form class="auth-form" id="authForm" onsubmit="return false;">
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••" required autocomplete="current-password" minlength="6">
+    </div>
+    <button type="submit" class="submit-btn" id="submitBtn">Sign in</button>
+    <div class="message" id="message"></div>
+  </form>
+
+  <div class="toggle">
+    <span id="toggleText">Need an account?</span>
+    <a id="toggleLink" onclick="toggleMode()">Create one</a>
+  </div>
+</div>
+
+<div class="footer">
+  <a href="/">← james.today</a>
+</div>
+
+<script>
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  CONFIGURATION — Replace with your values
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_trmR_URy0KyDtDUfpgjOfg_owXvNPRI';
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  STATE
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  let isSignUp = false;
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  CHECK EXISTING SESSION
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      window.location.href = './dashboard.html';
+    }
+  })();
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  FORM HANDLING
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const form = document.getElementById('authForm');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const submitBtn = document.getElementById('submitBtn');
+  const messageEl = document.getElementById('message');
+
+  function showMessage(text, type = 'error') {
+    messageEl.textContent = text;
+    messageEl.className = `message ${type}`;
+  }
+
+  function setLoading(loading) {
+    submitBtn.disabled = loading;
+    submitBtn.textContent = loading
+      ? (isSignUp ? 'Creating account…' : 'Signing in…')
+      : (isSignUp ? 'Create account' : 'Sign in');
+    if (loading) submitBtn.classList.add('loading');
+    else submitBtn.classList.remove('loading');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) {
+      showMessage('Please fill in all fields.');
+      return;
+    }
+
+    setLoading(true);
+    messageEl.textContent = '';
+
+    try {
+      if (isSignUp) {
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if (error) throw error;
+
+        // Some Supabase projects require email confirmation
+        if (data.user && !data.session) {
+          showMessage('Check your email to confirm your account.', 'success');
+        } else {
+          window.location.href = './dashboard.html';
+        }
+      } else {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        window.location.href = './dashboard.html';
+      }
+    } catch (err) {
+      showMessage(err.message || 'Something went wrong.');
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  TOGGLE SIGN IN / SIGN UP
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  function toggleMode() {
+    isSignUp = !isSignUp;
+    submitBtn.textContent = isSignUp ? 'Create account' : 'Sign in';
+    document.getElementById('toggleText').textContent = isSignUp ? 'Already have an account?' : 'Need an account?';
+    document.getElementById('toggleLink').textContent = isSignUp ? 'Sign in' : 'Create one';
+    passwordInput.autocomplete = isSignUp ? 'new-password' : 'current-password';
+    messageEl.textContent = '';
+  }
+</script>
+
+</body>
+</html>
