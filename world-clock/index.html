@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Clock</title>
+<link rel="stylesheet" href="https://use.typekit.net/zvp8mfo.css">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #060A14;
+    --text-primary: rgba(255,255,255,0.88);
+    --text-secondary: rgba(255,255,255,0.38);
+    --text-dim: rgba(255,255,255,0.18);
+    --accent: #E8A84C;
+    --accent-glow: rgba(232,168,76,0.5);
+    --date-change: #2A8C8C;
+    --date-change-glow: rgba(42,140,140,0.4);
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'neue-kabel', 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  #worldMap {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .header {
+    -webkit-app-region: drag;
+    position: relative;
+    z-index: 2;
+    padding: 8px 16px 2px;
+    flex-shrink: 0;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+  }
+
+  .header-controls {
+    -webkit-app-region: no-drag;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .toggle-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 5px;
+    color: rgba(255,255,255,0.4);
+    font-family: 'neue-kabel', 'Segoe UI', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    line-height: 1.2;
+  }
+
+  .toggle-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    border-color: rgba(255,255,255,0.18);
+  }
+
+  .toggle-btn.active {
+    background: rgba(232,168,76,0.12);
+    border-color: rgba(232,168,76,0.25);
+    color: var(--accent);
+  }
+
+  .toggle-btn svg {
+    width: 12px;
+    height: 12px;
+    vertical-align: -1px;
+    fill: currentColor;
+  }
+
+  /* Collapsed mode: non-home zones become thin bars */
+  .zone.collapsed {
+    flex: 0 0 auto;
+    min-height: 0;
+  }
+  .zone.collapsed .zone-info {
+    margin-bottom: 1px;
+  }
+  .zone.collapsed .zone-name {
+    font-size: 10px;
+  }
+  .zone.collapsed .zone-tz,
+  .zone.collapsed .zone-offset,
+  .zone.collapsed .home-tag {
+    font-size: 7px;
+  }
+  .zone.collapsed .zone-body {
+    flex: 0 0 13px;
+    height: 13px;
+  }
+  .zone.collapsed .zone-clock {
+    display: none;
+  }
+  .zone.collapsed .gradient-bar {
+    border-radius: 3px;
+    min-height: 13px;
+  }
+  .zone.collapsed .gradient-bar canvas {
+    border-radius: 3px;
+  }
+  .zone.collapsed .sun-icon {
+    font-size: 12px;
+  }
+  .zone.collapsed .zone-footer {
+    display: none;
+  }
+
+  /* Hidden mode: non-home zones disappear */
+  .zone.hidden-zone {
+    display: none;
+  }
+
+  .zones {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 2px 16px 10px;
+    flex: 1;
+    gap: 2px;
+    min-height: 0;
+  }
+
+  .zone {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .zone-info {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-bottom: 3px;
+  }
+
+  .zone-name {
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  .zone-tz {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+  }
+
+  .zone-offset {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .zone-offset.positive { color: rgba(137,196,225,0.6); }
+  .zone-offset.negative { color: rgba(232,114,74,0.6); }
+
+  .home-tag {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--accent);
+    opacity: 0.7;
+  }
+
+  .zone-body {
+    display: flex;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    gap: 12px;
+  }
+
+  .gradient-bar {
+    flex: 1;
+    position: relative;
+    border-radius: 6px;
+    overflow: visible;
+    min-height: 20px;
+  }
+
+  .gradient-bar canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 6px;
+  }
+
+  .sun-icon {
+    position: absolute;
+    z-index: 6;
+    pointer-events: none;
+    font-size: 28px;
+    line-height: 1;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
+  }
+
+  .date-change-marker {
+    position: absolute;
+    top: 0;
+    width: 1.5px;
+    height: 100%;
+    background: var(--date-change);
+    box-shadow: 0 0 6px var(--date-change-glow);
+    z-index: 4;
+    pointer-events: none;
+    border-radius: 1px;
+  }
+
+  .date-change-label {
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--date-change);
+    white-space: nowrap;
+    opacity: 0.9;
+  }
+
+  .zone-clock {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    flex-shrink: 0;
+    width: 110px;
+  }
+
+  .zone-clock-time {
+    font-size: 36px;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    line-height: 1.1;
+  }
+
+  .zone-clock-time .ampm {
+    font-size: 17px;
+    font-weight: 500;
+    text-transform: lowercase;
+    margin-left: 3px;
+  }
+  .zone-clock-time .ampm.am { color: rgba(248,180,100,0.7); }
+  .zone-clock-time .ampm.pm { color: rgba(130,180,220,0.7); }
+
+  .zone-footer {
+    display: flex;
+    align-items: center;
+    padding: 2px 2px 0;
+    flex-shrink: 0;
+    height: 18px;
+    position: relative;
+    gap: 12px;
+  }
+
+  .zone-footer-spacer {
+    flex-shrink: 0;
+    width: 110px;
+  }
+
+  .timeline-labels {
+    flex: 1;
+    position: relative;
+    height: 100%;
+  }
+
+  .timeline-label {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.3px;
+    font-variant-numeric: tabular-nums;
+    position: absolute;
+    transform: translateX(-50%);
+    top: 0;
+  }
+
+  #globalNowLine {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow), 0 0 18px var(--accent-glow);
+    z-index: 10;
+    border-radius: 1px;
+    pointer-events: none;
+    transition: left 0.3s linear;
+  }
+
+  #globalNowLine .now-cap {
+    position: absolute;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+  #globalNowLine .now-cap.top { top: -4px; }
+  #globalNowLine .now-cap.bottom { bottom: -4px; }
+
+  #globalNowLine.draggable {
+    pointer-events: auto;
+    cursor: grab;
+  }
+  #globalNowLine.draggable::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    width: 18px;
+    height: 100%;
+    cursor: grab;
+  }
+  #globalNowLine.dragging,
+  #globalNowLine.dragging::before {
+    cursor: grabbing;
+  }
+
+  #globalNowLine.dimmed {
+    opacity: 0.35;
+    box-shadow: none;
+  }
+  #globalNowLine.dimmed .now-cap {
+    opacity: 0.35;
+    box-shadow: none;
+  }
+
+  #draggedNowLine {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow), 0 0 18px var(--accent-glow);
+    z-index: 11;
+    border-radius: 1px;
+    pointer-events: none;
+    display: none;
+    cursor: grab;
+  }
+  #draggedNowLine.pinned {
+    pointer-events: auto;
+  }
+  #draggedNowLine.pinned::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    width: 18px;
+    height: 100%;
+    cursor: grab;
+  }
+  #draggedNowLine.dragging-line,
+  #draggedNowLine.dragging-line::before {
+    cursor: grabbing;
+  }
+  #draggedNowLine .now-cap {
+    position: absolute;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent-glow);
+  }
+  #draggedNowLine .now-cap.top { top: -4px; }
+  #draggedNowLine .now-cap.bottom { bottom: -4px; }
+
+  .drag-overlay {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .drag-overlay.future {
+    background: rgba(80, 200, 120, 0.12);
+    border-left: 1px solid rgba(80, 200, 120, 0.25);
+    border-right: 1px solid rgba(80, 200, 120, 0.25);
+  }
+  .drag-overlay.past {
+    background: rgba(220, 80, 40, 0.12);
+    border-left: 1px solid rgba(220, 80, 40, 0.25);
+    border-right: 1px solid rgba(220, 80, 40, 0.25);
+  }
+
+  .drag-duration {
+    position: absolute;
+    z-index: 12;
+    background: rgba(20, 24, 40, 0.9);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+    display: none;
+    transform: translateX(-50%);
+    letter-spacing: 0.5px;
+  }
+  .drag-duration.future {
+    color: #50C878;
+    border: 1px solid rgba(80, 200, 120, 0.4);
+  }
+  .drag-duration.past {
+    color: #DC5028;
+    border: 1px solid rgba(220, 80, 40, 0.4);
+  }
+
+  @media (max-width: 600px) {
+    .zone-name { font-size: 16px; font-weight: 500; }
+    .zone-clock { width: 80px; }
+    .zone-footer-spacer { width: 80px; }
+    .zone-clock-time { font-size: 26px; }
+    .zones { padding: 2px 10px 8px; }
+    .header { padding: 6px 10px 2px; }
+    .sun-icon { font-size: 22px; }
+    .timeline-label { font-size: 11px; font-weight: 300; }
+  }
+
+  @media (min-height: 600px) {
+    .zone-info { margin-bottom: 4px; }
+    .zones { gap: 4px; }
+  }
+
+  @media (min-height: 800px) {
+    .zone-info { margin-bottom: 6px; }
+    .zone-name { font-size: 22px; }
+    .zone-clock-time { font-size: 40px; }
+    .zone-clock { width: 130px; }
+    .zone-footer-spacer { width: 130px; }
+    .zones { gap: 6px; padding: 4px 20px 14px; }
+    .header { padding: 10px 20px 2px; }
+    .zone-footer { height: 22px; }
+    .timeline-label { font-size: 15px; }
+    .zone-date { font-size: 11px; }
+    .sun-icon { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="worldMap"></canvas>
+
+<div class="header">
+  <span class="header-title">World Clock</span>
+  <div class="header-controls">
+    <button class="toggle-btn" id="toggleCollapse" title="Collapse other zones">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+    </button>
+    <button class="toggle-btn" id="toggleHide" title="Show only home">
+      <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zm0 12.5c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/></svg>
+    </button>
+    <button class="toggle-btn" id="toggleFormat" title="Toggle 12/24 hour">12h</button>
+    <button class="toggle-btn" id="toggleHome" title="Toggle home on top">
+      <svg viewBox="0 0 24 24"><path d="M12 3L4 9v12h5v-7h6v7h5V9z"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="zones" id="zones">
+  <div id="globalNowLine" class="draggable">
+    <div class="now-cap top"></div>
+    <div class="now-cap bottom"></div>
+  </div>
+  <div id="draggedNowLine">
+    <div class="now-cap top"></div>
+    <div class="now-cap bottom"></div>
+  </div>
+  <div class="drag-duration" id="dragDuration"></div>
+</div>
+
+<script>
+const CITIES = [
+  { name: 'California', region: 'California', tz: 'America/Los_Angeles', lat: 37.77, lng: -122.42 },
+  { name: 'Philadelphia', region: 'Pennsylvania', tz: 'America/New_York', lat: 39.95, lng: -75.17, home: true },
+  { name: 'Berlin', region: 'Germany', tz: 'Europe/Berlin', lat: 52.52, lng: 13.41 },
+  { name: 'Thailand', region: 'Thailand', tz: 'Asia/Bangkok', lat: 13.75, lng: 100.52 },
+  { name: 'Bali', region: 'Indonesia', tz: 'Asia/Makassar', lat: -1.27, lng: 116.83 },
+];
+
+const HOME_TZ = 'America/New_York';
+
+let use24h = false;
+let homeOnTop = false;
+let collapseOthers = false;
+let hideOthers = false;
+
+const SUN_DATA = {
+  'America/Los_Angeles': {
+    rise: [7.18, 6.93, 7.28, 6.60, 6.10, 5.83, 6.00, 6.33, 6.72, 7.12, 6.55, 7.17],
+    set:  [17.18, 17.77, 19.27, 19.80, 20.22, 20.52, 20.48, 20.05, 19.33, 18.55, 17.03, 16.85]
+  },
+  'America/New_York': {
+    rise: [7.32, 6.97, 7.25, 6.42, 5.88, 5.53, 5.68, 6.10, 6.55, 7.02, 6.53, 7.13],
+    set:  [16.95, 17.48, 19.10, 19.65, 20.08, 20.40, 20.35, 19.90, 19.17, 18.38, 16.82, 16.63]
+  },
+  'Europe/Berlin': {
+    rise: [8.17, 7.47, 6.40, 6.20, 5.28, 4.83, 5.10, 5.80, 6.63, 7.47, 7.35, 8.15],
+    set:  [16.17, 17.10, 18.08, 20.17, 21.02, 21.43, 21.33, 20.58, 19.45, 18.27, 16.17, 15.95]
+  },
+  'Asia/Bangkok': {
+    rise: [6.70, 6.63, 6.37, 6.07, 5.87, 5.83, 5.93, 6.03, 6.05, 6.08, 6.22, 6.47],
+    set:  [18.00, 18.20, 18.28, 18.35, 18.47, 18.58, 18.60, 18.45, 18.18, 17.90, 17.72, 17.73]
+  },
+  'Asia/Makassar': {
+    rise: [5.73, 5.78, 5.72, 5.63, 5.63, 5.70, 5.73, 5.63, 5.40, 5.15, 5.02, 5.13],
+    set:  [17.95, 17.98, 17.87, 17.68, 17.52, 17.47, 17.55, 17.62, 17.60, 17.57, 17.63, 17.80]
+  }
+};
+
+const CONTINENTS = [
+  [[-140,60],[-130,55],[-125,50],[-125,45],[-120,35],[-115,32],[-110,30],[-105,25],[-100,25],[-97,26],[-95,29],[-90,30],[-82,25],[-80,25],[-75,30],[-70,43],[-65,45],[-60,47],[-55,50],[-60,55],[-65,60],[-70,62],[-80,65],[-90,70],[-100,72],[-110,70],[-120,70],[-135,68],[-140,65],[-140,60]],
+  [[-105,25],[-100,20],[-97,16],[-92,15],[-88,15],[-85,12],[-83,10],[-80,8],[-78,8],[-77,9],[-82,10],[-85,14],[-88,16],[-90,17],[-95,18],[-97,20],[-100,22],[-100,25],[-105,25]],
+  [[-80,10],[-75,12],[-70,12],[-65,10],[-60,5],[-52,4],[-50,0],[-50,-5],[-45,-8],[-40,-12],[-38,-15],[-40,-20],[-42,-22],[-45,-25],[-50,-28],[-53,-33],[-55,-35],[-58,-38],[-65,-40],[-68,-43],[-70,-45],[-72,-48],[-75,-50],[-73,-53],[-70,-55],[-68,-54],[-65,-50],[-65,-45],[-63,-40],[-60,-35],[-57,-30],[-55,-25],[-50,-20],[-48,-15],[-45,-10],[-42,-5],[-40,-2],[-50,0],[-52,3],[-55,5],[-60,8],[-65,10],[-70,12],[-72,10],[-75,8],[-78,8],[-80,10]],
+  [[-10,36],[-8,38],[-10,40],[-8,43],[-5,44],[0,43],[3,43],[5,44],[7,44],[10,45],[13,45],[15,46],[17,48],[15,50],[14,52],[10,54],[12,56],[10,58],[12,60],[15,62],[18,63],[20,65],[22,68],[25,70],[28,71],[30,70],[32,68],[30,65],[28,60],[30,58],[28,55],[24,55],[22,54],[20,54],[18,55],[14,55],[12,54],[10,54],[8,54],[5,52],[4,51],[2,51],[0,50],[-2,48],[-5,44],[-8,44],[-10,40],[-10,36]],
+  [[-15,30],[-17,15],[-15,10],[-10,5],[0,5],[5,4],[10,4],[10,0],[12,-5],[15,-5],[20,-10],[25,-15],[30,-20],[33,-25],[35,-28],[35,-33],[30,-34],[28,-32],[25,-30],[20,-28],[18,-25],[15,-20],[12,-15],[10,-10],[10,-5],[10,0],[5,5],[10,5],[15,8],[20,10],[25,10],[30,10],[32,12],[35,12],[37,15],[40,15],[42,12],[44,10],[50,12],[48,8],[45,5],[42,0],[42,-2],[40,-5],[40,-10],[35,-15],[35,-20],[33,-25],[35,-28],[35,-33],[30,-34],[28,-32],[25,-30],[20,-28],[18,-25],[15,-20],[12,-15],[10,-10],[10,-5],[5,-2],[0,5],[-5,5],[-10,5],[-15,10],[-17,15],[-17,20],[-15,22],[-13,25],[-10,30],[-5,35],[0,37],[5,37],[10,37],[12,35],[10,32],[5,30],[0,32],[-5,35],[-10,36],[-15,30]],
+  [[30,70],[35,68],[40,65],[45,60],[50,55],[55,55],[60,55],[65,55],[70,55],[75,55],[80,55],[85,55],[90,55],[95,50],[100,50],[105,48],[110,45],[115,42],[120,40],[125,38],[130,35],[130,42],[132,43],[135,45],[140,45],[142,48],[145,50],[148,52],[150,55],[155,58],[160,60],[165,62],[170,65],[175,68],[180,70],[175,72],[170,72],[160,70],[150,68],[140,65],[130,62],[120,60],[110,58],[100,55],[90,55],[80,55],[70,60],[65,62],[60,65],[55,68],[50,70],[45,70],[40,70],[35,70],[30,70]],
+  [[68,30],[70,28],[72,24],[72,20],[73,16],[75,12],[77,8],[80,10],[82,12],[85,15],[88,22],[90,22],[92,20],[92,25],[88,26],[85,27],[82,28],[80,30],[78,32],[75,34],[72,34],[70,32],[68,30]],
+  [[95,28],[98,25],[100,22],[100,18],[100,14],[100,10],[102,5],[104,2],[104,1],[102,2],[100,4],[98,8],[96,10],[95,15],[95,20],[95,28]],
+  [[115,-12],[120,-14],[125,-14],[130,-12],[135,-12],[138,-14],[140,-17],[142,-15],[145,-15],[148,-18],[150,-22],[152,-25],[153,-28],[152,-32],[150,-35],[148,-38],[145,-39],[140,-38],[137,-36],[135,-35],[130,-33],[125,-33],[120,-34],[116,-34],[114,-32],[114,-28],[115,-25],[118,-22],[120,-20],[118,-18],[115,-15],[115,-12]],
+  [[95,5],[98,4],[100,2],[102,0],[104,-2],[106,-6],[108,-7],[110,-7],[112,-8],[115,-8],[118,-9],[120,-10],[122,-8],[125,-8],[128,-5],[130,-3],[132,-2],[135,-3],[138,-5],[140,-6],[140,-8],[138,-8],[135,-8],[130,-8],[125,-10],[120,-10],[115,-8],[110,-8],[108,-8],[106,-7],[105,-5],[103,-3],[100,0],[98,2],[95,5]],
+  [[130,31],[131,33],[133,34],[135,35],[137,37],[140,40],[141,42],[142,43],[144,44],[145,45],[144,43],[142,41],[140,39],[138,37],[136,35],[134,33],[132,31],[130,31]],
+  [[-10,51],[-8,52],[-6,53],[-5,55],[-3,57],[-2,58],[-3,58],[-5,57],[-6,55],[-8,54],[-10,53],[-10,51]],
+  [[5,58],[8,58],[10,59],[12,60],[12,63],[14,65],[16,67],[18,68],[20,69],[22,70],[25,70],[28,71],[30,70],[28,68],[25,66],[20,65],[18,63],[15,60],[12,58],[10,57],[8,58],[5,58]],
+];
+
+function pointInPolygon(x, y, poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const xi = poly[i][0], yi = poly[i][1];
+    const xj = poly[j][0], yj = poly[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+  }
+  return inside;
+}
+
+function isLand(lng, lat) {
+  for (const poly of CONTINENTS) {
+    if (pointInPolygon(lng, lat, poly)) return true;
+  }
+  return false;
+}
+
+function drawWorldMap() {
+  const canvas = document.getElementById('worldMap');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  ctx.clearRect(0, 0, W, H);
+  const step = 4, dotR = 1;
+  for (let lat = -60; lat <= 75; lat += step) {
+    for (let lng = -170; lng <= 180; lng += step) {
+      if (!isLand(lng, lat)) continue;
+      ctx.beginPath();
+      ctx.arc(((lng + 180) / 360) * W, ((90 - lat) / 180) * H, dotR, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      ctx.fill();
+    }
+  }
+  for (const city of CITIES) {
+    const x = ((city.lng + 180) / 360) * W, y = ((90 - city.lat) / 180) * H;
+    ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = city.home ? 'rgba(232,168,76,0.3)' : 'rgba(255,255,255,0.15)';
+    ctx.fill();
+    ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = city.home ? 'rgba(232,168,76,0.6)' : 'rgba(255,255,255,0.3)';
+    ctx.fill();
+  }
+}
+
+function getUtcOffsetHours(tz) {
+  const str = new Date().toLocaleString('en-US', { timeZone: tz, timeZoneName: 'shortOffset' });
+  const match = str.match(/GMT([+-]?\d+(?::\d+)?)?/);
+  if (!match || !match[1]) return 0;
+  const parts = match[1].split(':');
+  const hours = parseInt(parts[0]);
+  const minutes = parts[1] ? parseInt(parts[1]) : 0;
+  return hours + (hours < 0 ? -minutes : minutes) / 60;
+}
+
+function getNowInTz(tz) {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: tz }));
+}
+
+function getTzAbbr(tz) {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' }).formatToParts(new Date());
+  const p = parts.find(p => p.type === 'timeZoneName');
+  return p ? p.value : '';
+}
+
+function getSunTimes(tz) {
+  const now = getNowInTz(tz);
+  const month = now.getMonth(), day = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), month + 1, 0).getDate();
+  const t = (day - 15) / daysInMonth;
+  const next = (month + 1) % 12, prev = (month - 1 + 12) % 12;
+  const data = SUN_DATA[tz];
+  if (!data) return { sunrise: 6, sunset: 18 };
+  let rise, set;
+  if (t >= 0) {
+    rise = data.rise[month] + (data.rise[next] - data.rise[month]) * t;
+    set = data.set[month] + (data.set[next] - data.set[month]) * t;
+  } else {
+    rise = data.rise[prev] + (data.rise[month] - data.rise[prev]) * (1 + t);
+    set = data.set[prev] + (data.set[month] - data.set[prev]) * (1 + t);
+  }
+  return { sunrise: rise, sunset: set };
+}
+
+function lerp(a, b, t) { return a + (b - a) * Math.max(0, Math.min(1, t)); }
+
+function getGradientColor(hour, sunrise, sunset) {
+  // Twilight / transition zones
+  const dawnStart = sunrise - 1.8;   // twilight begins
+  const dawnMid = sunrise - 0.5;     // deep orange
+  const morningGold = sunrise + 0.8;  // golden hour ends
+  const morningWarm = sunrise + 2.0;  // warm light
+  const dayStart = sunrise + 3.0;     // full daylight blue begins
+  const dayEnd = sunset - 3.0;        // full daylight blue ends
+  const afternoonWarm = sunset - 2.0; // warm light returns
+  const duskGold = sunset - 0.8;      // golden hour starts
+  const duskMid = sunset + 0.5;       // deep orange
+  const duskEnd = sunset + 1.8;       // twilight ends
+
+  // Color palette
+  // Deep night
+  const night = [6, 8, 28];
+  // Twilight - deep blue-purple
+  const twilight = [18, 22, 58];
+  // Early dawn - purple/rose
+  const earlyDawn = [80, 40, 90];
+  // Dawn orange
+  const dawnOrange = [220, 100, 50];
+  // Sunrise gold
+  const sunriseGold = [248, 180, 80];
+  // Morning warm
+  const morningLight = [255, 230, 170];
+  // Day transition
+  const dayWarm = [200, 225, 245];
+  // Midday sky blue
+  const midday = [130, 195, 235];
+  // Afternoon warm
+  const pmLight = [255, 225, 160];
+  // Dusk gold (warmer/redder than sunrise)
+  const duskGoldC = [250, 165, 60];
+  // Dusk deep (more purple than dawn)
+  const duskDeep = [200, 80, 70];
+  // Evening twilight - purple tones
+  const eveningTwi = [60, 30, 80];
+
+  if (hour < dawnStart || hour > duskEnd) {
+    // Deep night
+    return night;
+  } else if (hour < dawnMid) {
+    // Night → twilight → early dawn
+    const span = dawnMid - dawnStart;
+    const t = (hour - dawnStart) / span;
+    if (t < 0.5) {
+      const t2 = t * 2;
+      return [lerp(night[0], twilight[0], t2), lerp(night[1], twilight[1], t2), lerp(night[2], twilight[2], t2)];
+    } else {
+      const t2 = (t - 0.5) * 2;
+      return [lerp(twilight[0], earlyDawn[0], t2), lerp(twilight[1], earlyDawn[1], t2), lerp(twilight[2], earlyDawn[2], t2)];
+    }
+  } else if (hour < sunrise) {
+    // Early dawn → dawn orange
+    const t = (hour - dawnMid) / (sunrise - dawnMid);
+    return [lerp(earlyDawn[0], dawnOrange[0], t), lerp(earlyDawn[1], dawnOrange[1], t), lerp(earlyDawn[2], dawnOrange[2], t)];
+  } else if (hour < morningGold) {
+    // Dawn orange → sunrise gold
+    const t = (hour - sunrise) / (morningGold - sunrise);
+    return [lerp(dawnOrange[0], sunriseGold[0], t), lerp(dawnOrange[1], sunriseGold[1], t), lerp(dawnOrange[2], sunriseGold[2], t)];
+  } else if (hour < morningWarm) {
+    // Gold → warm light
+    const t = (hour - morningGold) / (morningWarm - morningGold);
+    return [lerp(sunriseGold[0], morningLight[0], t), lerp(sunriseGold[1], morningLight[1], t), lerp(sunriseGold[2], morningLight[2], t)];
+  } else if (hour < dayStart) {
+    // Warm → blue transition
+    const t = (hour - morningWarm) / (dayStart - morningWarm);
+    return [lerp(morningLight[0], dayWarm[0], t), lerp(morningLight[1], dayWarm[1], t), lerp(morningLight[2], dayWarm[2], t)];
+  } else if (hour <= dayEnd) {
+    // Expanded midday blue - gentle parabola
+    const mid = (dayStart + dayEnd) / 2;
+    const halfSpan = (dayEnd - dayStart) / 2;
+    if (halfSpan > 0) {
+      const t = Math.abs(hour - mid) / halfSpan;
+      return [lerp(midday[0], dayWarm[0], t), lerp(midday[1], dayWarm[1], t), lerp(midday[2], dayWarm[2], t)];
+    }
+    return midday;
+  } else if (hour < afternoonWarm) {
+    // Blue → warm transition
+    const t = (hour - dayEnd) / (afternoonWarm - dayEnd);
+    return [lerp(dayWarm[0], pmLight[0], t), lerp(dayWarm[1], pmLight[1], t), lerp(dayWarm[2], pmLight[2], t)];
+  } else if (hour < duskGold) {
+    // Warm → dusk gold
+    const t = (hour - afternoonWarm) / (duskGold - afternoonWarm);
+    return [lerp(pmLight[0], duskGoldC[0], t), lerp(pmLight[1], duskGoldC[1], t), lerp(pmLight[2], duskGoldC[2], t)];
+  } else if (hour < sunset) {
+    // Dusk gold → dusk deep
+    const t = (hour - duskGold) / (sunset - duskGold);
+    return [lerp(duskGoldC[0], duskDeep[0], t), lerp(duskGoldC[1], duskDeep[1], t), lerp(duskGoldC[2], duskDeep[2], t)];
+  } else if (hour < duskMid) {
+    // Dusk deep → evening twilight
+    const t = (hour - sunset) / (duskMid - sunset);
+    return [lerp(duskDeep[0], eveningTwi[0], t), lerp(duskDeep[1], eveningTwi[1], t), lerp(duskDeep[2], eveningTwi[2], t)];
+  } else {
+    // Evening twilight → twilight → night
+    const span = duskEnd - duskMid;
+    const t = (hour - duskMid) / span;
+    if (t < 0.5) {
+      const t2 = t * 2;
+      return [lerp(eveningTwi[0], twilight[0], t2), lerp(eveningTwi[1], twilight[1], t2), lerp(eveningTwi[2], twilight[2], t2)];
+    } else {
+      const t2 = (t - 0.5) * 2;
+      return [lerp(twilight[0], night[0], t2), lerp(twilight[1], night[1], t2), lerp(twilight[2], night[2], t2)];
+    }
+  }
+}
+
+function drawTimeline(canvas, sunTimes, startHour) {
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.clientWidth, H = canvas.clientHeight;
+  if (W === 0 || H === 0) return;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const { sunrise, sunset } = sunTimes;
+
+  for (let px = 0; px < W; px++) {
+    const localHour = startHour + (px / W) * 24;
+    const hour = ((localHour % 24) + 24) % 24;
+    const [r, g, b] = getGradientColor(hour, sunrise, sunset);
+    ctx.fillStyle = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+    ctx.fillRect(px, 0, 1, H);
+  }
+
+  // Subtle hour markers
+  for (let i = 0; i <= 24; i++) {
+    const x = (i / 24) * W;
+    const localH = startHour + i;
+    const normH = ((Math.round(localH) % 24) + 24) % 24;
+    const isMajor = normH % 3 === 0;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H);
+    ctx.strokeStyle = isMajor ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = isMajor ? 0.6 : 0.4;
+    ctx.stroke();
+  }
+}
+
+function formatTime(date) {
+  let h = date.getHours();
+  const m = date.getMinutes().toString().padStart(2, '0');
+  if (use24h) {
+    return `${h.toString().padStart(2, '0')}:${m}`;
+  }
+  const ampm = h >= 12 ? 'pm' : 'am';
+  h = h % 12 || 12;
+  return `${h}:${m}<span class="ampm ${ampm}">${ampm}</span>`;
+}
+
+function formatDate(date) {
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}`;
+}
+
+function buildUI() {
+  const container = document.getElementById('zones');
+  const globalLine = document.getElementById('globalNowLine');
+  const draggedLine = document.getElementById('draggedNowLine');
+  const dragDuration = document.getElementById('dragDuration');
+  container.innerHTML = '';
+  container.appendChild(globalLine);
+  container.appendChild(draggedLine);
+  container.appendChild(dragDuration);
+
+  const homeOffset = getUtcOffsetHours(HOME_TZ);
+
+  let orderedCities = [...CITIES];
+  if (homeOnTop) {
+    const home = orderedCities.find(c => c.home);
+    const rest = orderedCities.filter(c => !c.home);
+    orderedCities = [home, ...rest];
+  }
+
+  for (const city of orderedCities) {
+    const offset = getUtcOffsetHours(city.tz);
+    const rel = offset - homeOffset;
+    const relStr = rel === 0 ? '' : (rel > 0 ? `+${rel}` : `${rel}`);
+    const offsetClass = rel > 0 ? 'positive' : rel < 0 ? 'negative' : '';
+    const tzAbbr = getTzAbbr(city.tz);
+
+    const zone = document.createElement('div');
+    let zoneClass = 'zone';
+    if (!city.home && hideOthers) zoneClass += ' hidden-zone';
+    else if (!city.home && collapseOthers) zoneClass += ' collapsed';
+    zone.className = zoneClass;
+    zone.innerHTML = `
+      <div class="zone-info">
+        <span class="zone-name">${city.name}</span>
+        <span class="zone-tz">${tzAbbr}</span>
+        ${relStr ? `<span class="zone-offset ${offsetClass}">${relStr}h</span>` : ''}
+        ${city.home ? '<span class="home-tag">home</span>' : ''}
+      </div>
+      <div class="zone-body">
+        <div class="gradient-bar" data-tz="${city.tz}">
+          <canvas></canvas>
+        </div>
+        <div class="zone-clock">
+          <span class="zone-clock-time" data-tz="${city.tz}"></span>
+        </div>
+      </div>
+      <div class="zone-footer">
+        <div class="timeline-labels" data-labels="${city.tz}"></div>
+        <div class="zone-footer-spacer"></div>
+      </div>
+    `;
+    container.appendChild(zone);
+  }
+}
+
+function updateTimes() {
+  for (const city of CITIES) {
+    const now = getNowInTz(city.tz);
+    const timeEl = document.querySelector(`.zone-clock-time[data-tz="${city.tz}"]`);
+    if (timeEl) timeEl.innerHTML = formatTime(now);
+  }
+
+  // Global now line
+  const homeNow = getNowInTz(HOME_TZ);
+  const currentHour = homeNow.getHours() + homeNow.getMinutes() / 60 + homeNow.getSeconds() / 3600;
+  const nowPct = currentHour / 24;
+
+  // Use home timezone's canvas for positioning (always visible)
+  const homeCanvas = document.querySelector(`.gradient-bar[data-tz="${HOME_TZ}"] canvas`);
+  const zonesEl = document.getElementById('zones');
+  const globalLine = document.getElementById('globalNowLine');
+  if (homeCanvas && zonesEl && globalLine) {
+    const canvasRect = homeCanvas.getBoundingClientRect();
+    const zonesRect = zonesEl.getBoundingClientRect();
+    const xPos = canvasRect.left - zonesRect.left + canvasRect.width * nowPct;
+    globalLine.style.left = `${xPos}px`;
+  }
+}
+
+function drawAllTimelines() {
+  const homeOffset = getUtcOffsetHours(HOME_TZ);
+
+  for (const city of CITIES) {
+    const bar = document.querySelector(`.gradient-bar[data-tz="${city.tz}"]`);
+    if (!bar) continue;
+    const canvas = bar.querySelector('canvas');
+    if (!canvas) continue;
+
+    const cityOffset = getUtcOffsetHours(city.tz);
+    const startHour = cityOffset - homeOffset;
+    const sunTimes = getSunTimes(city.tz);
+    drawTimeline(canvas, sunTimes, startHour);
+
+    // Clear old markers
+    bar.querySelectorAll('.sun-icon, .date-change-marker').forEach(el => el.remove());
+
+    // Sunrise icon - floating above gradient
+    const risePos = (sunTimes.sunrise - startHour) / 24;
+    const wrappedRisePos = risePos < 0 ? risePos + 1 : risePos > 1 ? risePos - 1 : risePos;
+    if (wrappedRisePos >= 0 && wrappedRisePos <= 1) {
+      const icon = document.createElement('div');
+      icon.className = 'sun-icon';
+      icon.textContent = '☀️';
+      icon.style.left = `${wrappedRisePos * 100}%`;
+      bar.appendChild(icon);
+    }
+
+    // Sunset icon - floating above gradient
+    const setPos = (sunTimes.sunset - startHour) / 24;
+    const wrappedSetPos = setPos < 0 ? setPos + 1 : setPos > 1 ? setPos - 1 : setPos;
+    if (wrappedSetPos >= 0 && wrappedSetPos <= 1) {
+      const icon = document.createElement('div');
+      icon.className = 'sun-icon';
+      icon.textContent = '🌙';
+      icon.style.left = `${wrappedSetPos * 100}%`;
+      bar.appendChild(icon);
+    }
+
+    // Date change marker (midnight crossing)
+    // The timeline starts at local hour `startHour` on a specific calendar day.
+    // When startHour >= 0: timeline starts on home's current date
+    // When startHour < 0: timeline starts on the day before home's current date
+    // The midnight crossing marks the start of the NEXT calendar day after the timeline start.
+    const midnightPos = startHour <= 0 ? -startHour / 24 : (24 - startHour) / 24;
+    if (midnightPos > 0.01 && midnightPos < 0.99) {
+      const homeNow = getNowInTz(HOME_TZ);
+      const homeToday = new Date(homeNow.getFullYear(), homeNow.getMonth(), homeNow.getDate());
+      const timelineStartDate = new Date(homeToday);
+      if (startHour < 0) timelineStartDate.setDate(timelineStartDate.getDate() - 1);
+      const crossingDate = new Date(timelineStartDate);
+      crossingDate.setDate(crossingDate.getDate() + 1);
+
+      const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+      const dc = document.createElement('div');
+      dc.className = 'date-change-marker';
+      dc.style.left = `${midnightPos * 100}%`;
+      const lbl = document.createElement('div');
+      lbl.className = 'date-change-label';
+      lbl.textContent = `${dayNames[crossingDate.getDay()]} ${monthNames[crossingDate.getMonth()]} ${crossingDate.getDate()}`;
+      dc.appendChild(lbl);
+      bar.appendChild(dc);
+    }
+
+    // Labels
+    const labelsEl = document.querySelector(`[data-labels="${city.tz}"]`);
+    if (labelsEl) {
+      labelsEl.innerHTML = '';
+      for (let i = 0; i <= 8; i++) {
+        const labelLocalHour = startHour + i * 3;
+        const displayHour = ((Math.round(labelLocalHour) % 24) + 24) % 24;
+        const label = document.createElement('span');
+        label.className = 'timeline-label';
+        if (use24h) {
+          label.textContent = displayHour.toString().padStart(2, '0');
+        } else {
+          const h12 = displayHour % 12 || 12;
+          const suffix = displayHour === 0 || displayHour === 24 ? 'a' : displayHour < 12 ? 'a' : 'p';
+          label.textContent = displayHour === 0 ? '12a' : `${h12}${suffix}`;
+        }
+        label.style.left = `${(i * 3 / 24) * 100}%`;
+        labelsEl.appendChild(label);
+      }
+    }
+  }
+}
+
+// Init
+drawWorldMap();
+buildUI();
+updateTimes();
+drawAllTimelines();
+
+setInterval(() => updateTimes(), 1000);
+setInterval(drawAllTimelines, 60000);
+
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    drawWorldMap();
+    drawAllTimelines();
+    updateTimes();
+  }, 100);
+});
+
+// Toggle 12/24 hour format
+document.getElementById('toggleFormat').addEventListener('click', () => {
+  use24h = !use24h;
+  const btn = document.getElementById('toggleFormat');
+  btn.textContent = use24h ? '24h' : '12h';
+  btn.classList.toggle('active', use24h);
+  updateTimes();
+  drawAllTimelines();
+});
+
+// Toggle home on top
+document.getElementById('toggleHome').addEventListener('click', () => {
+  homeOnTop = !homeOnTop;
+  document.getElementById('toggleHome').classList.toggle('active', homeOnTop);
+  buildUI();
+  updateTimes();
+  drawAllTimelines();
+});
+
+function rebuild() {
+  buildUI();
+  updateTimes();
+  drawAllTimelines();
+}
+
+// Toggle collapse
+document.getElementById('toggleCollapse').addEventListener('click', () => {
+  collapseOthers = !collapseOthers;
+  if (collapseOthers) hideOthers = false;
+  document.getElementById('toggleCollapse').classList.toggle('active', collapseOthers);
+  document.getElementById('toggleHide').classList.toggle('active', hideOthers);
+  rebuild();
+});
+
+// Toggle hide
+document.getElementById('toggleHide').addEventListener('click', () => {
+  hideOthers = !hideOthers;
+  if (hideOthers) collapseOthers = false;
+  document.getElementById('toggleHide').classList.toggle('active', hideOthers);
+  document.getElementById('toggleCollapse').classList.toggle('active', collapseOthers);
+  rebuild();
+});
+
+// --- Drag now-indicator feature ---
+let isDragging = false;
+let dragStartX = 0;
+let dragNowLineOrigX = 0;
+let dragActive = false;
+let dragJustPinned = false;
+let dragHourOffset = 0; // hours offset from now for dragged position
+let dragPinnedTime = null; // absolute timestamp when pinned, for stable clock display
+
+function getCanvasInfo() {
+  const homeCanvas = document.querySelector(`.gradient-bar[data-tz="${HOME_TZ}"] canvas`);
+  const zonesEl = document.getElementById('zones');
+  if (!homeCanvas || !zonesEl) return null;
+  const canvasRect = homeCanvas.getBoundingClientRect();
+  const zonesRect = zonesEl.getBoundingClientRect();
+  return { canvasRect, zonesRect, canvasLeft: canvasRect.left - zonesRect.left, canvasWidth: canvasRect.width };
+}
+
+function getDragDirection(nowLineX, draggedLineX) {
+  return draggedLineX >= nowLineX ? 'future' : 'past';
+}
+
+function updateDragOverlays(nowLineX, draggedLineX) {
+  document.querySelectorAll('.drag-overlay').forEach(el => el.remove());
+
+  const bars = document.querySelectorAll('.gradient-bar');
+  const zonesEl = document.getElementById('zones');
+  const zonesRect = zonesEl.getBoundingClientRect();
+  const direction = getDragDirection(nowLineX, draggedLineX);
+
+  const leftX = Math.min(nowLineX, draggedLineX);
+  const rightX = Math.max(nowLineX, draggedLineX);
+
+  bars.forEach(bar => {
+    const zone = bar.closest('.zone');
+    if (zone && zone.classList.contains('hidden-zone')) return;
+    const barRect = bar.getBoundingClientRect();
+    const barLeft = barRect.left - zonesRect.left;
+    const barRight = barLeft + barRect.width;
+
+    const oLeft = Math.max(leftX, barLeft);
+    const oRight = Math.min(rightX, barRight);
+    if (oRight <= oLeft) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = `drag-overlay ${direction}`;
+    overlay.style.left = `${oLeft}px`;
+    overlay.style.width = `${oRight - oLeft}px`;
+    overlay.style.top = `${barRect.top - zonesRect.top}px`;
+    overlay.style.height = `${barRect.height}px`;
+    zonesEl.appendChild(overlay);
+  });
+}
+
+function updateDragDuration(nowLineX, draggedLineX) {
+  const info = getCanvasInfo();
+  if (!info) return;
+  const durationEl = document.getElementById('dragDuration');
+  const pixelDiff = draggedLineX - nowLineX;
+  const hourDiff = (pixelDiff / info.canvasWidth) * 24;
+  dragHourOffset = hourDiff;
+  const direction = getDragDirection(nowLineX, draggedLineX);
+  const sign = hourDiff >= 0 ? '+' : '-';
+  const absHours = Math.abs(hourDiff);
+  const h = Math.floor(absHours);
+  const m = Math.round((absHours - h) * 60);
+  durationEl.textContent = `${sign}${h}h:${m.toString().padStart(2, '0')}m`;
+  durationEl.className = `drag-duration ${direction}`;
+  durationEl.style.display = 'block';
+
+  const midX = (nowLineX + draggedLineX) / 2;
+  durationEl.style.left = `${midX}px`;
+  durationEl.style.top = '0px';
+}
+
+function updateDraggedClocks() {
+  if (!dragActive && !isDragging) return;
+  for (const city of CITIES) {
+    let draggedDate;
+    if (dragPinnedTime !== null) {
+      // Use stable pinned timestamp for consistent display
+      draggedDate = new Date(dragPinnedTime.toLocaleString('en-US', { timeZone: city.tz }));
+    } else {
+      // During active drag, use offset
+      const now = getNowInTz(city.tz);
+      draggedDate = new Date(now.getTime() + dragHourOffset * 3600000);
+    }
+    const timeEl = document.querySelector(`.zone-clock-time[data-tz="${city.tz}"]`);
+    if (timeEl) timeEl.innerHTML = formatTime(draggedDate);
+  }
+}
+
+function clearDragState() {
+  dragActive = false;
+  dragHourOffset = 0;
+  dragPinnedTime = null;
+  document.querySelectorAll('.drag-overlay').forEach(el => el.remove());
+  const draggedLine = document.getElementById('draggedNowLine');
+  const durationEl = document.getElementById('dragDuration');
+  const nowLine = document.getElementById('globalNowLine');
+  draggedLine.style.display = 'none';
+  draggedLine.classList.remove('pinned', 'dragging-line');
+  durationEl.style.display = 'none';
+  nowLine.classList.remove('dimmed');
+  // Restore real clocks
+  updateTimesReal();
+}
+
+// Keep original updateTimes for restoring
+const origUpdateTimes = updateTimes;
+function updateTimesReal() { origUpdateTimes(); }
+
+updateTimes = function() {
+  // Always update the now line position
+  const homeNow = getNowInTz(HOME_TZ);
+  const currentHour = homeNow.getHours() + homeNow.getMinutes() / 60 + homeNow.getSeconds() / 3600;
+  const nowPct = currentHour / 24;
+  const homeCanvas = document.querySelector(`.gradient-bar[data-tz="${HOME_TZ}"] canvas`);
+  const zonesEl = document.getElementById('zones');
+  const nowLine = document.getElementById('globalNowLine');
+  if (homeCanvas && zonesEl && nowLine) {
+    const canvasRect = homeCanvas.getBoundingClientRect();
+    const zonesRect = zonesEl.getBoundingClientRect();
+    const xPos = canvasRect.left - zonesRect.left + canvasRect.width * nowPct;
+    nowLine.style.left = `${xPos}px`;
+  }
+
+  if (dragActive || isDragging) {
+    // Show dragged time on clocks, keep now line dimmed
+    nowLine.classList.add('dimmed');
+    const draggedLine = document.getElementById('draggedNowLine');
+    const nowX = parseFloat(nowLine.style.left);
+    const draggedX = parseFloat(draggedLine.style.left);
+    if (!isNaN(nowX) && !isNaN(draggedX)) {
+      updateDragOverlays(nowX, draggedX);
+      updateDragDuration(nowX, draggedX);
+    }
+    updateDraggedClocks();
+  } else {
+    // Normal mode: show real clocks
+    for (const city of CITIES) {
+      const now = getNowInTz(city.tz);
+      const timeEl = document.querySelector(`.zone-clock-time[data-tz="${city.tz}"]`);
+      if (timeEl) timeEl.innerHTML = formatTime(now);
+    }
+  }
+};
+
+const globalLine = document.getElementById('globalNowLine');
+
+function startDrag(e, fromDraggedLine) {
+  isDragging = true;
+  dragStartX = e.clientX;
+  document.body.style.userSelect = 'none';
+  document.body.style.webkitUserSelect = 'none';
+
+  const draggedLine = document.getElementById('draggedNowLine');
+
+  if (fromDraggedLine) {
+    // Re-drag from the pinned dragged line position
+    dragNowLineOrigX = parseFloat(draggedLine.style.left) || 0;
+    draggedLine.classList.add('dragging-line');
+    draggedLine.classList.remove('pinned');
+  } else {
+    // Fresh drag from now line
+    dragNowLineOrigX = parseFloat(globalLine.style.left) || 0;
+    globalLine.classList.add('dragging');
+  }
+
+  globalLine.classList.add('dimmed');
+  globalLine.style.transition = 'none';
+  draggedLine.style.display = 'block';
+  draggedLine.style.left = `${dragNowLineOrigX}px`;
+  dragActive = false;
+  dragPinnedTime = null;
+
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+globalLine.addEventListener('mousedown', (e) => {
+  if (dragActive) return;
+  startDrag(e, false);
+});
+
+// Allow re-drag from pinned dragged line
+document.getElementById('draggedNowLine').addEventListener('mousedown', (e) => {
+  if (!dragActive) return;
+  startDrag(e, true);
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const info = getCanvasInfo();
+  if (!info) return;
+
+  const dx = e.clientX - dragStartX;
+  let newX = dragNowLineOrigX + dx;
+  newX = Math.max(info.canvasLeft, Math.min(info.canvasLeft + info.canvasWidth, newX));
+
+  // Shift key: snap to nearest absolute 15-minute mark (1:00, 1:15, 1:30, 1:45)
+  if (e.shiftKey) {
+    // Calculate what absolute home time this pixel represents
+    const homeNow = getNowInTz(HOME_TZ);
+    const currentHour = homeNow.getHours() + homeNow.getMinutes() / 60 + homeNow.getSeconds() / 3600;
+    const pxToHour = ((newX - info.canvasLeft) / info.canvasWidth) * 24;
+    // Snap to nearest 0.25h (15 min)
+    const snappedHour = Math.round(pxToHour * 4) / 4;
+    newX = info.canvasLeft + (snappedHour / 24) * info.canvasWidth;
+    newX = Math.max(info.canvasLeft, Math.min(info.canvasLeft + info.canvasWidth, newX));
+  }
+
+  const draggedLine = document.getElementById('draggedNowLine');
+  draggedLine.style.left = `${newX}px`;
+
+  const nowX = parseFloat(globalLine.style.left) || dragNowLineOrigX;
+  updateDragOverlays(nowX, newX);
+  updateDragDuration(nowX, newX);
+  updateDraggedClocks();
+});
+
+document.addEventListener('mouseup', (e) => {
+  if (!isDragging) return;
+  isDragging = false;
+  globalLine.classList.remove('dragging');
+  globalLine.style.transition = 'left 0.3s linear';
+  document.body.style.userSelect = '';
+  document.body.style.webkitUserSelect = '';
+
+  const draggedLine = document.getElementById('draggedNowLine');
+  draggedLine.classList.remove('dragging-line');
+  const draggedX = parseFloat(draggedLine.style.left);
+  const nowX = parseFloat(globalLine.style.left) || dragNowLineOrigX;
+
+  // If barely moved, treat as click → don't pin
+  if (Math.abs(draggedX - nowX) < 3) {
+    clearDragState();
+    return;
+  }
+
+  // Pin the dragged position — store absolute time for stable clocks
+  dragActive = true;
+  dragPinnedTime = new Date(Date.now() + dragHourOffset * 3600000);
+  draggedLine.classList.add('pinned');
+  dragJustPinned = true;
+  setTimeout(() => { dragJustPinned = false; }, 50);
+});
+
+// Click anywhere on zones to clear pinned state
+document.getElementById('zones').addEventListener('click', (e) => {
+  if (!dragActive || dragJustPinned) return;
+  if (e.target.closest('#globalNowLine')) return;
+  clearDragState();
+});
+
+// Also clear drag state on rebuild
+const origRebuild = rebuild;
+rebuild = function() {
+  clearDragState();
+  origRebuild();
+};
+</script>
+</body>
+</html>
