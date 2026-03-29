@@ -1,0 +1,112 @@
+:root {
+  /* Brand */
+  --accent: #c4956a;
+  --accent-hover: #d4a87d;
+  --accent-subtle: rgba(196, 149, 106, 0.12);
+  --accent-line: rgba(196, 149, 106, 0.2);
+  --accent-ghost: rgba(196, 149, 106, 0.06);
+
+  /* Backgrounds */
+  --bg: #0b0a0f;
+  --bg-raised: #141319;
+  --bg-sunken: #08070c;
+  --bg-hover: rgba(255, 255, 255, 0.045);
+  --bg-card: rgba(255, 255, 255, 0.025);
+  --bg-card-hover: rgba(255, 255, 255, 0.045);
+  --bg-input: rgba(255, 255, 255, 0.03);
+
+  /* Text (4-tier) */
+  --text-primary: #f5f0e6;
+  --text-default: #e8e4dc;
+  --text-secondary: #a8a39b;
+  --text-tertiary: #706b62;
+  --text-faint: #524e48;
+
+  /* Borders (3-tier, gold-tinted) */
+  --border: rgba(196, 149, 106, 0.2);
+  --border-subtle: rgba(196, 149, 106, 0.08);
+  --border-hover: rgba(196, 149, 106, 0.35);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+  /* Status colors */
+  --status-idea: #add8e6;
+  --status-planning: #ffd700;
+  --status-scheduled: #ffa500;
+  --status-building: #32cd32;
+  --status-done: #1e90ff;
+  --status-integrated: #9370db;
+  --status-idea-text: #1c1b19;
+  --status-planning-text: #1c1b19;
+  --status-scheduled-text: #1c1b19;
+  --status-building-text: #ffffff;
+  --status-done-text: #ffffff;
+  --status-integrated-text: #ffffff;
+
+  /* Semantic */
+  --error: #c46a6a;
+  --success: #6ac47a;
+  --urgent: #ce4320;
+  --importance: #279daf;
+
+  /* Planetary domain colors */
+  --domain-mula: #7c7c8a;
+  --domain-dharma: #d4a017;
+  --domain-seva: #b8c4d0;
+  --domain-karma: #c0392b;
+  --domain-vidya: #27ae60;
+  --domain-sangha: #8e44ad;
+  --domain-prema: #e8a0bf;
+  --domain-moksha: #e8e4dc;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius: 5px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 20px;
+  --radius-full: 50%;
+
+  /* Spacing */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-8: 16px;
+  --space-10: 20px;
+  --space-12: 24px;
+  --space-16: 32px;
+  --space-20: 40px;
+
+  /* Animation */
+  --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --header-h: 56px;
+  --col-width: 220px;
+  --ai-panel-width: 360px;
+
+  /* Typography */
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --text-2xs: 0.5625rem;
+  --text-xs: 0.625rem;
+  --text-sm: 0.6875rem;
+  --text-base: 0.8125rem;
+  --text-md: 0.875rem;
+  --text-lg: 1.0625rem;
+  --text-xl: 1.3rem;
+  --text-display: clamp(3rem, 8vw, 4.5rem);
+  --tracking-tight: 0.03em;
+  --tracking-normal: 0.04em;
+  --tracking-wide: 0.06em;
+  --tracking-wider: 0.08em;
+  --tracking-widest: 0.14em;
+}

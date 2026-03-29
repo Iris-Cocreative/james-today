@@ -1,0 +1,132 @@
+/* ============================================
+   map.css — Map / Projects grid view
+   ============================================ */
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-8);
+  padding: var(--space-10);
+}
+
+/* Project card */
+.project-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  cursor: pointer;
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+/* Top color bar */
+.project-card .card-color-bar {
+  height: 2px;
+  width: 100%;
+}
+
+.project-card .card-color-bar.domain-mula     { background: var(--domain-mula); }
+.project-card .card-color-bar.domain-dharma   { background: var(--domain-dharma); }
+.project-card .card-color-bar.domain-seva     { background: var(--domain-seva); }
+.project-card .card-color-bar.domain-karma    { background: var(--domain-karma); }
+.project-card .card-color-bar.domain-vidya    { background: var(--domain-vidya); }
+.project-card .card-color-bar.domain-sangha   { background: var(--domain-sangha); }
+.project-card .card-color-bar.domain-prema    { background: var(--domain-prema); }
+.project-card .card-color-bar.domain-moksha   { background: var(--domain-moksha); }
+
+/* Card image */
+.project-card .card-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: var(--bg-sunken);
+}
+
+/* Card body */
+.project-card .card-body {
+  padding: var(--space-6) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.project-card .card-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.project-card .card-name {
+  flex: 1;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.25;
+}
+
+.project-card .card-type-badge {
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--text-faint);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.project-card .card-description {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Card footer */
+.project-card .card-footer {
+  padding: var(--space-4) var(--space-8) var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.project-card .card-footer .status-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.project-card .card-footer .feature-stats {
+  flex: 1;
+  font-size: var(--text-2xs);
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.project-card .card-footer .completion-bar {
+  width: 60px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--bg-sunken);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.project-card .card-footer .completion-bar .completion-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width var(--transition-slow);
+}
