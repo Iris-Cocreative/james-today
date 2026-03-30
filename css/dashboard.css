@@ -5,7 +5,7 @@
 
 /* ---- Global reset ---- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { height: 100%; background: var(--bg); font-family: var(--font-sans); color: var(--text-default); overflow: hidden; }
+html, body { height: 100%; background: var(--bg); font-family: neue-kabel, sans-serif; font-weight: 300; color: var(--text-default); overflow: hidden; }
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -98,7 +98,7 @@ body::after {
   flex-shrink: 0;
 }
 .domain-name {
-  font-family: var(--font-serif);
+  font-family: loretta, serif;
   font-size: 1.1rem;
   font-weight: 400;
 }
@@ -135,6 +135,7 @@ body::after {
 }
 
 .day-question {
+  font-family: loretta, serif;
   font-size: 0.8rem;
   color: var(--text-tertiary);
   font-style: italic;
@@ -196,6 +197,7 @@ body::after {
   flex-shrink: 0;
   border: 1px solid var(--border-subtle);
   border-left: 1em solid var(--c, var(--accent));
+  border-radius: 4px;
   background: color-mix(in srgb, var(--c, var(--accent)) 5%, transparent);
   transition: all 0.3s cubic-bezier(.22,1,.36,1);
   cursor: default;
@@ -293,14 +295,17 @@ body::after {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  flex: var(--group-flex, 1);
+  flex: none;
   min-height: 0;
   border-left: 1em solid var(--c);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--c) 5%, transparent);
   transition: all 0.5s cubic-bezier(.22,1,.36,1);
 }
 .acc-tasks.expanded .task-group {
   border: 1px solid var(--border-subtle);
   border-left-width: 1em;
+  border-radius: 4px;
 }
 .acc-tasks:not(.expanded) .task-group {
   border-left-color: color-mix(in srgb, var(--c) 50%, transparent);
@@ -377,6 +382,33 @@ body::after {
 .squircle-btn:hover { transform: scale(1.2); }
 .acc-tasks.expanded .squircle-btn { opacity: 1; pointer-events: auto; }
 
+/* ---- Task group quick-add (per group, on hover) ---- */
+.task-quick-add {
+  padding: 2px 10px;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.acc-tasks.expanded .task-group:hover .task-quick-add {
+  opacity: 1;
+  height: 28px;
+}
+.task-quick-add input {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: neue-kabel, sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  outline: none;
+}
+.task-quick-add input::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.5;
+}
+
 /* ---- Quick-add inputs ---- */
 .quick-add {
   display: flex;
@@ -391,7 +423,7 @@ body::after {
   background: none;
   border: none;
   color: var(--text-default);
-  font-family: var(--font-sans);
+  font-family: neue-kabel, sans-serif;
   font-size: 13px;
   outline: none;
 }
@@ -521,7 +553,7 @@ body::after {
 .wc-bar.home { height: 40px; }
 .wc-bar:not(.home) { height: 16px; }
 .wc-gradient-wrap { position: relative; width: 100%; height: 100%; }
-.wc-canvas { width: 100%; height: 100%; display: block; }
+.wc-canvas { width: 100%; height: 100%; display: block; image-rendering: auto; }
 .wc-bar-label {
   position: absolute;
   left: 8px;
@@ -731,7 +763,7 @@ body::after {
   align-items: center;
   gap: 4px;
   transition: all 0.2s;
-  font-family: var(--font-sans);
+  font-family: neue-kabel, sans-serif;
 }
 .timer-btn:hover { border-color: var(--accent); color: var(--accent); }
 .timer-btn.running {
@@ -833,7 +865,7 @@ body::after {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: neue-kabel, sans-serif;
   font-size: 12px;
   padding: 4px 8px;
   width: 100%;
@@ -862,7 +894,7 @@ body::after {
   padding: 28px;
 }
 .modal h2 {
-  font-family: var(--font-serif);
+  font-family: loretta, serif;
   font-size: 1.2rem;
   color: var(--text-primary);
   margin-bottom: 20px;
@@ -884,7 +916,7 @@ body::after {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: neue-kabel, sans-serif;
   font-size: 14px;
   font-weight: 300;
   resize: vertical;
@@ -900,7 +932,7 @@ body::after {
   margin-top: 20px;
 }
 .modal-actions button {
-  font-family: var(--font-sans);
+  font-family: neue-kabel, sans-serif;
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -938,7 +970,7 @@ body::after {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius);
   color: var(--text-primary);
-  font-family: var(--font-sans);
+  font-family: neue-kabel, sans-serif;
   font-size: 14px;
   outline: none;
   appearance: none;

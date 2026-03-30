@@ -199,16 +199,19 @@
    * @param {string} tz - IANA timezone
    * @param {number} startHour - hour offset for the left edge of the bar
    */
+  // Fixed internal resolution for gradient rendering (CSS stretches to full width)
+  var GRADIENT_WIDTH = 480;
+
   function drawTimeline(canvas, tz, startHour) {
-    var dpr = window.devicePixelRatio || 1;
-    var W = canvas.clientWidth, H = canvas.clientHeight;
-    if (W === 0 || H === 0) return;
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
+    var H = canvas.clientHeight;
+    if (canvas.clientWidth === 0 || H === 0) return;
+    // Use fixed internal width for performance — CSS stretches to fill
+    canvas.width = GRADIENT_WIDTH;
+    canvas.height = H;
     var ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
     var sunTimes = getSunTimes(tz);
     var sunrise = sunTimes.sunrise, sunset = sunTimes.sunset;
+    var W = GRADIENT_WIDTH;
 
     for (var px = 0; px < W; px++) {
       var localHour = startHour + (px / W) * 24;
@@ -242,6 +245,7 @@
   var _updateTimerId = null;
   var _redrawTimerId = null;
   var _resizeTimeout = null;
+  var _gradientCacheDate = null; // date string when gradients were last drawn
 
   /**
    * Order cities: Philadelphia (home) first, then Berlin, Thailand, Bali, California (bottom).
@@ -408,44 +412,77 @@
   }
 
   var _isDraggingNowLine = false;
+  var _isPinned = false;
 
   function _setupNowLineDrag(nowLine, barsWrap, container) {
+    var tooltip = null;
+
     nowLine.addEventListener('mousedown', function (e) {
       e.preventDefault();
+      e.stopPropagation();
       _isDraggingNowLine = true;
       nowLine.classList.add('dragging');
 
       // Create tooltip
-      var tooltip = document.createElement('div');
+      tooltip = document.createElement('div');
       tooltip.className = 'wc-drag-tooltip';
       nowLine.appendChild(tooltip);
 
       var homeWrap = container.querySelector('.wc-gradient-wrap[data-tz="' + HOME_TZ + '"]');
       if (!homeWrap) return;
 
-      function updateDragPos(clientX) {
+      function updateDragPos(clientX, shiftKey) {
         var wrapRect = homeWrap.getBoundingClientRect();
         var barsRect = barsWrap.getBoundingClientRect();
         var relX = clientX - wrapRect.left;
         var pct = Math.max(0, Math.min(1, relX / wrapRect.width));
         var hour = pct * 24;
 
+        // Shift key: snap to 15-minute increments
+        if (shiftKey) {
+          hour = Math.round(hour * 4) / 4;
+          pct = hour / 24;
+          relX = pct * wrapRect.width;
+        }
+
         var xPos = (wrapRect.left - barsRect.left) + relX;
         nowLine.style.left = xPos + 'px';
 
-        // Format time for tooltip
+        // Calculate current time for offset
+        var homeNow = getNowInTz(HOME_TZ);
+        var currentHour = homeNow.getHours() + homeNow.getMinutes() / 60 + homeNow.getSeconds() / 3600;
+
+        // Format dragged time
         var h = Math.floor(hour);
         var m = Math.round((hour - h) * 60);
         if (m === 60) { h++; m = 0; }
         var ampm = h >= 12 ? 'pm' : 'am';
         var h12 = h % 12 || 12;
-        tooltip.textContent = h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+        var timeStr = h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+
+        // Calculate offset from current time
+        var offsetHours = hour - currentHour;
+        var sign = offsetHours >= 0 ? '+' : '-';
+        var absOffset = Math.abs(offsetHours);
+        var offH = Math.floor(absOffset);
+        var offM = Math.round((absOffset - offH) * 60);
+        if (offM === 60) { offH++; offM = 0; }
+        var offsetStr = sign + offH + 'h';
+        if (offM > 0) offsetStr += ' ' + offM + 'm';
+
+        tooltip.textContent = timeStr + ' (' + offsetStr + ')';
+        // Color offset: green for future, red for past
+        if (offsetHours >= 0) {
+          tooltip.style.color = '#6ac47a';
+        } else {
+          tooltip.style.color = '#c46a6a';
+        }
       }
 
-      updateDragPos(e.clientX);
+      updateDragPos(e.clientX, e.shiftKey);
 
-      function onMove(e) {
-        updateDragPos(e.clientX);
+      function onMove(ev) {
+        updateDragPos(ev.clientX, ev.shiftKey);
       }
 
       function onUp() {
@@ -453,23 +490,46 @@
         document.removeEventListener('mouseup', onUp);
         _isDraggingNowLine = false;
         nowLine.classList.remove('dragging');
-        if (tooltip.parentNode) tooltip.remove();
-        // Snap back to real time
-        _updateNow();
+        // Keep the line pinned at this position
+        _isPinned = true;
+        // Keep tooltip visible while pinned (restyle for pinned state)
+        if (tooltip) {
+          tooltip.style.color = '#E8A84C';
+        }
       }
 
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
+    });
+
+    // Click anywhere else to un-pin
+    document.addEventListener('mousedown', function (e) {
+      if (!_isPinned) return;
+      // If the click is on the now-line itself, don't un-pin (drag will start)
+      if (nowLine.contains(e.target)) return;
+      _isPinned = false;
+      // Remove tooltip if present
+      if (tooltip && tooltip.parentNode) {
+        tooltip.remove();
+        tooltip = null;
+      }
+      // Return to real time
+      _updateNow();
     });
   }
 
   /**
    * Draw all gradient canvases, sun/moon icons, date markers, and hour labels.
    */
-  function _drawAll() {
+  function _drawAll(force) {
     if (!_containerId) return;
     var container = document.getElementById(_containerId);
     if (!container) return;
+
+    // Skip redraw if gradients were already drawn today (sunrise/sunset only change daily)
+    var todayStr = new Date().toDateString();
+    if (!force && _gradientCacheDate === todayStr) return;
+    _gradientCacheDate = todayStr;
 
     var homeOffset = getUtcOffsetHours(HOME_TZ);
 
@@ -533,7 +593,7 @@
    */
   function _updateNow() {
     if (!_containerId) return;
-    if (_isDraggingNowLine) return; // Don't fight the drag
+    if (_isDraggingNowLine || _isPinned) return; // Don't fight drag or pinned state
     var container = document.getElementById(_containerId);
     if (!container) return;
 
@@ -583,7 +643,7 @@
   function _onResize() {
     clearTimeout(_resizeTimeout);
     _resizeTimeout = setTimeout(function () {
-      _drawAll();
+      _drawAll(true); // force redraw on resize
       _updateNow();
     }, 100);
   }

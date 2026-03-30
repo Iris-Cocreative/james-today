@@ -145,6 +145,7 @@
   var _resizingSession = null;
   var _draggingSession = null;
   var _newSessionInput = null;
+  var _sessionTracks = {}; // sessionId -> track number (local-only, for manual track positioning)
 
   // Initialize type filters to all visible
   for (var ti = 0; ti < PROJECT_TYPES.length; ti++) _typeFilters[PROJECT_TYPES[ti]] = true;
@@ -748,8 +749,13 @@
       }
 
       if (allTasks.length === 0) {
-        html += '<div class="task-row"><span class="task-label" style="opacity:0.3;font-style:italic">No tasks</span></div>';
+        html += '<div class="task-row task-empty" style="min-height:8px"></div>';
       }
+
+      // Per-group quick-add
+      html += '<div class="task-quick-add">' +
+        '<input type="text" placeholder="+ Add task..." data-project-id="' + p.id + '" data-action-enter="add-task-to-project">' +
+      '</div>';
 
       html += '</div>';
     }
@@ -774,16 +780,12 @@
           '<span class="task-delete-icon" data-action="delete-task" data-task-id="' + ut.id + '" title="Delete">\u00D7</span>' +
         '</div>';
       }
+      // Per-group quick-add for unassigned
+      html += '<div class="task-quick-add">' +
+        '<input type="text" placeholder="+ Add task..." data-project-id="" data-action-enter="add-task-to-project">' +
+      '</div>';
       html += '</div>';
     }
-
-    // Quick-add
-    html += '<div class="quick-add">' +
-      '<span class="project-cycle" id="task-project-cycle" style="background:' + (projects.length > 0 ? projectColor(projects[0]) : '#706b62') + '" ' +
-        'data-action="cycle-task-project" data-project-index="0" title="Click to change project"></span>' +
-      '<span class="plus">+</span>' +
-      '<input type="text" placeholder="New task..." id="task-quick-add" data-action-enter="add-task">' +
-    '</div>';
 
     container.innerHTML = html;
   }
@@ -851,7 +853,9 @@
       var sh = sd.getHours() + sd.getMinutes() / 60;
       var eh = ed.getHours() + ed.getMinutes() / 60;
       if (eh - sh < 0.33) eh = sh + 0.33;
-      items.push({ session: s, startH: sh, endH: eh, isGhost: false });
+      // Check if this session has a manually-set track
+      var manualTrack = (s.id && _sessionTracks[s.id] !== undefined) ? _sessionTracks[s.id] : -1;
+      items.push({ session: s, startH: sh, endH: eh, isGhost: false, manualTrack: manualTrack });
     }
     if (ghost) {
       items.push(ghost);
@@ -859,13 +863,27 @@
     // Sort by start hour
     items.sort(function (a, b) { return a.startH - b.startH; });
 
-    // Greedy track assignment
+    // First pass: place manually-tracked items
     var trackEnds = []; // end hour of each track
+    var maxTrack = 0;
     for (var j = 0; j < items.length; j++) {
       var item = items[j];
+      if (item.manualTrack >= 0) {
+        item.track = item.manualTrack;
+        // Ensure trackEnds array is long enough
+        while (trackEnds.length <= item.track) trackEnds.push(0);
+        trackEnds[item.track] = Math.max(trackEnds[item.track] || 0, item.endH);
+        if (item.track + 1 > maxTrack) maxTrack = item.track + 1;
+      }
+    }
+
+    // Second pass: greedy assignment for items without manual track
+    for (var k = 0; k < items.length; k++) {
+      var item = items[k];
+      if (item.manualTrack >= 0) continue; // already placed
       var placed = false;
       for (var t = 0; t < trackEnds.length; t++) {
-        if (item.startH >= trackEnds[t]) {
+        if (item.startH >= (trackEnds[t] || 0)) {
           trackEnds[t] = item.endH;
           item.track = t;
           placed = true;
@@ -876,8 +894,9 @@
         item.track = trackEnds.length;
         trackEnds.push(item.endH);
       }
+      if (item.track + 1 > maxTrack) maxTrack = item.track + 1;
     }
-    return { items: items, trackCount: Math.max(trackEnds.length, 1) };
+    return { items: items, trackCount: Math.max(maxTrack, trackEnds.length, 1) };
   }
 
   function renderTimelineSessions() {
@@ -1213,24 +1232,39 @@
     if (!session) return;
 
     var inner = document.getElementById('timeline-inner');
-    if (!inner) return;
+    var tracksContainer = document.getElementById('timeline-sessions');
+    if (!inner || !tracksContainer) return;
     var innerRect = inner.getBoundingClientRect();
     var startX = startEvent.clientX;
+    var startY = startEvent.clientY;
     // Read current left % and convert to px for dragging
     var origLeftPct = parseFloat(el.style.left);
     var origLeftPx = (origLeftPct / 100) * innerRect.width;
+    var origTopPx = parseInt(el.style.top, 10) || 0;
 
     _draggingSession = sessionId;
     document.body.classList.add('is-dragging');
 
     function onMove(e) {
+      // Horizontal movement (time)
       var dx = e.clientX - startX;
       var newLeftPx = Math.max(0, origLeftPx + dx);
       var newLeftPct = (newLeftPx / innerRect.width) * 100;
-      // Clamp so session doesn't go past right edge
       var widthPct = parseFloat(el.style.width);
       if (newLeftPct + widthPct > 100) newLeftPct = 100 - widthPct;
       el.style.left = newLeftPct + '%';
+
+      // Vertical movement (track)
+      var dy = e.clientY - startY;
+      var newTopPx = origTopPx + dy;
+      var newTrack = Math.max(0, Math.round(newTopPx / TRACK_HEIGHT));
+      el.style.top = (newTrack * TRACK_HEIGHT) + 'px';
+
+      // Grow the tracks container if dragging beyond current bounds
+      var neededHeight = (newTrack + 1) * TRACK_HEIGHT;
+      if (neededHeight > tracksContainer.offsetHeight) {
+        tracksContainer.style.height = neededHeight + 'px';
+      }
     }
 
     function onUp(e) {
@@ -1241,6 +1275,7 @@
 
       var finalLeftPct = parseFloat(el.style.left);
       var newHour = (finalLeftPct / 100) * 24;
+      var finalTrack = Math.max(0, Math.round(parseInt(el.style.top, 10) / TRACK_HEIGHT));
 
       var origStart = new Date(session.started_at);
       var origEnd = session.ended_at ? new Date(session.ended_at) : new Date();
@@ -1250,6 +1285,9 @@
       newStart.setHours(Math.floor(newHour), Math.round((newHour % 1) * 60), 0, 0);
       var newEnd = new Date(newStart.getTime() + durationMs);
 
+      // Store the manually-set track
+      _sessionTracks[sessionId] = finalTrack;
+
       Data.deleteTimeSession(sessionId).then(function () {
         return Data.saveTimeSession({
           started_at: newStart.toISOString(),
@@ -1258,7 +1296,11 @@
           description: session.description,
           is_billable: session.is_billable
         });
-      }).then(function () {
+      }).then(function (newSession) {
+        // Transfer track to new session ID if save returned one
+        if (newSession && newSession.id && newSession.id !== sessionId) {
+          _sessionTracks[newSession.id] = finalTrack;
+        }
         renderTimelineSessions();
         updateTimelineHeader();
       });
@@ -1460,19 +1502,6 @@
         return;
       }
 
-      // Cycle task project
-      var cycleBtn = target.closest('[data-action="cycle-task-project"]');
-      if (cycleBtn) {
-        var projects = projectsArray();
-        if (projects.length === 0) return;
-        var idx = parseInt(cycleBtn.dataset.projectIndex || '0', 10);
-        idx = (idx + 1) % projects.length;
-        cycleBtn.dataset.projectIndex = idx;
-        cycleBtn.style.background = projectColor(projects[idx]);
-        cycleBtn.title = projects[idx].name;
-        return;
-      }
-
       // Color picker on project card left border
       var card = target.closest('.project-card');
       if (card) {
@@ -1509,20 +1538,13 @@
         return;
       }
 
-      // Task quick-add
-      if (target.id === 'task-quick-add') {
+      // Per-group task quick-add
+      if (target.dataset.actionEnter === 'add-task-to-project') {
         var title = target.value.trim();
         if (!title) return;
         target.value = '';
 
-        // Get selected project from cycle button
-        var cycleBtn = document.getElementById('task-project-cycle');
-        var projects = projectsArray();
-        var projectId = null;
-        if (cycleBtn && projects.length > 0) {
-          var idx = parseInt(cycleBtn.dataset.projectIndex || '0', 10);
-          projectId = projects[idx] ? projects[idx].id : null;
-        }
+        var projectId = target.dataset.projectId || null;
 
         Data.saveTask({ title: title, status: 'idea', project_id: projectId }).then(function (saved) {
           if (saved) {
@@ -1560,6 +1582,14 @@
     // Mousemove on project cards for resize cursor hint
     app.addEventListener('mousemove', function (e) {
       var card = e.target.closest('.project-card');
+      // Clear resize-hover from all cards that aren't the current target
+      var allCards = app.querySelectorAll('.project-card.resize-hover');
+      for (var i = 0; i < allCards.length; i++) {
+        if (allCards[i] !== card) {
+          allCards[i].classList.remove('resize-hover');
+          allCards[i].style.cursor = '';
+        }
+      }
       if (!card) return;
       var cardRect = card.getBoundingClientRect();
       var relY = e.clientY - cardRect.top;
