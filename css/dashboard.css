@@ -305,10 +305,6 @@ body::after {
   border: 1px solid var(--border-subtle);
   border-left-width: 1em;
   border-left-color: var(--c);
-  padding-top: 0;
-  transition: padding-top 0.2s, all 0.5s cubic-bezier(.22,1,.36,1);
-}
-.acc-tasks.expanded .task-group:hover {
   padding-top: 16px;
 }
 .acc-tasks:not(.expanded) .task-group {
@@ -325,11 +321,11 @@ body::after {
   text-transform: uppercase;
   color: color-mix(in srgb, var(--c) 70%, white);
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.3s;
   pointer-events: none;
   z-index: 2;
 }
-.acc-tasks.expanded .task-group:hover .task-group-label {
+.acc-tasks.expanded .task-group-label {
   opacity: 1;
 }
 
