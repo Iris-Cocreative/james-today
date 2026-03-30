@@ -227,8 +227,8 @@
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, H);
-      ctx.strokeStyle = isMajor ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)';
-      ctx.lineWidth = isMajor ? 0.6 : 0.4;
+      ctx.strokeStyle = isMajor ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
       ctx.stroke();
     }
   }
@@ -402,6 +402,65 @@
     // Initial draw
     _drawAll();
     _updateNow();
+
+    // Setup drag on now-line
+    _setupNowLineDrag(nowLine, barsWrap, container);
+  }
+
+  var _isDraggingNowLine = false;
+
+  function _setupNowLineDrag(nowLine, barsWrap, container) {
+    nowLine.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      _isDraggingNowLine = true;
+      nowLine.classList.add('dragging');
+
+      // Create tooltip
+      var tooltip = document.createElement('div');
+      tooltip.className = 'wc-drag-tooltip';
+      nowLine.appendChild(tooltip);
+
+      var homeWrap = container.querySelector('.wc-gradient-wrap[data-tz="' + HOME_TZ + '"]');
+      if (!homeWrap) return;
+
+      function updateDragPos(clientX) {
+        var wrapRect = homeWrap.getBoundingClientRect();
+        var barsRect = barsWrap.getBoundingClientRect();
+        var relX = clientX - wrapRect.left;
+        var pct = Math.max(0, Math.min(1, relX / wrapRect.width));
+        var hour = pct * 24;
+
+        var xPos = (wrapRect.left - barsRect.left) + relX;
+        nowLine.style.left = xPos + 'px';
+
+        // Format time for tooltip
+        var h = Math.floor(hour);
+        var m = Math.round((hour - h) * 60);
+        if (m === 60) { h++; m = 0; }
+        var ampm = h >= 12 ? 'pm' : 'am';
+        var h12 = h % 12 || 12;
+        tooltip.textContent = h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+      }
+
+      updateDragPos(e.clientX);
+
+      function onMove(e) {
+        updateDragPos(e.clientX);
+      }
+
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        _isDraggingNowLine = false;
+        nowLine.classList.remove('dragging');
+        if (tooltip.parentNode) tooltip.remove();
+        // Snap back to real time
+        _updateNow();
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
   }
 
   /**
@@ -426,32 +485,8 @@
       drawTimeline(canvas, tz, startHour);
 
       // Remove old overlays
-      var oldIcons = wrap.querySelectorAll('.wc-sun-icon, .wc-moon-icon, .wc-date-marker');
+      var oldIcons = wrap.querySelectorAll('.wc-date-marker');
       for (var j = 0; j < oldIcons.length; j++) oldIcons[j].remove();
-
-      var sunTimes = getSunTimes(tz);
-
-      // Sun icon at sunrise
-      var risePos = (sunTimes.sunrise - startHour) / 24;
-      var wrappedRise = risePos < 0 ? risePos + 1 : risePos > 1 ? risePos - 1 : risePos;
-      if (wrappedRise >= 0 && wrappedRise <= 1) {
-        var sunIcon = document.createElement('div');
-        sunIcon.className = 'wc-sun-icon';
-        sunIcon.textContent = '\u2600\uFE0F'; // sun emoji
-        sunIcon.style.left = (wrappedRise * 100) + '%';
-        wrap.appendChild(sunIcon);
-      }
-
-      // Moon icon at sunset
-      var setPos = (sunTimes.sunset - startHour) / 24;
-      var wrappedSet = setPos < 0 ? setPos + 1 : setPos > 1 ? setPos - 1 : setPos;
-      if (wrappedSet >= 0 && wrappedSet <= 1) {
-        var moonIcon = document.createElement('div');
-        moonIcon.className = 'wc-moon-icon';
-        moonIcon.textContent = '\uD83C\uDF19'; // crescent moon emoji
-        moonIcon.style.left = (wrappedSet * 100) + '%';
-        wrap.appendChild(moonIcon);
-      }
 
       // Date change marker (midnight crossing)
       var midnightPos = startHour <= 0 ? -startHour / 24 : (24 - startHour) / 24;
@@ -498,6 +533,7 @@
    */
   function _updateNow() {
     if (!_containerId) return;
+    if (_isDraggingNowLine) return; // Don't fight the drag
     var container = document.getElementById(_containerId);
     if (!container) return;
 

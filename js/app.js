@@ -10,12 +10,12 @@
      ================================================================ */
 
   var STATUSES = [
-    { key: 'idea',       label: 'Idea',       color: 'var(--status-idea)',       solid: '#add8e6' },
-    { key: 'planning',   label: 'Planning',   color: 'var(--status-planning)',   solid: '#ffd700' },
-    { key: 'scheduled',  label: 'Scheduled',  color: 'var(--status-scheduled)',  solid: '#ffa500' },
-    { key: 'building',   label: 'Building',   color: 'var(--status-building)',   solid: '#32cd32' },
-    { key: 'done',       label: 'Done',       color: 'var(--status-done)',       solid: '#1e90ff' },
-    { key: 'integrated', label: 'Integrated', color: 'var(--status-integrated)', solid: '#9370db' }
+    { key: 'idea',       label: 'Idea',       color: '#add8e6', solid: false },
+    { key: 'planning',   label: 'Planning',   color: '#ffd700', solid: false },
+    { key: 'scheduled',  label: 'Scheduled',  color: '#ffa500', solid: false },
+    { key: 'building',   label: 'Building',   color: '#32cd32', solid: true },
+    { key: 'done',       label: 'Done',       color: '#1e90ff', solid: true },
+    { key: 'integrated', label: 'Integrated', color: '#9370db', solid: true }
   ];
 
   var STATUS_MAP = {};
@@ -57,13 +57,15 @@
     return Math.ceil((days + oneJan.getDay() + 1) / 7);
   }
 
-  /** Build a squircle SVG string for a status color */
-  function squircleSVG(color, size) {
+  /** Build a squircle SVG string — solid (filled) or outlined (stroke only) */
+  var SQUIRCLE_PATH = 'M10 0C13.5 0 16 0 17.5 1 19 2 20 4.5 20 10 20 15.5 19 18 17.5 19 16 20 13.5 20 10 20 6.5 20 4 20 2.5 19 1 18 0 15.5 0 10 0 4.5 1 2 2.5 1 4 0 6.5 0 10 0Z';
+
+  function squircleSVG(color, solid, size) {
     size = size || 16;
-    var r = size / 2;
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" xmlns="http://www.w3.org/2000/svg">' +
-      '<rect x="1" y="1" width="' + (size - 2) + '" height="' + (size - 2) + '" rx="' + Math.round(r * 0.35) + '" ' +
-      'fill="' + color + '" opacity="0.85"/></svg>';
+    if (solid) {
+      return '<svg viewBox="0 0 20 20" width="' + size + '" height="' + size + '" fill="none"><path d="' + SQUIRCLE_PATH + '" fill="' + color + '"/></svg>';
+    }
+    return '<svg viewBox="0 0 20 20" width="' + size + '" height="' + size + '" fill="none"><path d="' + SQUIRCLE_PATH + '" fill="none" stroke="' + color + '" stroke-width="2"/></svg>';
   }
 
   function esc(s) { return Utils.esc(s); }
@@ -137,6 +139,7 @@
   var _typeFilterModal = null;
   var _journalModalOpen = false;
   var _projectModalOpen = false;
+  var _taskModalOpen = false;
   var _draggedProjectId = null;
   var _resizingCard = null;
   var _resizingSession = null;
@@ -493,6 +496,81 @@
   }
 
   /* ================================================================
+     Task Edit Modal
+     ================================================================ */
+
+  function openTaskModal(taskId) {
+    if (_taskModalOpen) return;
+    _taskModalOpen = true;
+
+    var t = findTask(taskId);
+    if (!t) { _taskModalOpen = false; return; }
+
+    var projects = projectsArray();
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML =
+      '<div class="modal project-modal">' +
+        '<h2>Edit Task</h2>' +
+        '<div class="modal-field">' +
+          '<label>Title</label>' +
+          '<input type="text" id="tm-title" value="' + esc(t.title || t.name || '') + '">' +
+        '</div>' +
+        '<div class="modal-field">' +
+          '<label>Project</label>' +
+          '<select id="tm-project">' +
+            '<option value="">Unassigned</option>' +
+            projects.map(function (p) {
+              var sel = (t.project_id === p.id) ? ' selected' : '';
+              return '<option value="' + p.id + '"' + sel + '>' + esc(p.name) + '</option>';
+            }).join('') +
+          '</select>' +
+        '</div>' +
+        '<div class="modal-actions">' +
+          '<button class="btn-danger" id="tm-archive">Archive</button>' +
+          '<button class="btn-cancel" id="tm-cancel">Cancel</button>' +
+          '<button class="btn-save" id="tm-save">Save</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeTaskModal(overlay);
+    });
+    overlay.querySelector('#tm-cancel').onclick = function () { closeTaskModal(overlay); };
+
+    overlay.querySelector('#tm-save').onclick = function () {
+      var title = document.getElementById('tm-title').value.trim();
+      if (!title) { toast('Task title is required', 'error'); return; }
+      var projectId = document.getElementById('tm-project').value || null;
+      Data.saveTask({ title: title, project_id: projectId }, taskId).then(function (saved) {
+        if (saved) {
+          toast('Task updated', 'success');
+          closeTaskModal(overlay);
+          renderTasks();
+          renderTimelineSessions();
+        }
+      });
+    };
+
+    overlay.querySelector('#tm-archive').onclick = function () {
+      Data.archiveTask(taskId).then(function (ok) {
+        if (ok) {
+          toast('Task archived', 'success');
+          closeTaskModal(overlay);
+          renderTasks();
+        }
+      });
+    };
+  }
+
+  function closeTaskModal(overlay) {
+    _taskModalOpen = false;
+    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }
+
+  /* ================================================================
      Color Picker (popup on left-border click)
      ================================================================ */
 
@@ -552,7 +630,7 @@
       var s = STATUSES[i];
       var isCurrent = task.status === s.key;
       html += '<div class="status-option' + (isCurrent ? ' current' : '') + '" data-status="' + s.key + '">' +
-        squircleSVG(s.solid, 14) +
+        squircleSVG(s.color, s.solid, 14) +
         '<span>' + esc(s.label) + '</span>' +
       '</div>';
     }
@@ -654,7 +732,6 @@
 
       var groupFlex = allTasks.length || 1;
       html += '<div class="task-group" style="--c:' + c + '; --group-flex:' + groupFlex + '" data-project-id="' + p.id + '">';
-      html += '<div class="task-group-header">' + esc(p.name) + '</div>';
 
       for (var j = 0; j < allTasks.length; j++) {
         var t = allTasks[j];
@@ -662,9 +739,11 @@
         var isDone = t.status === 'done' || t.status === 'integrated';
         html += '<div class="task-row' + (isDone ? ' done' : '') + '" data-task-id="' + t.id + '" draggable="true">' +
           '<span class="squircle-btn" data-action="status-click" data-task-id="' + t.id + '">' +
-            squircleSVG(statusInfo.solid, 16) +
+            squircleSVG(statusInfo.color, statusInfo.solid, 16) +
           '</span>' +
           '<span class="task-label">' + esc(t.title || t.name || '') + '</span>' +
+          '<span class="task-edit-icon" data-action="edit-task" data-task-id="' + t.id + '" title="Edit">\u270E</span>' +
+          '<span class="task-delete-icon" data-action="delete-task" data-task-id="' + t.id + '" title="Delete">\u00D7</span>' +
         '</div>';
       }
 
@@ -682,16 +761,17 @@
     });
     if (unassigned.length > 0) {
       html += '<div class="task-group" style="--c:#706b62; --group-flex:' + unassigned.length + '">';
-      html += '<div class="task-group-header">Unassigned</div>';
       for (var u = 0; u < unassigned.length; u++) {
         var ut = unassigned[u];
         var us = STATUS_MAP[ut.status] || STATUS_MAP['idea'];
         var uDone = ut.status === 'done' || ut.status === 'integrated';
         html += '<div class="task-row' + (uDone ? ' done' : '') + '" data-task-id="' + ut.id + '" draggable="true">' +
           '<span class="squircle-btn" data-action="status-click" data-task-id="' + ut.id + '">' +
-            squircleSVG(us.solid, 16) +
+            squircleSVG(us.color, us.solid, 16) +
           '</span>' +
           '<span class="task-label">' + esc(ut.title || ut.name || '') + '</span>' +
+          '<span class="task-edit-icon" data-action="edit-task" data-task-id="' + ut.id + '" title="Edit">\u270E</span>' +
+          '<span class="task-delete-icon" data-action="delete-task" data-task-id="' + ut.id + '" title="Delete">\u00D7</span>' +
         '</div>';
       }
       html += '</div>';
@@ -712,8 +792,7 @@
      Timeline
      ================================================================ */
 
-  var HOUR_HEIGHT = 60;
-  var TOTAL_HEIGHT = 24 * HOUR_HEIGHT; // 1440px
+  var TRACK_HEIGHT = 40; // height of each session track lane
 
   function renderTimeline() {
     var container = document.getElementById('timeline');
@@ -732,28 +811,22 @@
       '</div>' +
     '</div>';
 
-    // Scrollable inner
+    // Horizontal inner (width matches world clock)
     html += '<div class="timeline-inner" id="timeline-inner">';
 
-    // Hour labels
-    html += '<div class="timeline-hours">';
-    for (var h = 0; h < 24; h++) {
-      html += '<div class="timeline-hour-label" style="top:' + (h * HOUR_HEIGHT) + 'px">' + hourLabel(h) + '</div>';
-    }
-    html += '</div>';
-
-    // Grid lines
+    // Grid lines (vertical, one per hour)
     html += '<div class="timeline-grid" id="timeline-grid">';
-    for (var g = 0; g < 24; g++) {
-      html += '<div class="timeline-hour-line" style="top:' + (g * HOUR_HEIGHT) + 'px"></div>';
+    for (var g = 0; g <= 24; g++) {
+      var pct = (g / 24) * 100;
+      html += '<div class="timeline-hour-line" style="left:' + pct + '%"></div>';
     }
     html += '</div>';
 
-    // Now marker
-    html += '<div class="timeline-now-marker" id="timeline-now" style="top:0"></div>';
+    // Now marker (vertical line)
+    html += '<div class="timeline-now-marker" id="timeline-now" style="left:0"></div>';
 
-    // Sessions container
-    html += '<div id="timeline-sessions"></div>';
+    // Session tracks container
+    html += '<div class="timeline-tracks" id="timeline-sessions"></div>';
 
     html += '</div>'; // end timeline-inner
 
@@ -762,6 +835,49 @@
     renderTimelineSessions();
     updateTimelineHeader();
     updateNowMarker();
+  }
+
+  /**
+   * Assign sessions to tracks (lanes) to avoid overlapping.
+   * Returns an array of { session, track } objects.
+   */
+  function assignSessionTracks(sessions, ghost) {
+    // Build items with start/end hours
+    var items = [];
+    for (var i = 0; i < sessions.length; i++) {
+      var s = sessions[i];
+      var sd = new Date(s.started_at);
+      var ed = s.ended_at ? new Date(s.ended_at) : new Date();
+      var sh = sd.getHours() + sd.getMinutes() / 60;
+      var eh = ed.getHours() + ed.getMinutes() / 60;
+      if (eh - sh < 0.33) eh = sh + 0.33;
+      items.push({ session: s, startH: sh, endH: eh, isGhost: false });
+    }
+    if (ghost) {
+      items.push(ghost);
+    }
+    // Sort by start hour
+    items.sort(function (a, b) { return a.startH - b.startH; });
+
+    // Greedy track assignment
+    var trackEnds = []; // end hour of each track
+    for (var j = 0; j < items.length; j++) {
+      var item = items[j];
+      var placed = false;
+      for (var t = 0; t < trackEnds.length; t++) {
+        if (item.startH >= trackEnds[t]) {
+          trackEnds[t] = item.endH;
+          item.track = t;
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        item.track = trackEnds.length;
+        trackEnds.push(item.endH);
+      }
+    }
+    return { items: items, trackCount: Math.max(trackEnds.length, 1) };
   }
 
   function renderTimelineSessions() {
@@ -773,30 +889,40 @@
       return s.started_at && s.started_at.slice(0, 10) === todayStr;
     });
 
-    var html = '';
-    for (var i = 0; i < sessions.length; i++) {
-      var s = sessions[i];
-      html += sessionBlockHTML(s);
+    // Build ghost item if timer running
+    var ghost = null;
+    if (_activeTimer) {
+      var gStart = _activeTimer.startedAt;
+      var gNow = new Date();
+      var gsh = gStart.getHours() + gStart.getMinutes() / 60;
+      var geh = gNow.getHours() + gNow.getMinutes() / 60;
+      if (geh - gsh < 0.33) geh = gsh + 0.33;
+      ghost = { session: null, startH: gsh, endH: geh, isGhost: true };
     }
 
-    // Active timer ghost block
-    if (_activeTimer) {
-      html += timerGhostHTML();
+    var layout = assignSessionTracks(sessions, ghost);
+
+    // Set container height based on track count
+    container.style.height = (layout.trackCount * TRACK_HEIGHT) + 'px';
+
+    var html = '';
+    for (var i = 0; i < layout.items.length; i++) {
+      var item = layout.items[i];
+      if (item.isGhost) {
+        html += timerGhostHTML(item.startH, item.endH, item.track);
+      } else {
+        html += sessionBlockHTML(item.session, item.startH, item.endH, item.track);
+      }
     }
 
     container.innerHTML = html;
   }
 
-  function sessionBlockHTML(s) {
-    var startDate = new Date(s.started_at);
-    var endDate = s.ended_at ? new Date(s.ended_at) : new Date();
-    var startHour = startDate.getHours() + startDate.getMinutes() / 60;
-    var endHour = endDate.getHours() + endDate.getMinutes() / 60;
+  function sessionBlockHTML(s, startHour, endHour, track) {
     var duration = endHour - startHour;
-    if (duration < 0.33) duration = 0.33; // min height
-
-    var top = startHour * HOUR_HEIGHT;
-    var height = duration * HOUR_HEIGHT;
+    var leftPct = (startHour / 24) * 100;
+    var widthPct = (duration / 24) * 100;
+    var topPx = track * TRACK_HEIGHT;
 
     // Get project color
     var color = '#c4956a';
@@ -809,26 +935,22 @@
     var endTime = s.ended_at ? Utils.formatTime(s.ended_at) : 'now';
 
     return '<div class="timeline-session" data-session-id="' + s.id + '" ' +
-      'style="top:' + top + 'px; height:' + height + 'px; background: color-mix(in srgb, ' + color + ' 25%, transparent); border-left: 3px solid ' + color + ';">' +
-      '<div class="resize-top"></div>' +
+      'style="left:' + leftPct + '%; width:' + widthPct + '%; top:' + topPx + 'px; ' +
+      'background: color-mix(in srgb, ' + color + ' 25%, transparent); border-left: 3px solid ' + color + ';">' +
+      '<div class="resize-left"></div>' +
       '<div class="session-title">' + esc(s.description || 'Untitled') + '</div>' +
       '<div class="session-time">' + startTime + ' \u2013 ' + endTime + '</div>' +
       '<button class="session-delete" data-action="delete-session" data-session-id="' + s.id + '">\u2715</button>' +
-      '<div class="resize-bottom"></div>' +
+      '<div class="resize-right"></div>' +
     '</div>';
   }
 
-  function timerGhostHTML() {
+  function timerGhostHTML(startHour, endHour, track) {
     if (!_activeTimer) return '';
-    var start = _activeTimer.startedAt;
-    var now = new Date();
-    var startHour = start.getHours() + start.getMinutes() / 60;
-    var nowHour = now.getHours() + now.getMinutes() / 60;
-    var duration = nowHour - startHour;
-    if (duration < 0.33) duration = 0.33;
-
-    var top = startHour * HOUR_HEIGHT;
-    var height = duration * HOUR_HEIGHT;
+    var duration = endHour - startHour;
+    var leftPct = (startHour / 24) * 100;
+    var widthPct = (duration / 24) * 100;
+    var topPx = track * TRACK_HEIGHT;
 
     var color = '#c4956a';
     if (_activeTimer.projectId) {
@@ -837,7 +959,8 @@
     }
 
     return '<div class="timeline-session timer-ghost" ' +
-      'style="top:' + top + 'px; height:' + height + 'px; background: color-mix(in srgb, ' + color + ' 20%, transparent); border-left: 3px solid ' + color + ';">' +
+      'style="left:' + leftPct + '%; width:' + widthPct + '%; top:' + topPx + 'px; ' +
+      'background: color-mix(in srgb, ' + color + ' 20%, transparent); border-left: 3px solid ' + color + ';">' +
       '<div class="session-title">' + esc(_activeTimer.description || 'Timer running...') + '</div>' +
       '<div class="session-time">' + Utils.formatTime(_activeTimer.startedAt.toISOString()) + ' \u2013 now</div>' +
     '</div>';
@@ -860,7 +983,8 @@
     if (!marker) return;
     var now = new Date();
     var h = now.getHours() + now.getMinutes() / 60;
-    marker.style.top = (h * HOUR_HEIGHT) + 'px';
+    var pct = (h / 24) * 100;
+    marker.style.left = pct + '%';
 
     // Update timer ghost if running
     if (_activeTimer) {
@@ -869,15 +993,7 @@
   }
 
   function scrollTimelineToNow() {
-    var timeline = document.getElementById('timeline');
-    if (!timeline) return;
-    var now = new Date();
-    var h = now.getHours() + now.getMinutes() / 60;
-    var targetScroll = (h * HOUR_HEIGHT) - (timeline.clientHeight / 2);
-    // Wait for layout
-    setTimeout(function () {
-      timeline.scrollTop = Math.max(0, targetScroll);
-    }, 100);
+    // No scrolling needed for horizontal timeline — it shows all 24 hours
   }
 
   /* ================================================================
@@ -960,15 +1076,23 @@
      Timeline interactions (double-click to add, drag to move/resize)
      ================================================================ */
 
+  /** Convert an X pixel position within timeline-inner to a decimal hour (0-24). */
+  function xToHour(inner, clientX) {
+    var rect = inner.getBoundingClientRect();
+    var relX = clientX - rect.left;
+    var pct = Math.max(0, Math.min(1, relX / rect.width));
+    return pct * 24;
+  }
+
   function setupTimelineInteractions() {
     var grid = document.getElementById('timeline-grid');
     if (!grid) return;
 
     // Double-click to create new session
     grid.addEventListener('dblclick', function (e) {
-      var rect = grid.getBoundingClientRect();
-      var y = e.clientY - rect.top + grid.parentElement.parentElement.scrollTop;
-      var hour = y / HOUR_HEIGHT;
+      var inner = document.getElementById('timeline-inner');
+      if (!inner) return;
+      var hour = xToHour(inner, e.clientX);
       var roundedHour = Math.floor(hour * 2) / 2; // snap to half hours
       createSessionAtHour(roundedHour);
     });
@@ -993,9 +1117,8 @@
         if (!task) return;
 
         var inner = document.getElementById('timeline-inner');
-        var rect = inner.getBoundingClientRect();
-        var y = e.clientY - rect.top + timeline.scrollTop;
-        var hour = Math.floor((y / HOUR_HEIGHT) * 2) / 2;
+        if (!inner) return;
+        var hour = Math.floor(xToHour(inner, e.clientX) * 2) / 2;
 
         var startDate = new Date();
         startDate.setHours(Math.floor(hour), (hour % 1) * 60, 0, 0);
@@ -1016,20 +1139,20 @@
 
     // Session drag and resize via mousedown delegation
     document.addEventListener('mousedown', function (e) {
-      // Check for session resize handles
-      var resizeTop = e.target.closest('.timeline-session .resize-top');
-      var resizeBottom = e.target.closest('.timeline-session .resize-bottom');
-      if (resizeTop || resizeBottom) {
+      // Check for session resize handles (now left/right)
+      var resizeLeft = e.target.closest('.timeline-session .resize-left');
+      var resizeRight = e.target.closest('.timeline-session .resize-right');
+      if (resizeLeft || resizeRight) {
         e.preventDefault();
         var sessionEl = e.target.closest('.timeline-session');
         var sessionId = sessionEl.dataset.sessionId;
-        startSessionResize(sessionId, sessionEl, resizeTop ? 'top' : 'bottom', e);
+        startSessionResize(sessionId, sessionEl, resizeLeft ? 'left' : 'right', e);
         return;
       }
 
-      // Check for session drag (move)
+      // Check for session drag (move horizontally)
       var sessionEl = e.target.closest('.timeline-session');
-      if (sessionEl && !e.target.closest('.session-delete') && !e.target.closest('.resize-top') && !e.target.closest('.resize-bottom')) {
+      if (sessionEl && !e.target.closest('.session-delete') && !e.target.closest('.resize-left') && !e.target.closest('.resize-right')) {
         e.preventDefault();
         startSessionDrag(sessionEl.dataset.sessionId, sessionEl, e);
       }
@@ -1041,14 +1164,15 @@
     startDate.setHours(Math.floor(hour), (hour % 1) * 60, 0, 0);
     var endDate = new Date(startDate.getTime() + 3600000);
 
-    // Show inline input
+    // Show inline input positioned horizontally
     var inner = document.getElementById('timeline-inner');
     if (!inner) return;
 
-    var top = hour * HOUR_HEIGHT;
+    var leftPct = (hour / 24) * 100;
+    var widthPct = (1 / 24) * 100; // 1 hour wide
     var inputWrap = document.createElement('div');
     inputWrap.className = 'timeline-session';
-    inputWrap.style.cssText = 'top:' + top + 'px; height:' + HOUR_HEIGHT + 'px; left:50px; right:8px; background:rgba(196,149,106,0.15); border-left:3px solid var(--accent); z-index:10;';
+    inputWrap.style.cssText = 'left:' + leftPct + '%; width:' + widthPct + '%; top:2px; height:36px; background:rgba(196,149,106,0.15); border-left:3px solid var(--accent); z-index:10;';
     inputWrap.innerHTML = '<input class="session-name-input" placeholder="What were you working on?" autofocus>';
     inner.appendChild(inputWrap);
 
@@ -1059,7 +1183,6 @@
       var desc = input.value.trim() || 'Untitled';
       inputWrap.remove();
 
-      // Try to find a matching project by first project
       var projects = projectsArray();
       var projectId = projects.length > 0 ? projects[0].id : null;
 
@@ -1079,7 +1202,6 @@
       if (e.key === 'Escape') { inputWrap.remove(); }
     });
     input.addEventListener('blur', function () {
-      // Small delay to allow click events
       setTimeout(function () {
         if (inputWrap.parentNode) save();
       }, 200);
@@ -1093,17 +1215,22 @@
     var inner = document.getElementById('timeline-inner');
     if (!inner) return;
     var innerRect = inner.getBoundingClientRect();
-    var timeline = document.getElementById('timeline');
-    var startY = startEvent.clientY;
-    var origTop = parseFloat(el.style.top);
+    var startX = startEvent.clientX;
+    // Read current left % and convert to px for dragging
+    var origLeftPct = parseFloat(el.style.left);
+    var origLeftPx = (origLeftPct / 100) * innerRect.width;
 
     _draggingSession = sessionId;
     document.body.classList.add('is-dragging');
 
     function onMove(e) {
-      var dy = e.clientY - startY;
-      var newTop = Math.max(0, Math.min(TOTAL_HEIGHT - parseFloat(el.style.height), origTop + dy));
-      el.style.top = newTop + 'px';
+      var dx = e.clientX - startX;
+      var newLeftPx = Math.max(0, origLeftPx + dx);
+      var newLeftPct = (newLeftPx / innerRect.width) * 100;
+      // Clamp so session doesn't go past right edge
+      var widthPct = parseFloat(el.style.width);
+      if (newLeftPct + widthPct > 100) newLeftPct = 100 - widthPct;
+      el.style.left = newLeftPct + '%';
     }
 
     function onUp(e) {
@@ -1112,10 +1239,9 @@
       document.body.classList.remove('is-dragging');
       _draggingSession = null;
 
-      var finalTop = parseFloat(el.style.top);
-      var newHour = finalTop / HOUR_HEIGHT;
+      var finalLeftPct = parseFloat(el.style.left);
+      var newHour = (finalLeftPct / 100) * 24;
 
-      // Calculate new start and end
       var origStart = new Date(session.started_at);
       var origEnd = session.ended_at ? new Date(session.ended_at) : new Date();
       var durationMs = origEnd - origStart;
@@ -1124,7 +1250,6 @@
       newStart.setHours(Math.floor(newHour), Math.round((newHour % 1) * 60), 0, 0);
       var newEnd = new Date(newStart.getTime() + durationMs);
 
-      // Update via delete and re-add (since Data.saveTimeSession only inserts)
       Data.deleteTimeSession(sessionId).then(function () {
         return Data.saveTimeSession({
           started_at: newStart.toISOString(),
@@ -1147,24 +1272,31 @@
     var session = Data.state.timeSessions.find(function (s) { return s.id === sessionId; });
     if (!session) return;
 
-    var startY = startEvent.clientY;
-    var origTop = parseFloat(el.style.top);
-    var origHeight = parseFloat(el.style.height);
+    var inner = document.getElementById('timeline-inner');
+    if (!inner) return;
+    var innerW = inner.getBoundingClientRect().width;
+    var startX = startEvent.clientX;
+    var origLeftPct = parseFloat(el.style.left);
+    var origWidthPct = parseFloat(el.style.width);
+    var minWidthPct = (0.25 / 24) * 100; // 15 min minimum
 
     _resizingSession = sessionId;
     document.body.classList.add('is-dragging');
 
     function onMove(e) {
-      var dy = e.clientY - startY;
-      if (edge === 'bottom') {
-        var newH = Math.max(HOUR_HEIGHT * 0.25, origHeight + dy);
-        el.style.height = newH + 'px';
+      var dx = e.clientX - startX;
+      var dPct = (dx / innerW) * 100;
+      if (edge === 'right') {
+        var newW = Math.max(minWidthPct, origWidthPct + dPct);
+        if (origLeftPct + newW > 100) newW = 100 - origLeftPct;
+        el.style.width = newW + '%';
       } else {
-        var newTop = Math.max(0, origTop + dy);
-        var newH = origHeight - dy;
-        if (newH < HOUR_HEIGHT * 0.25) return;
-        el.style.top = newTop + 'px';
-        el.style.height = newH + 'px';
+        var newLeft = origLeftPct + dPct;
+        var newW = origWidthPct - dPct;
+        if (newW < minWidthPct) return;
+        if (newLeft < 0) { newLeft = 0; newW = origLeftPct + origWidthPct; }
+        el.style.left = newLeft + '%';
+        el.style.width = newW + '%';
       }
     }
 
@@ -1174,10 +1306,10 @@
       document.body.classList.remove('is-dragging');
       _resizingSession = null;
 
-      var finalTop = parseFloat(el.style.top);
-      var finalH = parseFloat(el.style.height);
-      var startHour = finalTop / HOUR_HEIGHT;
-      var endHour = (finalTop + finalH) / HOUR_HEIGHT;
+      var finalLeftPct = parseFloat(el.style.left);
+      var finalWidthPct = parseFloat(el.style.width);
+      var startHour = (finalLeftPct / 100) * 24;
+      var endHour = ((finalLeftPct + finalWidthPct) / 100) * 24;
 
       var today = new Date();
       var newStart = new Date(today);
@@ -1261,6 +1393,25 @@
       var statusBtn = target.closest('[data-action="status-click"]');
       if (statusBtn) {
         showStatusDropdown(statusBtn.dataset.taskId, statusBtn);
+        return;
+      }
+
+      // Edit task
+      var editTaskBtn = target.closest('[data-action="edit-task"]');
+      if (editTaskBtn) {
+        openTaskModal(editTaskBtn.dataset.taskId);
+        return;
+      }
+
+      // Delete task
+      var deleteTaskBtn = target.closest('[data-action="delete-task"]');
+      if (deleteTaskBtn) {
+        Data.archiveTask(deleteTaskBtn.dataset.taskId).then(function (ok) {
+          if (ok) {
+            renderTasks();
+            toast('Task archived', 'info');
+          }
+        });
         return;
       }
 

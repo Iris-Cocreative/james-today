@@ -310,10 +310,10 @@ body::after {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 10px;
+  padding: 4px 10px;
   overflow: hidden;
-  flex: 1;
-  min-height: 0;
+  min-height: 28px;
+  height: auto;
   position: relative;
   transition: padding 0.5s cubic-bezier(.22,1,.36,1);
 }
@@ -329,13 +329,35 @@ body::after {
   transition: opacity 0.3s 0.12s;
 }
 .acc-tasks.expanded .task-row .task-label { opacity: 1; }
-.acc-tasks.expanded .task-row { padding: 0 10px; }
-.acc-tasks:not(.expanded) .task-row { padding: 0; gap: 0; }
+.acc-tasks.expanded .task-row { padding: 4px 10px; }
+.acc-tasks:not(.expanded) .task-row { padding: 0; gap: 0; min-height: 0; }
 
 .task-row.done .task-label {
   text-decoration: line-through;
   opacity: 0.5;
 }
+
+/* Task edit/delete icons — hidden until hover */
+.task-edit-icon,
+.task-delete-icon {
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  padding: 2px 4px;
+  transition: opacity 0.2s, color 0.15s;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+}
+.acc-tasks.expanded .task-row:hover .task-edit-icon,
+.acc-tasks.expanded .task-row:hover .task-delete-icon {
+  opacity: 1;
+  pointer-events: auto;
+}
+.task-edit-icon:hover { color: var(--accent); }
+.task-delete-icon:hover { color: var(--error); }
 
 /* Draggable tasks */
 .task-row[draggable="true"] { cursor: grab; }
@@ -549,32 +571,38 @@ body::after {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 2px;
+  width: 1.5px;
   background: #E8A84C;
   z-index: 10;
-  box-shadow: 0 0 8px rgba(232,168,76,0.5);
-  pointer-events: none;
+  box-shadow: 0 0 4px rgba(232,168,76,0.3);
+  cursor: grab;
 }
+.wc-now-line.dragging { cursor: grabbing; }
 .wc-now-cap {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #E8A84C;
-  left: -3px;
+  left: -1.75px;
 }
-.wc-now-cap.top { top: -4px; }
-.wc-now-cap.bottom { bottom: -4px; }
-.wc-sun-icon, .wc-moon-icon {
+.wc-now-cap.top { top: -2.5px; }
+.wc-now-cap.bottom { bottom: -2.5px; }
+.wc-drag-tooltip {
   position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.85);
+  color: #E8A84C;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
   pointer-events: none;
-  filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
+  font-variant-numeric: tabular-nums;
 }
-.wc-sun-icon { font-size: 20px; }
-.wc-moon-icon { font-size: 16px; }
 .wc-date-marker {
   position: absolute;
   top: 0;
@@ -605,67 +633,61 @@ body::after {
   text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-/* ---- Timeline ---- */
+/* ---- Timeline (horizontal) ---- */
 .timeline {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 .timeline-inner {
   position: relative;
-  height: 1440px; /* 24 hours x 60px per hour */
-  min-height: 1440px;
-}
-.timeline-hours {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 50px;
-  height: 100%;
-  z-index: 2;
-}
-.timeline-hour-label {
-  position: absolute;
-  left: 0;
-  width: 50px;
-  text-align: right;
-  padding-right: 8px;
-  font-size: 10px;
-  color: var(--text-tertiary);
-  transform: translateY(-50%);
+  width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 .timeline-grid {
   position: absolute;
-  left: 50px;
+  left: 0;
   right: 0;
   top: 0;
-  height: 100%;
+  bottom: 0;
 }
 .timeline-hour-line {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
   background: var(--border-subtle);
 }
 .timeline-now-marker {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
+  top: 0;
+  bottom: 0;
+  width: 1.5px;
   background: #E8A84C;
   z-index: 5;
-  box-shadow: 0 0 6px rgba(232,168,76,0.3);
+  box-shadow: 0 0 4px rgba(232,168,76,0.3);
   pointer-events: none;
 }
 .timeline-now-marker::before {
   content: '';
   position: absolute;
-  left: -4px;
   top: -3px;
-  width: 8px;
-  height: 8px;
+  left: -2.5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #E8A84C;
+}
+.timeline-now-marker::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: -2.5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #E8A84C;
 }
@@ -722,14 +744,28 @@ body::after {
   50% { box-shadow: 0 0 8px rgba(106,196,122,0.3); }
 }
 
-/* Timeline sessions */
+/* Timeline tracks */
+.timeline-tracks {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+.timeline-track {
+  position: relative;
+  height: 40px;
+  width: 100%;
+}
+
+/* Timeline sessions (horizontal) */
 .timeline-session {
   position: absolute;
-  left: 50px;
-  right: 8px;
+  top: 2px;
+  height: 36px;
   border-radius: 4px;
   cursor: move;
-  min-height: 20px;
+  min-width: 20px;
   padding: 4px 8px;
   font-size: 11px;
   color: var(--text-primary);
@@ -737,6 +773,9 @@ body::after {
   border: 1px solid rgba(255,255,255,0.1);
   z-index: 3;
   transition: box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .timeline-session:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -746,10 +785,12 @@ body::after {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.2;
 }
 .timeline-session .session-time {
   font-size: 9px;
   color: rgba(255,255,255,0.6);
+  white-space: nowrap;
 }
 .timeline-session .session-delete {
   position: absolute;
@@ -765,16 +806,16 @@ body::after {
   transition: opacity 0.15s;
 }
 .timeline-session:hover .session-delete { opacity: 1; }
-.timeline-session .resize-top,
-.timeline-session .resize-bottom {
+.timeline-session .resize-left,
+.timeline-session .resize-right {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 6px;
-  cursor: ns-resize;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: ew-resize;
 }
-.timeline-session .resize-top { top: 0; }
-.timeline-session .resize-bottom { bottom: 0; }
+.timeline-session .resize-left { left: 0; }
+.timeline-session .resize-right { right: 0; }
 
 /* Active timer ghost block */
 .timeline-session.timer-ghost {
