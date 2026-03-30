@@ -846,7 +846,11 @@
   function updateTimelineHeader() {
     var totalEl = document.getElementById('timeline-total');
     if (totalEl) {
-      var mins = Data.totalMinutesToday();
+      var sessions = Data.todaySessions();
+      var mins = 0;
+      for (var i = 0; i < sessions.length; i++) {
+        mins += parseFloat(sessions[i].duration_min || 0);
+      }
       totalEl.textContent = Utils.formatDuration(mins) + ' today';
     }
   }
