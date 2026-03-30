@@ -172,6 +172,7 @@
     setupEventDelegation();
     setupTimelineInteractions();
     setupKeyboard();
+    setupLeftColResize();
 
     // Listen for data changes
     Data.on('projectChanged', function () { renderProjects(); renderTasks(); renderTimelineSessions(); });
@@ -1862,6 +1863,42 @@
     renderTasks: renderTasks,
     renderTimeline: renderTimeline
   };
+
+  /* ---- Left column resize ---- */
+  function setupLeftColResize() {
+    var handle = document.getElementById('left-col-resize');
+    var col = document.getElementById('left-col');
+    if (!handle || !col) return;
+
+    handle.addEventListener('mousedown', function (e) {
+      e.preventDefault();
+      handle.classList.add('dragging');
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+
+      var startX = e.clientX;
+      var startW = col.offsetWidth;
+
+      function onMove(e) {
+        var newW = startW + (e.clientX - startX);
+        newW = Math.max(200, Math.min(600, newW));
+        col.style.width = newW + 'px';
+      }
+
+      function onUp() {
+        handle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        // Redraw world clock to fit new width
+        if (window.WorldClock) WorldClock._drawAll && WorldClock._drawAll(true);
+      }
+
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
 
   /* ---- Boot ---- */
   if (document.readyState === 'loading') {
