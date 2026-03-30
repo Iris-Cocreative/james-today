@@ -208,7 +208,7 @@
         ' <span class="domain-sanskrit">' + esc(d.sanskrit) + '</span>' +
       '</div>' +
       '<div class="day-theme">' + esc(d.theme) + ' \u00B7 ' + esc(d.planet) + ' \u00B7 ' + esc(d.planetSkt) + '</div>' +
-      '<div class="day-date">' + esc(Utils.formatDateFull(Utils.isoDate(now))) + '</div>' +
+      '<div class="day-date">' + esc(Utils.formatDateFull(now)) + '</div>' +
       '<div class="day-numbers">Day ' + dayOfYear(now) + ' \u00B7 Week ' + weekNumber(now) + '</div>' +
       '<div class="day-question">\u201C' + esc(d.question) + '\u201D</div>';
     container.onclick = function () { openJournalModal(); };
