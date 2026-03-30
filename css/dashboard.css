@@ -305,6 +305,11 @@ body::after {
   border: 1px solid var(--border-subtle);
   border-left-width: 1em;
   border-left-color: var(--c);
+  padding-top: 0;
+  transition: padding-top 0.2s, all 0.5s cubic-bezier(.22,1,.36,1);
+}
+.acc-tasks.expanded .task-group:hover {
+  padding-top: 16px;
 }
 .acc-tasks:not(.expanded) .task-group {
   border-left-color: color-mix(in srgb, var(--c) 50%, transparent);
