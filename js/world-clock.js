@@ -529,12 +529,12 @@
     // Skip redraw if gradients were already drawn today (sunrise/sunset only change daily)
     var todayStr = new Date().toDateString();
     if (!force && _gradientCacheDate === todayStr) return;
-    _gradientCacheDate = todayStr;
 
     var homeOffset = getUtcOffsetHours(HOME_TZ);
 
     // Draw each gradient bar
     var wraps = container.querySelectorAll('.wc-gradient-wrap');
+    var anyDrawn = false;
     for (var i = 0; i < wraps.length; i++) {
       var wrap = wraps[i];
       var tz = wrap.getAttribute('data-tz');
@@ -543,6 +543,7 @@
       if (!canvas) continue;
 
       drawTimeline(canvas, tz, startHour);
+      if (canvas.width > 0 && canvas.height > 0) anyDrawn = true;
 
       // Remove old overlays
       var oldIcons = wrap.querySelectorAll('.wc-date-marker');
@@ -586,6 +587,9 @@
         labelsContainer.appendChild(lbl);
       }
     }
+
+    // Only cache if canvases actually rendered (had nonzero dimensions)
+    if (anyDrawn) _gradientCacheDate = todayStr;
   }
 
   /**
@@ -625,6 +629,12 @@
 
   function startUpdates() {
     stopUpdates();
+
+    // Initial draw may fail if layout isn't ready — retry after a short delay
+    _drawAll(true);
+    setTimeout(function () { _drawAll(true); }, 100);
+    setTimeout(function () { _drawAll(true); }, 500);
+
     // 1-second interval for now-line + clock
     _updateTimerId = setInterval(function () { _updateNow(); }, 1000);
     // 60-second interval for gradient redraws

@@ -297,6 +297,7 @@ body::after {
   overflow: hidden;
   flex: none;
   min-height: 0;
+  background: color-mix(in srgb, var(--c) 8%, transparent);
   border-left: 1em solid var(--c);
   border-radius: 4px;
   background: color-mix(in srgb, var(--c) 5%, transparent);
@@ -603,11 +604,15 @@ body::after {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1.5px;
+  width: 2px;
   background: #E8A84C;
   z-index: 10;
   box-shadow: 0 0 4px rgba(232,168,76,0.3);
   cursor: grab;
+  /* Wider hit area for dragging */
+  padding: 0 6px;
+  margin-left: -6px;
+  background-clip: content-box;
 }
 .wc-now-line.dragging { cursor: grabbing; }
 .wc-now-cap {
