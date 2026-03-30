@@ -1,403 +1,503 @@
-/* ============================================================
-   data.js — Supabase data layer & local state
-   Exposed on window.Data
-   ============================================================ */
-(function () {
+(function() {
   'use strict';
 
   var SUPABASE_URL = 'https://reoliysifzxuzpskywtm.supabase.co';
   var SUPABASE_KEY = 'sb_publishable_trmR_URy0KyDtDUfpgjOfg_owXvNPRI';
 
-  var sb = null;  // Supabase client
+  var client = null;
+  var listeners = {};
 
-  /* ---- Local state ---- */
   var state = {
-    projects:     new Map(),
-    features:     new Map(),
-    tasks:        new Map(),
+    projects: [],
+    tasks: [],
     timeSessions: [],
-    user:         null,
+    journal: null,
+    user: null,
   };
 
-  /* ---- Event bus ---- */
-  var _listeners = {};
+  // ---------------------------------------------------------------------------
+  // Event bus
+  // ---------------------------------------------------------------------------
 
   function on(event, cb) {
-    if (!_listeners[event]) _listeners[event] = [];
-    _listeners[event].push(cb);
+    if (!listeners[event]) listeners[event] = [];
+    listeners[event].push(cb);
   }
 
   function emit(event, data) {
-    var cbs = _listeners[event];
-    if (!cbs) return;
+    var cbs = listeners[event] || [];
     for (var i = 0; i < cbs.length; i++) {
-      try { cbs[i](data); } catch (err) { console.error('Data event handler error:', err); }
+      try { cbs[i](data); } catch (e) { console.error('[Data] listener error:', e); }
     }
   }
 
-  /* ---- Init ---- */
-  async function init() {
-    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  // ---------------------------------------------------------------------------
+  // Toast
+  // ---------------------------------------------------------------------------
 
-    var { data: sessionData, error: sessionErr } = await sb.auth.getSession();
-    if (sessionErr || !sessionData.session) {
+  function toast(msg, type) {
+    type = type || 'info';
+    var container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;';
+      document.body.appendChild(container);
+    }
+    var el = document.createElement('div');
+    var bgMap = { success: '#2d6a4f', error: '#a4161a', info: '#343a40' };
+    el.style.cssText = 'padding:10px 18px;border-radius:8px;color:#fff;font-size:14px;pointer-events:auto;opacity:0;transition:opacity 0.3s;background:' + (bgMap[type] || bgMap.info) + ';';
+    el.textContent = msg;
+    container.appendChild(el);
+    // fade in
+    requestAnimationFrame(function() { el.style.opacity = '1'; });
+    // auto-dismiss
+    setTimeout(function() {
+      el.style.opacity = '0';
+      setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
+    }, 3000);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Init / Auth
+  // ---------------------------------------------------------------------------
+
+  function init() {
+    if (typeof supabase === 'undefined' || !supabase.createClient) {
+      console.error('[Data] Supabase JS library not loaded');
+      toast('Supabase library not loaded', 'error');
+      return Promise.reject(new Error('Supabase not loaded'));
+    }
+
+    client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    return client.auth.getSession().then(function(result) {
+      var session = result.data && result.data.session;
+      if (!session) {
+        window.location.href = 'login.html';
+        return Promise.reject(new Error('No session'));
+      }
+      state.user = session.user;
+      return loadAll();
+    }).then(function() {
+      emit('dataChanged', state);
+      return state;
+    }).catch(function(err) {
+      console.error('[Data] init error:', err);
+      if (err.message !== 'No session') {
+        toast('Failed to initialize: ' + err.message, 'error');
+      }
+      throw err;
+    });
+  }
+
+  function signOut() {
+    if (!client) return;
+    client.auth.signOut().then(function() {
       window.location.href = 'login.html';
-      return;
-    }
-    state.user = sessionData.session.user;
-
-    await loadAll();
-    emit('loaded');
+    }).catch(function(err) {
+      console.error('[Data] sign out error:', err);
+      toast('Sign out failed: ' + err.message, 'error');
+    });
   }
 
-  /* ---- Load functions ---- */
+  // ---------------------------------------------------------------------------
+  // Load
+  // ---------------------------------------------------------------------------
 
-  async function loadAll() {
-    await Promise.all([
+  function loadAll() {
+    return Promise.all([
       loadProjects(),
-      loadFeatures(),
       loadTasks(),
       loadTimeSessions(),
+      loadTodayJournal(),
     ]);
   }
 
-  async function loadProjects() {
-    var { data, error } = await sb
+  function loadProjects() {
+    return client
       .from('projects')
       .select('*')
       .eq('is_archived', false)
-      .order('name');
-    if (error) { console.error('loadProjects:', error); return; }
-    state.projects = new Map();
-    for (var i = 0; i < data.length; i++) {
-      state.projects.set(data[i].id, data[i]);
-    }
+      .order('sort_order', { ascending: true })
+      .order('name', { ascending: true })
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.projects = res.data || [];
+        return state.projects;
+      })
+      .catch(function(err) {
+        console.error('[Data] loadProjects error:', err);
+        toast('Failed to load projects: ' + (err.message || err), 'error');
+        state.projects = [];
+      });
   }
 
-  async function loadFeatures() {
-    var { data, error } = await sb
-      .from('features')
-      .select('*')
-      .eq('is_archived', false)
-      .order('sort_order');
-    if (error) { console.error('loadFeatures:', error); return; }
-    state.features = new Map();
-    for (var i = 0; i < data.length; i++) {
-      state.features.set(data[i].id, data[i]);
-    }
-  }
-
-  async function loadTasks() {
-    var { data, error } = await sb
+  function loadTasks() {
+    return client
       .from('tasks')
       .select('*')
       .eq('is_archived', false)
-      .order('created_at', { ascending: false });
-    if (error) { console.error('loadTasks:', error); return; }
-    state.tasks = new Map();
-    for (var i = 0; i < data.length; i++) {
-      state.tasks.set(data[i].id, data[i]);
-    }
+      .order('created_at', { ascending: false })
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.tasks = res.data || [];
+        return state.tasks;
+      })
+      .catch(function(err) {
+        console.error('[Data] loadTasks error:', err);
+        toast('Failed to load tasks: ' + (err.message || err), 'error');
+        state.tasks = [];
+      });
   }
 
-  async function loadTimeSessions() {
-    var { data, error } = await sb
+  function loadTimeSessions() {
+    return client
       .from('time_sessions')
       .select('*')
       .order('started_at', { ascending: false })
-      .limit(50);
-    if (error) { console.error('loadTimeSessions:', error); return; }
-    state.timeSessions = data || [];
+      .limit(50)
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.timeSessions = res.data || [];
+        return state.timeSessions;
+      })
+      .catch(function(err) {
+        console.error('[Data] loadTimeSessions error:', err);
+        toast('Failed to load time sessions: ' + (err.message || err), 'error');
+        state.timeSessions = [];
+      });
   }
 
-  /* ---- CRUD: Projects ---- */
+  function loadTodayJournal() {
+    var today = Utils.isoDate(new Date());
+    return client
+      .from('journal')
+      .select('*')
+      .eq('entry_date', today)
+      .maybeSingle()
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.journal = res.data || null;
+        return state.journal;
+      })
+      .catch(function(err) {
+        console.error('[Data] loadTodayJournal error:', err);
+        toast('Failed to load journal: ' + (err.message || err), 'error');
+        state.journal = null;
+      });
+  }
 
-  async function saveProject(obj, id) {
+  // ---------------------------------------------------------------------------
+  // CRUD — Projects
+  // ---------------------------------------------------------------------------
+
+  function saveProject(obj, id) {
     try {
-      // If status is done or integrated, set completed_at if not already set
-      if ((obj.status === 'done' || obj.status === 'integrated') && !obj.completed_at) {
-        obj.completed_at = new Date().toISOString();
-      }
-
-      var result;
       if (id) {
-        obj.updated_at = new Date().toISOString();
-        result = await sb.from('projects').update(obj).eq('id', id).select().single();
+        return client
+          .from('projects')
+          .update(obj)
+          .eq('id', id)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadProjects().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveProject update error:', err);
+            toast('Failed to save project: ' + (err.message || err), 'error');
+            throw err;
+          });
       } else {
-        result = await sb.from('projects').insert(obj).select().single();
+        var maxOrder = 0;
+        for (var i = 0; i < state.projects.length; i++) {
+          if ((state.projects[i].sort_order || 0) > maxOrder) {
+            maxOrder = state.projects[i].sort_order || 0;
+          }
+        }
+        obj.sort_order = maxOrder + 1;
+
+        return client
+          .from('projects')
+          .insert(obj)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadProjects().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveProject insert error:', err);
+            toast('Failed to create project: ' + (err.message || err), 'error');
+            throw err;
+          });
       }
-      if (result.error) throw result.error;
-      var saved = result.data;
-      state.projects.set(saved.id, saved);
-      emit('projectChanged', saved);
-      return saved;
     } catch (err) {
-      console.error('saveProject:', err);
-      return null;
+      console.error('[Data] saveProject error:', err);
+      toast('Failed to save project: ' + (err.message || err), 'error');
+      return Promise.reject(err);
     }
   }
 
-  async function archiveProject(id) {
-    try {
-      var { error } = await sb.from('projects').update({ is_archived: true, updated_at: new Date().toISOString() }).eq('id', id);
-      if (error) throw error;
-      state.projects.delete(id);
-      emit('projectChanged', { id: id, archived: true });
-      return true;
-    } catch (err) {
-      console.error('archiveProject:', err);
-      return null;
-    }
+  function archiveProject(id) {
+    return client
+      .from('projects')
+      .update({ is_archived: true })
+      .eq('id', id)
+      .then(function(res) {
+        if (res.error) throw res.error;
+        return loadProjects().then(function() {
+          emit('dataChanged', state);
+        });
+      })
+      .catch(function(err) {
+        console.error('[Data] archiveProject error:', err);
+        toast('Failed to archive project: ' + (err.message || err), 'error');
+        throw err;
+      });
   }
 
-  /* ---- CRUD: Features ---- */
-
-  async function saveFeature(obj, id) {
-    try {
-      if ((obj.status === 'done' || obj.status === 'integrated') && !obj.completed_at) {
-        obj.completed_at = new Date().toISOString();
-      }
-
-      var result;
-      if (id) {
-        obj.updated_at = new Date().toISOString();
-        result = await sb.from('features').update(obj).eq('id', id).select().single();
-      } else {
-        result = await sb.from('features').insert(obj).select().single();
-      }
-      if (result.error) throw result.error;
-      var saved = result.data;
-      state.features.set(saved.id, saved);
-      emit('featureChanged', saved);
-      return saved;
-    } catch (err) {
-      console.error('saveFeature:', err);
-      return null;
-    }
-  }
-
-  async function archiveFeature(id) {
-    try {
-      var { error } = await sb.from('features').update({ is_archived: true, updated_at: new Date().toISOString() }).eq('id', id);
-      if (error) throw error;
-      state.features.delete(id);
-      emit('featureChanged', { id: id, archived: true });
-      return true;
-    } catch (err) {
-      console.error('archiveFeature:', err);
-      return null;
-    }
-  }
-
-  /* ---- CRUD: Tasks ---- */
-
-  async function saveTask(obj, id) {
-    try {
-      if ((obj.status === 'done' || obj.status === 'integrated') && !obj.completed_at) {
-        obj.completed_at = new Date().toISOString();
-      }
-
-      var result;
-      if (id) {
-        obj.updated_at = new Date().toISOString();
-        result = await sb.from('tasks').update(obj).eq('id', id).select().single();
-      } else {
-        result = await sb.from('tasks').insert(obj).select().single();
-      }
-      if (result.error) throw result.error;
-      var saved = result.data;
-      state.tasks.set(saved.id, saved);
-      emit('taskChanged', saved);
-      return saved;
-    } catch (err) {
-      console.error('saveTask:', err);
-      return null;
-    }
-  }
-
-  async function archiveTask(id) {
-    try {
-      var { error } = await sb.from('tasks').update({ is_archived: true, updated_at: new Date().toISOString() }).eq('id', id);
-      if (error) throw error;
-      state.tasks.delete(id);
-      emit('taskChanged', { id: id, archived: true });
-      return true;
-    } catch (err) {
-      console.error('archiveTask:', err);
-      return null;
-    }
-  }
-
-  /* ---- CRUD: Time Sessions ---- */
-
-  async function saveTimeSession(obj) {
-    try {
-      var result = await sb.from('time_sessions').insert(obj).select().single();
-      if (result.error) throw result.error;
-      var saved = result.data;
-      state.timeSessions.unshift(saved);
-      emit('timeSessionChanged', saved);
-      return saved;
-    } catch (err) {
-      console.error('saveTimeSession:', err);
-      return null;
-    }
-  }
-
-  async function deleteTimeSession(id) {
-    try {
-      var { error } = await sb.from('time_sessions').delete().eq('id', id);
-      if (error) throw error;
-      state.timeSessions = state.timeSessions.filter(function (s) { return s.id !== id; });
-      emit('timeSessionChanged', { id: id, deleted: true });
-      return true;
-    } catch (err) {
-      console.error('deleteTimeSession:', err);
-      return null;
-    }
-  }
-
-  /* ---- Query helpers (local state, no network) ---- */
-
-  function projectFeatures(projectId) {
-    var out = [];
-    state.features.forEach(function (f) {
-      if (f.project_id === projectId) out.push(f);
+  function reorderProjects(orderedIds) {
+    var updates = orderedIds.map(function(id, idx) {
+      return client
+        .from('projects')
+        .update({ sort_order: idx })
+        .eq('id', id);
     });
-    out.sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
-    return out;
+
+    return Promise.all(updates).then(function(results) {
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].error) throw results[i].error;
+      }
+      return loadProjects().then(function() {
+        emit('dataChanged', state);
+      });
+    }).catch(function(err) {
+      console.error('[Data] reorderProjects error:', err);
+      toast('Failed to reorder projects: ' + (err.message || err), 'error');
+      throw err;
+    });
   }
 
-  function featureTasks(featureId) {
-    var out = [];
-    state.tasks.forEach(function (t) {
-      if (t.feature_id === featureId) out.push(t);
-    });
-    out.sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
-    return out;
+  // ---------------------------------------------------------------------------
+  // CRUD — Tasks
+  // ---------------------------------------------------------------------------
+
+  function saveTask(obj, id) {
+    try {
+      if (id) {
+        return client
+          .from('tasks')
+          .update(obj)
+          .eq('id', id)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadTasks().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveTask update error:', err);
+            toast('Failed to save task: ' + (err.message || err), 'error');
+            throw err;
+          });
+      } else {
+        return client
+          .from('tasks')
+          .insert(obj)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadTasks().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveTask insert error:', err);
+            toast('Failed to create task: ' + (err.message || err), 'error');
+            throw err;
+          });
+      }
+    } catch (err) {
+      console.error('[Data] saveTask error:', err);
+      toast('Failed to save task: ' + (err.message || err), 'error');
+      return Promise.reject(err);
+    }
   }
+
+  function archiveTask(id) {
+    return client
+      .from('tasks')
+      .update({ is_archived: true })
+      .eq('id', id)
+      .then(function(res) {
+        if (res.error) throw res.error;
+        return loadTasks().then(function() {
+          emit('dataChanged', state);
+        });
+      })
+      .catch(function(err) {
+        console.error('[Data] archiveTask error:', err);
+        toast('Failed to archive task: ' + (err.message || err), 'error');
+        throw err;
+      });
+  }
+
+  // ---------------------------------------------------------------------------
+  // CRUD — Time Sessions
+  // ---------------------------------------------------------------------------
+
+  function saveTimeSession(obj, id) {
+    try {
+      if (id) {
+        return client
+          .from('time_sessions')
+          .update(obj)
+          .eq('id', id)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadTimeSessions().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveTimeSession update error:', err);
+            toast('Failed to save time session: ' + (err.message || err), 'error');
+            throw err;
+          });
+      } else {
+        return client
+          .from('time_sessions')
+          .insert(obj)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadTimeSessions().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveTimeSession insert error:', err);
+            toast('Failed to create time session: ' + (err.message || err), 'error');
+            throw err;
+          });
+      }
+    } catch (err) {
+      console.error('[Data] saveTimeSession error:', err);
+      toast('Failed to save time session: ' + (err.message || err), 'error');
+      return Promise.reject(err);
+    }
+  }
+
+  function deleteTimeSession(id) {
+    return client
+      .from('time_sessions')
+      .delete()
+      .eq('id', id)
+      .then(function(res) {
+        if (res.error) throw res.error;
+        return loadTimeSessions().then(function() {
+          emit('dataChanged', state);
+        });
+      })
+      .catch(function(err) {
+        console.error('[Data] deleteTimeSession error:', err);
+        toast('Failed to delete time session: ' + (err.message || err), 'error');
+        throw err;
+      });
+  }
+
+  // ---------------------------------------------------------------------------
+  // CRUD — Journal
+  // ---------------------------------------------------------------------------
+
+  function saveJournal(obj) {
+    var today = Utils.isoDate(new Date());
+    obj.entry_date = today;
+
+    return client
+      .from('journal')
+      .upsert(obj, { onConflict: 'entry_date' })
+      .select()
+      .single()
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.journal = res.data;
+        emit('dataChanged', state);
+        return res.data;
+      })
+      .catch(function(err) {
+        console.error('[Data] saveJournal error:', err);
+        toast('Failed to save journal: ' + (err.message || err), 'error');
+        throw err;
+      });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Local state helpers
+  // ---------------------------------------------------------------------------
 
   function projectTasks(projectId) {
-    var out = [];
-    state.tasks.forEach(function (t) {
-      if (t.project_id === projectId && !t.feature_id) out.push(t);
-    });
-    out.sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
-    return out;
+    return state.tasks.filter(function(t) { return t.project_id === projectId; });
   }
 
   function activeProjects() {
-    var out = [];
-    state.projects.forEach(function (p) {
-      if (p.status !== 'done' && p.status !== 'integrated' && p.status !== 'archived') {
-        out.push(p);
-      }
-    });
-    out.sort(function (a, b) { return (a.name || '').localeCompare(b.name || ''); });
-    return out;
-  }
-
-  function thisWeekItems() {
-    var monday = Utils.isoWeek(new Date());
-    var items = [];
-    state.features.forEach(function (f) {
-      if (f.target_week === monday) items.push(Object.assign({ _type: 'feature' }, f));
-    });
-    state.tasks.forEach(function (t) {
-      if (t.target_week === monday) items.push(Object.assign({ _type: 'task' }, t));
-    });
-    return items;
-  }
-
-  function staleItems(days) {
-    var out = [];
-    var cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - days);
-    var cutoffMs = cutoff.getTime();
-
-    state.tasks.forEach(function (t) {
-      if (t.status === 'idea' && new Date(t.created_at).getTime() < cutoffMs) {
-        out.push(Object.assign({ _type: 'task' }, t));
-      }
-    });
-    state.features.forEach(function (f) {
-      if (f.status === 'idea' && new Date(f.created_at).getTime() < cutoffMs) {
-        out.push(Object.assign({ _type: 'feature' }, f));
-      }
-    });
-    return out;
-  }
-
-  function todaysSessions() {
-    var todayStr = Utils.isoDate(new Date());
-    return state.timeSessions.filter(function (s) {
-      return s.started_at && s.started_at.slice(0, 10) === todayStr;
+    return state.projects.filter(function(p) {
+      return p.status !== 'done' && p.status !== 'integrated';
     });
   }
 
-  function totalMinutesToday() {
-    var sessions = todaysSessions();
-    var total = 0;
-    for (var i = 0; i < sessions.length; i++) {
-      total += (sessions[i].duration_min || 0);
-    }
-    return total;
-  }
-
-  function featuresByStatus(projectId, statusGroup) {
-    var feats = projectFeatures(projectId);
-    return feats.filter(function (f) {
-      if (statusGroup === 'built')  return f.status === 'done' || f.status === 'integrated';
-      if (statusGroup === 'active') return f.status === 'scheduled' || f.status === 'building';
-      if (statusGroup === 'todo')   return f.status === 'idea' || f.status === 'planning';
-      return false;
+  function todaySessions() {
+    var today = Utils.isoDate(new Date());
+    return state.timeSessions.filter(function(s) {
+      return s.started_at && Utils.isoDate(s.started_at) === today;
     });
   }
 
-  /* ---- Auth ---- */
+  // ---------------------------------------------------------------------------
+  // Public API
+  // ---------------------------------------------------------------------------
 
-  async function signOut() {
-    if (sb) await sb.auth.signOut();
-    window.location.href = 'login.html';
-  }
-
-  function getUser() {
-    return state.user;
-  }
-
-  /* ---- Expose ---- */
   window.Data = {
-    state:  state,
-    init:   init,
-    on:     on,
-    emit:   emit,
-
-    loadAll:          loadAll,
-    loadProjects:     loadProjects,
-    loadFeatures:     loadFeatures,
-    loadTasks:        loadTasks,
-    loadTimeSessions: loadTimeSessions,
-
-    saveProject:      saveProject,
-    archiveProject:   archiveProject,
-    saveFeature:      saveFeature,
-    archiveFeature:   archiveFeature,
-    saveTask:         saveTask,
-    archiveTask:      archiveTask,
-    saveTimeSession:  saveTimeSession,
-    deleteTimeSession: deleteTimeSession,
-
-    projectFeatures:  projectFeatures,
-    featureTasks:     featureTasks,
-    projectTasks:     projectTasks,
-    activeProjects:   activeProjects,
-    thisWeekItems:    thisWeekItems,
-    staleItems:       staleItems,
-    todaysSessions:   todaysSessions,
-    totalMinutesToday: totalMinutesToday,
-    featuresByStatus: featuresByStatus,
-
+    state: state,
+    init: init,
     signOut: signOut,
-    getUser: getUser,
+    loadAll: loadAll,
+    loadProjects: loadProjects,
+    loadTasks: loadTasks,
+    loadTimeSessions: loadTimeSessions,
+    loadTodayJournal: loadTodayJournal,
+    saveProject: saveProject,
+    archiveProject: archiveProject,
+    reorderProjects: reorderProjects,
+    saveTask: saveTask,
+    archiveTask: archiveTask,
+    saveTimeSession: saveTimeSession,
+    deleteTimeSession: deleteTimeSession,
+    saveJournal: saveJournal,
+    projectTasks: projectTasks,
+    activeProjects: activeProjects,
+    todaySessions: todaySessions,
+    on: on,
+    emit: emit,
+    toast: toast,
   };
 })();

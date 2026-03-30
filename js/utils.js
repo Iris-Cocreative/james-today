@@ -1,184 +1,128 @@
-/* ============================================================
-   utils.js — Shared utility helpers
-   Exposed on window.Utils
-   ============================================================ */
-(function () {
+(function() {
   'use strict';
 
-  const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-
-  const STATUS_COLORS = {
-    idea:       'var(--status-idea)',
-    planning:   'var(--status-planning)',
-    scheduled:  'var(--status-scheduled)',
-    building:   'var(--status-building)',
-    done:       'var(--status-done)',
-    integrated: 'var(--status-integrated)',
-    paused:     'var(--status-paused)',
-    archived:   'var(--status-archived)',
-  };
-
-  const STATUS_LABELS = {
-    idea:       'Idea',
-    planning:   'Planning',
-    scheduled:  'Scheduled',
-    building:   'Building',
-    done:       'Done',
-    integrated: 'Integrated',
-    paused:     'Paused',
-    archived:   'Archived',
-  };
-
-  /* ---- XSS-safe HTML escaping ---- */
-  const _escDiv = document.createElement('div');
   function esc(str) {
-    if (str == null) return '';
-    _escDiv.textContent = String(str);
-    return _escDiv.innerHTML;
+    if (!str) return '';
+    var d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
   }
 
-  /* ---- Date helpers ---- */
-
-  /** Return the Monday of the week containing `date`. */
-  function getMonday(date) {
-    var d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    var day = d.getDay();          // 0=Sun … 6=Sat
-    var diff = (day === 0) ? -6 : 1 - day;   // Sunday → previous Monday
-    d.setDate(d.getDate() + diff);
-    return d;
+  function isoDate(d) {
+    var dt = d instanceof Date ? d : new Date(d);
+    return dt.toISOString().slice(0, 10);
   }
 
-  function addWeeks(date, n) {
-    var d = new Date(date);
-    d.setDate(d.getDate() + n * 7);
-    return d;
+  function dayOfYear(d) {
+    var dt = d instanceof Date ? d : new Date(d);
+    var start = new Date(dt.getFullYear(), 0, 0);
+    var diff = dt - start;
+    return Math.floor(diff / 86400000);
   }
 
-  /** YYYY-MM-DD */
-  function isoDate(date) {
-    var d = new Date(date);
-    var y = d.getFullYear();
-    var m = String(d.getMonth() + 1).padStart(2, '0');
-    var day = String(d.getDate()).padStart(2, '0');
-    return y + '-' + m + '-' + day;
+  function weekNumber(d) {
+    var dt = d instanceof Date ? d : new Date(d);
+    var oneJan = new Date(dt.getFullYear(), 0, 1);
+    return Math.ceil(((dt - oneJan) / 86400000 + oneJan.getDay() + 1) / 7);
   }
 
-  /** YYYY-MM-DD of the Monday of that week */
-  function isoWeek(date) {
-    return isoDate(getMonday(date));
+  function getDayName(d) {
+    return (d || new Date()).toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
   }
 
-  /** "Mar 15" */
-  function formatDate(dateStr) {
-    var d = new Date(dateStr + 'T00:00:00');
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return months[d.getMonth()] + ' ' + d.getDate();
+  function formatDateFull(d) {
+    return (d || new Date()).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   }
 
-  /** "Saturday, March 15, 2026" */
-  function formatDateFull(dateStr) {
-    var d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  }
-
-  /** "Mar 23 — Mar 29" */
-  function formatWeekLabel(monday) {
-    var mon = new Date(monday);
-    var sun = new Date(mon);
-    sun.setDate(sun.getDate() + 6);
-    return formatDate(isoDate(mon)) + ' \u2014 ' + formatDate(isoDate(sun));
-  }
-
-  /** "Mar 23" for a Monday */
-  function formatWeekShort(monday) {
-    return formatDate(isoDate(new Date(monday)));
-  }
-
-  /** "2:30 PM" */
   function formatTime(isoStr) {
-    var d = new Date(isoStr);
-    var h = d.getHours();
-    var m = String(d.getMinutes()).padStart(2, '0');
-    var ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12 || 12;
-    return h + ':' + m + ' ' + ampm;
+    return new Date(isoStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
-  /** "2h 15m" or "45m" */
   function formatDuration(mins) {
-    if (mins == null || mins <= 0) return '0m';
-    var h = Math.floor(mins / 60);
-    var m = mins % 60;
-    if (h === 0) return m + 'm';
-    if (m === 0) return h + 'h';
-    return h + 'h ' + m + 'm';
+    var h = Math.floor(mins / 60), m = Math.round(mins % 60);
+    return h > 0 ? h + 'h ' + m + 'm' : m + 'm';
   }
 
-  /** Relative time: "now", "5m", "3h", "2d" */
-  function timeAgo(dateStr) {
-    var now = Date.now();
-    var then = new Date(dateStr).getTime();
-    var diff = Math.max(0, now - then);
-    var secs = Math.floor(diff / 1000);
-    if (secs < 60)   return 'now';
-    var mins = Math.floor(secs / 60);
-    if (mins < 60)   return mins + 'm';
-    var hours = Math.floor(mins / 60);
-    if (hours < 24)  return hours + 'h';
-    var days = Math.floor(hours / 24);
-    return days + 'd';
-  }
-
-  /** Integer days since a date */
-  function daysSince(dateStr) {
-    var now = new Date();
-    now.setHours(0, 0, 0, 0);
-    var then = new Date(dateStr);
-    then.setHours(0, 0, 0, 0);
-    return Math.floor((now - then) / (1000 * 60 * 60 * 24));
-  }
-
-  /** Lowercase day name: "monday", "tuesday", etc. */
-  function getDayOfWeek() {
-    return DAY_NAMES[new Date().getDay()];
-  }
-
-  function statusColor(status) {
-    return STATUS_COLORS[status] || 'var(--text-secondary)';
-  }
-
-  function statusLabel(status) {
-    return STATUS_LABELS[status] || (status ? status.charAt(0).toUpperCase() + status.slice(1) : '');
+  function getMonday(d) {
+    var dt = new Date(d);
+    var day = dt.getDay();
+    dt.setDate(dt.getDate() - day + (day === 0 ? -6 : 1));
+    dt.setHours(0,0,0,0);
+    return dt;
   }
 
   function debounce(fn, ms) {
     var timer;
-    return function () {
+    return function() {
       var ctx = this, args = arguments;
       clearTimeout(timer);
-      timer = setTimeout(function () { fn.apply(ctx, args); }, ms);
+      timer = setTimeout(function() { fn.apply(ctx, args); }, ms);
     };
   }
 
-  /* ---- Expose ---- */
+  // Status system
+  var STATUSES = [
+    { key: 'integrated', label: 'Integrated', color: '#9370db', solid: true },
+    { key: 'done',       label: 'Done',       color: '#1e90ff', solid: true },
+    { key: 'building',   label: 'Building',   color: '#32cd32', solid: true },
+    { key: 'scheduled',  label: 'Scheduled',  color: '#ffa500', solid: false },
+    { key: 'planning',   label: 'Planning',   color: '#ffd700', solid: false },
+    { key: 'idea',       label: 'Idea',       color: '#add8e6', solid: false },
+  ];
+
+  var STATUS_MAP = {};
+  STATUSES.forEach(function(s) { STATUS_MAP[s.key] = s; });
+
+  function statusColor(key) { return STATUS_MAP[key] ? STATUS_MAP[key].color : '#706b62'; }
+  function statusLabel(key) { return STATUS_MAP[key] ? STATUS_MAP[key].label : key; }
+  function statusSolid(key) { return STATUS_MAP[key] ? STATUS_MAP[key].solid : false; }
+
+  // Squircle SVG for status icons (from the mockup)
+  var SQUIRCLE_PATH = 'M10 0C13.5 0 16 0 17.5 1 19 2 20 4.5 20 10 20 15.5 19 18 17.5 19 16 20 13.5 20 10 20 6.5 20 4 20 2.5 19 1 18 0 15.5 0 10 0 4.5 1 2 2.5 1 4 0 6.5 0 10 0Z';
+
+  function squircleSVG(color, solid, size) {
+    size = size || 16;
+    if (solid) {
+      return '<svg viewBox="0 0 20 20" width="' + size + '" height="' + size + '" fill="none"><path d="' + SQUIRCLE_PATH + '" fill="' + color + '"/></svg>';
+    }
+    return '<svg viewBox="0 0 20 20" width="' + size + '" height="' + size + '" fill="none"><path d="' + SQUIRCLE_PATH + '" fill="none" stroke="' + color + '" stroke-width="2"/></svg>';
+  }
+
+  // Qualitative time / domain system
+  var DOMAINS = {
+    saturday:  { name: 'MULA',    sanskrit: 'मूल',    planet: 'Saturn',  planetSkt: 'Shani',   symbol: '♄', color: '#7c7c8a', question: 'What does my body need right now?', theme: 'Root · Foundation' },
+    sunday:    { name: 'DHARMA',  sanskrit: 'धर्म',   planet: 'Sun',     planetSkt: 'Surya',   symbol: '☉', color: '#d4a017', question: 'What is this in service of?', theme: 'Purpose · Light' },
+    monday:    { name: 'SEVA',    sanskrit: 'सेवा',   planet: 'Moon',    planetSkt: 'Chandra', symbol: '☽', color: '#b8c4d0', question: 'Who am I responsible to today?', theme: 'Service · Care' },
+    tuesday:   { name: 'KARMA',   sanskrit: 'कर्म',   planet: 'Mars',    planetSkt: 'Mangal',  symbol: '♂', color: '#c0392b', question: "What's the ONE thing?", theme: 'Action · Craft' },
+    wednesday: { name: 'VIDYA',   sanskrit: 'विद्या',  planet: 'Mercury', planetSkt: 'Budh',    symbol: '☿', color: '#27ae60', question: 'What am I learning right now?', theme: 'Knowledge · Learning' },
+    thursday:  { name: 'SANGHA',  sanskrit: 'संघ',    planet: 'Jupiter', planetSkt: 'Guru',    symbol: '♃', color: '#8e44ad', question: "Who's with me?", theme: 'Community · Tribe' },
+    friday:    { name: 'PREMA',   sanskrit: 'प्रेम',   planet: 'Venus',   planetSkt: 'Shukra',  symbol: '♀', color: '#e8a0bf', question: 'Am I present, or just proximate?', theme: 'Love · Partnership' },
+  };
+
+  function todayDomain() {
+    var day = getDayName();
+    return DOMAINS[day] || DOMAINS.monday;
+  }
+
   window.Utils = {
     esc: esc,
-    getMonday: getMonday,
-    addWeeks: addWeeks,
     isoDate: isoDate,
-    isoWeek: isoWeek,
-    formatDate: formatDate,
+    dayOfYear: dayOfYear,
+    weekNumber: weekNumber,
+    getDayName: getDayName,
     formatDateFull: formatDateFull,
-    formatWeekLabel: formatWeekLabel,
-    formatWeekShort: formatWeekShort,
     formatTime: formatTime,
     formatDuration: formatDuration,
-    timeAgo: timeAgo,
-    daysSince: daysSince,
-    getDayOfWeek: getDayOfWeek,
+    getMonday: getMonday,
+    debounce: debounce,
+    STATUSES: STATUSES,
+    STATUS_MAP: STATUS_MAP,
     statusColor: statusColor,
     statusLabel: statusLabel,
-    debounce: debounce,
+    statusSolid: statusSolid,
+    SQUIRCLE_PATH: SQUIRCLE_PATH,
+    squircleSVG: squircleSVG,
+    DOMAINS: DOMAINS,
+    todayDomain: todayDomain,
   };
 })();
