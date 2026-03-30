@@ -572,6 +572,103 @@
   }
 
   /* ================================================================
+     Session Edit Modal
+     ================================================================ */
+
+  function openSessionEditModal(sessionId) {
+    var session = null;
+    for (var i = 0; i < Data.state.timeSessions.length; i++) {
+      if (Data.state.timeSessions[i].id === sessionId) { session = Data.state.timeSessions[i]; break; }
+    }
+    if (!session) return;
+
+    var projects = projectsArray();
+    var projOptions = '<option value="">No project</option>';
+    for (var i = 0; i < projects.length; i++) {
+      var p = projects[i];
+      var sel = (session.project_id === p.id) ? ' selected' : '';
+      projOptions += '<option value="' + p.id + '"' + sel + '>' + esc(p.name) + '</option>';
+    }
+
+    var startDt = new Date(session.started_at);
+    var endDt = session.ended_at ? new Date(session.ended_at) : new Date();
+    var startTime = String(startDt.getHours()).padStart(2,'0') + ':' + String(startDt.getMinutes()).padStart(2,'0');
+    var endTime = String(endDt.getHours()).padStart(2,'0') + ':' + String(endDt.getMinutes()).padStart(2,'0');
+
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML =
+      '<div class="modal" style="max-width:400px">' +
+        '<h2>Edit Session</h2>' +
+        '<div class="modal-field">' +
+          '<label>Description</label>' +
+          '<input type="text" id="se-desc" value="' + esc(session.description || '') + '">' +
+        '</div>' +
+        '<div class="modal-field">' +
+          '<label>Project</label>' +
+          '<select id="se-project">' + projOptions + '</select>' +
+        '</div>' +
+        '<div style="display:flex;gap:12px;">' +
+          '<div class="modal-field" style="flex:1">' +
+            '<label>Start time</label>' +
+            '<input type="time" id="se-start" value="' + startTime + '">' +
+          '</div>' +
+          '<div class="modal-field" style="flex:1">' +
+            '<label>End time</label>' +
+            '<input type="time" id="se-end" value="' + endTime + '">' +
+          '</div>' +
+        '</div>' +
+        '<div class="modal-field">' +
+          '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;">' +
+            '<input type="checkbox" id="se-billable"' + (session.is_billable ? ' checked' : '') + ' style="width:auto;accent-color:var(--accent);">' +
+            'Billable' +
+          '</label>' +
+        '</div>' +
+        '<div class="modal-actions">' +
+          '<button class="btn-cancel" id="se-cancel">Cancel</button>' +
+          '<button class="btn-save" id="se-save">Save</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
+    overlay.querySelector('#se-cancel').onclick = function () { overlay.remove(); };
+    overlay.querySelector('#se-save').onclick = function () {
+      var desc = document.getElementById('se-desc').value;
+      var projectId = document.getElementById('se-project').value || null;
+      var startVal = document.getElementById('se-start').value;
+      var endVal = document.getElementById('se-end').value;
+      var billable = document.getElementById('se-billable').checked;
+
+      // Build new timestamps preserving the date
+      var newStart = new Date(startDt);
+      var sp = startVal.split(':');
+      newStart.setHours(parseInt(sp[0]), parseInt(sp[1]), 0, 0);
+      var newEnd = new Date(endDt);
+      var ep = endVal.split(':');
+      newEnd.setHours(parseInt(ep[0]), parseInt(ep[1]), 0, 0);
+
+      Data.saveTimeSession({
+        description: desc,
+        project_id: projectId,
+        started_at: newStart.toISOString(),
+        ended_at: newEnd.toISOString(),
+        is_billable: billable
+      }, sessionId).then(function () {
+        toast('Session updated', 'success');
+        overlay.remove();
+        renderTimelineSessions();
+        updateTimelineHeader();
+      }).catch(function () {
+        toast('Failed to save session', 'error');
+      });
+    };
+
+    setTimeout(function () { document.getElementById('se-desc').focus(); }, 50);
+  }
+
+  /* ================================================================
      Color Picker (popup on left-border click)
      ================================================================ */
 
@@ -732,7 +829,8 @@
       allTasks.sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
 
       var groupFlex = allTasks.length || 1;
-      html += '<div class="task-group" style="--c:' + c + '; --group-flex:' + groupFlex + '" data-project-id="' + p.id + '">';
+      html += '<div class="task-group" style="--c:' + c + '; --group-flex:' + groupFlex + '" data-project-id="' + p.id + '">' +
+        '<span class="task-group-label">' + esc(p.name) + '</span>';
 
       for (var j = 0; j < allTasks.length; j++) {
         var t = allTasks[j];
@@ -766,7 +864,8 @@
       if (!t.project_id) unassigned.push(t);
     });
     if (unassigned.length > 0) {
-      html += '<div class="task-group" style="--c:#706b62; --group-flex:' + unassigned.length + '">';
+      html += '<div class="task-group" style="--c:#706b62; --group-flex:' + unassigned.length + '">' +
+        '<span class="task-group-label">Unassigned</span>';
       for (var u = 0; u < unassigned.length; u++) {
         var ut = unassigned[u];
         var us = STATUS_MAP[ut.status] || STATUS_MAP['idea'];
@@ -957,8 +1056,9 @@
       'style="left:' + leftPct + '%; width:' + widthPct + '%; top:' + topPx + 'px; ' +
       'background: color-mix(in srgb, ' + color + ' 25%, transparent); border-left: 3px solid ' + color + ';">' +
       '<div class="resize-left"></div>' +
-      '<div class="session-title">' + esc(s.description || 'Untitled') + '</div>' +
+      '<div class="session-title" data-action="edit-session" data-session-id="' + s.id + '">' + esc(s.description || 'Untitled') + '</div>' +
       '<div class="session-time">' + startTime + ' \u2013 ' + endTime + '</div>' +
+      '<button class="session-edit-btn" data-action="edit-session" data-session-id="' + s.id + '" title="Edit">\u270E</button>' +
       '<button class="session-delete" data-action="delete-session" data-session-id="' + s.id + '">\u2715</button>' +
       '<div class="resize-right"></div>' +
     '</div>';
@@ -1171,7 +1271,7 @@
 
       // Check for session drag (move horizontally)
       var sessionEl = e.target.closest('.timeline-session');
-      if (sessionEl && !e.target.closest('.session-delete') && !e.target.closest('.resize-left') && !e.target.closest('.resize-right')) {
+      if (sessionEl && !e.target.closest('.session-delete') && !e.target.closest('.session-edit-btn') && !e.target.closest('[data-action="edit-session"]') && !e.target.closest('.resize-left') && !e.target.closest('.resize-right')) {
         e.preventDefault();
         startSessionDrag(sessionEl.dataset.sessionId, sessionEl, e);
       }
@@ -1454,6 +1554,14 @@
             toast('Task archived', 'info');
           }
         });
+        return;
+      }
+
+      // Edit session
+      var editSessionBtn = target.closest('[data-action="edit-session"]');
+      if (editSessionBtn) {
+        e.stopPropagation();
+        openSessionEditModal(editSessionBtn.dataset.sessionId);
         return;
       }
 

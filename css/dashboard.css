@@ -197,7 +197,6 @@ body::after {
   flex-shrink: 0;
   border: 1px solid var(--border-subtle);
   border-left: 1em solid var(--c, var(--accent));
-  border-radius: 4px;
   background: color-mix(in srgb, var(--c, var(--accent)) 5%, transparent);
   transition: all 0.3s cubic-bezier(.22,1,.36,1);
   cursor: default;
@@ -297,19 +296,36 @@ body::after {
   overflow: hidden;
   flex: none;
   min-height: 0;
-  background: color-mix(in srgb, var(--c) 8%, transparent);
-  border-left: 1em solid var(--c);
-  border-radius: 4px;
   background: color-mix(in srgb, var(--c) 5%, transparent);
+  border-left: 1em solid var(--c);
   transition: all 0.5s cubic-bezier(.22,1,.36,1);
+  position: relative;
 }
 .acc-tasks.expanded .task-group {
   border: 1px solid var(--border-subtle);
   border-left-width: 1em;
-  border-radius: 4px;
+  border-left-color: var(--c);
 }
 .acc-tasks:not(.expanded) .task-group {
   border-left-color: color-mix(in srgb, var(--c) 50%, transparent);
+}
+/* Project name label on hover */
+.task-group-label {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 70%, white);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 2;
+}
+.acc-tasks.expanded .task-group:hover .task-group-label {
+  opacity: 1;
 }
 
 .task-row {
@@ -842,7 +858,22 @@ body::after {
   padding: 2px;
   transition: opacity 0.15s;
 }
-.timeline-session:hover .session-delete { opacity: 1; }
+.timeline-session .session-edit-btn {
+  position: absolute;
+  top: 2px;
+  right: 18px;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 10px;
+  color: rgba(255,255,255,0.5);
+  background: none;
+  border: none;
+  padding: 2px;
+  transition: opacity 0.15s;
+}
+.timeline-session .session-edit-btn:hover { color: var(--accent); }
+.timeline-session:hover .session-delete,
+.timeline-session:hover .session-edit-btn { opacity: 1; }
 .timeline-session .resize-left,
 .timeline-session .resize-right {
   position: absolute;
