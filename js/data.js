@@ -7,10 +7,22 @@
   var client = null;
   var listeners = {};
 
+  // Adds a .get(id) method to arrays so views can do state.projects.get(id)
+  function enrichArray(arr) {
+    arr.get = function(id) {
+      for (var i = 0; i < arr.length; i++) {
+        if (arr[i].id === id) return arr[i];
+      }
+      return undefined;
+    };
+    return arr;
+  }
+
   var state = {
-    projects: [],
-    tasks: [],
-    timeSessions: [],
+    projects: enrichArray([]),
+    features: enrichArray([]),
+    tasks: enrichArray([]),
+    timeSessions: enrichArray([]),
     journal: null,
     user: null,
   };
@@ -91,6 +103,10 @@
     });
   }
 
+  function getUser() {
+    return state.user;
+  }
+
   function signOut() {
     if (!client) return;
     client.auth.signOut().then(function() {
@@ -108,6 +124,7 @@
   function loadAll() {
     return Promise.all([
       loadProjects(),
+      loadFeatures(),
       loadTasks(),
       loadTimeSessions(),
       loadTodayJournal(),
@@ -123,13 +140,31 @@
       .order('name', { ascending: true })
       .then(function(res) {
         if (res.error) throw res.error;
-        state.projects = res.data || [];
+        state.projects = enrichArray(res.data || []);
         return state.projects;
       })
       .catch(function(err) {
         console.error('[Data] loadProjects error:', err);
         toast('Failed to load projects: ' + (err.message || err), 'error');
-        state.projects = [];
+        state.projects = enrichArray([]);
+      });
+  }
+
+  function loadFeatures() {
+    return client
+      .from('features')
+      .select('*')
+      .eq('is_archived', false)
+      .order('created_at', { ascending: false })
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.features = enrichArray(res.data || []);
+        return state.features;
+      })
+      .catch(function(err) {
+        console.error('[Data] loadFeatures error:', err);
+        toast('Failed to load features: ' + (err.message || err), 'error');
+        state.features = enrichArray([]);
       });
   }
 
@@ -141,13 +176,13 @@
       .order('created_at', { ascending: false })
       .then(function(res) {
         if (res.error) throw res.error;
-        state.tasks = res.data || [];
+        state.tasks = enrichArray(res.data || []);
         return state.tasks;
       })
       .catch(function(err) {
         console.error('[Data] loadTasks error:', err);
         toast('Failed to load tasks: ' + (err.message || err), 'error');
-        state.tasks = [];
+        state.tasks = enrichArray([]);
       });
   }
 
@@ -159,13 +194,13 @@
       .limit(50)
       .then(function(res) {
         if (res.error) throw res.error;
-        state.timeSessions = res.data || [];
+        state.timeSessions = enrichArray(res.data || []);
         return state.timeSessions;
       })
       .catch(function(err) {
         console.error('[Data] loadTimeSessions error:', err);
         toast('Failed to load time sessions: ' + (err.message || err), 'error');
-        state.timeSessions = [];
+        state.timeSessions = enrichArray([]);
       });
   }
 
@@ -285,6 +320,75 @@
       toast('Failed to reorder projects: ' + (err.message || err), 'error');
       throw err;
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // CRUD — Features
+  // ---------------------------------------------------------------------------
+
+  function saveFeature(obj, id) {
+    try {
+      if (id) {
+        return client
+          .from('features')
+          .update(obj)
+          .eq('id', id)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadFeatures().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveFeature update error:', err);
+            toast('Failed to save feature: ' + (err.message || err), 'error');
+            throw err;
+          });
+      } else {
+        return client
+          .from('features')
+          .insert(obj)
+          .select()
+          .single()
+          .then(function(res) {
+            if (res.error) throw res.error;
+            return loadFeatures().then(function() {
+              emit('dataChanged', state);
+              return res.data;
+            });
+          })
+          .catch(function(err) {
+            console.error('[Data] saveFeature insert error:', err);
+            toast('Failed to create feature: ' + (err.message || err), 'error');
+            throw err;
+          });
+      }
+    } catch (err) {
+      console.error('[Data] saveFeature error:', err);
+      toast('Failed to save feature: ' + (err.message || err), 'error');
+      return Promise.reject(err);
+    }
+  }
+
+  function archiveFeature(id) {
+    return client
+      .from('features')
+      .update({ is_archived: true })
+      .eq('id', id)
+      .then(function(res) {
+        if (res.error) throw res.error;
+        return loadFeatures().then(function() {
+          emit('dataChanged', state);
+        });
+      })
+      .catch(function(err) {
+        console.error('[Data] archiveFeature error:', err);
+        toast('Failed to archive feature: ' + (err.message || err), 'error');
+        throw err;
+      });
   }
 
   // ---------------------------------------------------------------------------
@@ -459,6 +563,10 @@
     return state.tasks.filter(function(t) { return t.project_id === projectId; });
   }
 
+  function projectFeatures(projectId) {
+    return state.features.filter(function(f) { return f.project_id === projectId; });
+  }
+
   function activeProjects() {
     return state.projects.filter(function(p) {
       return p.status !== 'done' && p.status !== 'integrated';
@@ -472,6 +580,37 @@
     });
   }
 
+  function totalMinutesToday() {
+    var sessions = todaySessions();
+    var total = 0;
+    sessions.forEach(function(s) {
+      if (s.duration_min) {
+        total += s.duration_min;
+      } else if (s.started_at && s.ended_at) {
+        total += Math.round((new Date(s.ended_at) - new Date(s.started_at)) / 60000);
+      }
+    });
+    return total;
+  }
+
+  function staleItems(days) {
+    var cutoff = Date.now() - (days * 86400000);
+    var items = [];
+    state.features.forEach(function(f) {
+      if ((f.status === 'idea' || f.status === 'planning') &&
+          f.created_at && new Date(f.created_at).getTime() < cutoff) {
+        items.push(Object.assign({ _type: 'feature' }, f));
+      }
+    });
+    state.tasks.forEach(function(t) {
+      if ((t.status === 'idea' || t.status === 'planning') &&
+          t.created_at && new Date(t.created_at).getTime() < cutoff) {
+        items.push(Object.assign({ _type: 'task' }, t));
+      }
+    });
+    return items;
+  }
+
   // ---------------------------------------------------------------------------
   // Public API
   // ---------------------------------------------------------------------------
@@ -479,23 +618,30 @@
   window.Data = {
     state: state,
     init: init,
+    getUser: getUser,
     signOut: signOut,
     loadAll: loadAll,
     loadProjects: loadProjects,
+    loadFeatures: loadFeatures,
     loadTasks: loadTasks,
     loadTimeSessions: loadTimeSessions,
     loadTodayJournal: loadTodayJournal,
     saveProject: saveProject,
     archiveProject: archiveProject,
     reorderProjects: reorderProjects,
+    saveFeature: saveFeature,
+    archiveFeature: archiveFeature,
     saveTask: saveTask,
     archiveTask: archiveTask,
     saveTimeSession: saveTimeSession,
     deleteTimeSession: deleteTimeSession,
     saveJournal: saveJournal,
     projectTasks: projectTasks,
+    projectFeatures: projectFeatures,
     activeProjects: activeProjects,
     todaySessions: todaySessions,
+    totalMinutesToday: totalMinutesToday,
+    staleItems: staleItems,
     on: on,
     emit: emit,
     toast: toast,
