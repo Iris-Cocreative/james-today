@@ -175,9 +175,12 @@
     setupLeftColResize();
 
     // Listen for data changes
-    Data.on('projectChanged', function () { renderProjects(); renderTasks(); renderTimelineSessions(); });
-    Data.on('taskChanged', function () { renderTasks(); renderTimelineSessions(); });
-    Data.on('timeSessionChanged', function () { renderTimelineSessions(); updateTimelineHeader(); });
+    Data.on('dataChanged', function () {
+      renderProjects();
+      renderTasks();
+      renderTimelineSessions();
+      updateTimelineHeader();
+    });
 
     // Hide loading, show app
     var loading = document.getElementById('loading');
