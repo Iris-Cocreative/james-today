@@ -169,8 +169,8 @@
       });
   }
 
-  function loadTodayJournal() {
-    var today = Utils.isoDate(new Date());
+  function loadTodayJournal(dateStr) {
+    var today = dateStr || Utils.isoDate(new Date());
     return client
       .from('journal')
       .select('*')

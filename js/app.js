@@ -146,6 +146,7 @@
   var _draggingSession = null;
   var _newSessionInput = null;
   var _sessionTracks = {}; // sessionId -> track number (local-only, for manual track positioning)
+  var _viewDate = new Date(); // currently viewed day (can navigate forward/back)
 
   // Initialize type filters to all visible
   for (var ti = 0; ti < PROJECT_TYPES.length; ti++) _typeFilters[PROJECT_TYPES[ti]] = true;
@@ -204,11 +205,18 @@
      ================================================================ */
 
   function renderDayInfo() {
-    var d = todayDomain();
-    var now = new Date();
+    var dayName = DAY_NAMES[_viewDate.getDay()];
+    var d = DOMAINS[dayName] || DOMAINS.monday;
     var container = document.getElementById('day-info');
     if (!container) return;
+
+    var isToday = Utils.isoDate(_viewDate) === Utils.isoDate(new Date());
+
     container.innerHTML =
+      '<div class="day-nav">' +
+        '<button class="day-nav-btn" data-action="day-prev" title="Previous day">\u2039</button>' +
+        '<button class="day-nav-btn" data-action="day-next" title="Next day">\u203A</button>' +
+      '</div>' +
       '<div class="day-domain" style="color:' + d.color + '">' +
         '<span class="domain-pip" style="background:' + d.color + '"></span>' +
         '<span class="domain-symbol">' + d.symbol + '</span> ' +
@@ -216,10 +224,23 @@
         ' <span class="domain-sanskrit">' + esc(d.sanskrit) + '</span>' +
       '</div>' +
       '<div class="day-theme">' + esc(d.theme) + ' \u00B7 ' + esc(d.planet) + ' \u00B7 ' + esc(d.planetSkt) + '</div>' +
-      '<div class="day-date">' + esc(Utils.formatDateFull(now)) + '</div>' +
-      '<div class="day-numbers">Day ' + dayOfYear(now) + ' \u00B7 Week ' + weekNumber(now) + '</div>' +
+      '<div class="day-date">' + esc(Utils.formatDateFull(_viewDate)) + '</div>' +
+      '<div class="day-numbers">Day ' + dayOfYear(_viewDate) + ' \u00B7 Week ' + weekNumber(_viewDate) +
+        (isToday ? '' : ' <span class="day-back-link" data-action="day-today" style="cursor:pointer;color:var(--accent);margin-left:6px;font-size:10px;">today</span>') +
+      '</div>' +
       '<div class="day-question">\u201C' + esc(d.question) + '\u201D</div>';
-    container.onclick = function () { openJournalModal(); };
+    container.querySelector('.day-domain').onclick = function () { openJournalModal(); };
+  }
+
+  function navigateDay(offset) {
+    _viewDate = new Date(_viewDate);
+    _viewDate.setDate(_viewDate.getDate() + offset);
+    renderDayInfo();
+    renderTimelineSessions();
+    updateTimelineHeader();
+    updateNowMarker();
+    // Reload journal for the new date
+    Data.loadTodayJournal(Utils.isoDate(_viewDate));
   }
 
   /* ================================================================
@@ -933,6 +954,19 @@
     // Session tracks container
     html += '<div class="timeline-tracks" id="timeline-sessions"></div>';
 
+    // Fixed schedule blocks (sleep, lunch, dinner)
+    html += '<div class="timeline-schedule">';
+    // Sleep: 1am - 9am
+    html += '<div class="schedule-block sleep" style="left:' + (1/24*100) + '%; width:' + (8/24*100) + '%;">' +
+      '<span class="schedule-label">Sleep</span></div>';
+    // Lunch: 1pm - 1:45pm (0.75 hours)
+    html += '<div class="schedule-block meal" style="left:' + (13/24*100) + '%; width:' + (0.75/24*100) + '%;">' +
+      '<span class="schedule-label">Lunch</span></div>';
+    // Dinner: 7pm - 7:45pm (0.75 hours)
+    html += '<div class="schedule-block meal" style="left:' + (19/24*100) + '%; width:' + (0.75/24*100) + '%;">' +
+      '<span class="schedule-label">Dinner</span></div>';
+    html += '</div>';
+
     html += '</div>'; // end timeline-inner
 
     container.innerHTML = html;
@@ -1006,19 +1040,11 @@
     var container = document.getElementById('timeline-sessions');
     if (!container) return;
 
-    // Filter to today's sessions using LOCAL date comparison
-    var now = new Date();
-    var todayStr = now.getFullYear() + '-' +
-      String(now.getMonth() + 1).padStart(2, '0') + '-' +
-      String(now.getDate()).padStart(2, '0');
+    // Filter sessions to the viewed day using LOCAL date comparison
+    var viewStr = Utils.isoDate(_viewDate);
     var sessions = Data.state.timeSessions.filter(function (s) {
       if (!s.started_at) return false;
-      // Compare using local date of the session start
-      var d = new Date(s.started_at);
-      var localDate = d.getFullYear() + '-' +
-        String(d.getMonth() + 1).padStart(2, '0') + '-' +
-        String(d.getDate()).padStart(2, '0');
-      return localDate === todayStr;
+      return Utils.isoDate(new Date(s.started_at)) === viewStr;
     });
 
     // Build ghost item if timer running
@@ -1592,6 +1618,14 @@
       }
 
       // Timer toggle
+      // Day navigation
+      var dayPrev = target.closest('[data-action="day-prev"]');
+      if (dayPrev) { navigateDay(-1); return; }
+      var dayNext = target.closest('[data-action="day-next"]');
+      if (dayNext) { navigateDay(1); return; }
+      var dayToday = target.closest('[data-action="day-today"]');
+      if (dayToday) { _viewDate = new Date(); navigateDay(0); return; }
+
       var timerBtn = target.closest('[data-action="toggle-timer"]');
       if (timerBtn) {
         toggleTimer();

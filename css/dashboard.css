@@ -93,13 +93,35 @@ body::after {
 /* ---- Day info section ---- */
 .day-info {
   padding: 20px;
-  cursor: pointer;
   transition: background var(--transition);
   border-bottom: 1px solid var(--border-subtle);
   flex-shrink: 0;
+  position: relative;
 }
-.day-info:hover {
-  background: var(--bg-hover);
+.day-nav {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.day-nav-btn {
+  pointer-events: auto;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+.day-nav-btn:hover {
+  color: var(--accent);
+  background: rgba(255,255,255,0.05);
 }
 
 .day-domain {
@@ -911,6 +933,38 @@ body::after {
 @keyframes timer-ghost-pulse {
   0%, 100% { opacity: 0.7; }
   50% { opacity: 1; }
+}
+
+/* ---- Fixed schedule blocks ---- */
+.timeline-schedule {
+  position: relative;
+  height: 28px;
+  margin-top: 4px;
+}
+.schedule-block {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.schedule-block.sleep {
+  background: rgba(30, 40, 80, 0.6);
+  border: 1px solid rgba(60, 80, 140, 0.3);
+}
+.schedule-block.meal {
+  background: rgba(80, 60, 30, 0.4);
+  border: 1px solid rgba(140, 110, 60, 0.3);
+}
+.schedule-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  font-weight: 400;
 }
 
 /* ---- Inline session name input ---- */
