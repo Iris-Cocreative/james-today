@@ -120,10 +120,10 @@
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { el.classList.add('visible'); });
     });
-    if (_toastTimer) clearTimeout(_toastTimer);
-    _toastTimer = setTimeout(function () {
+    // Each toast gets its own timer — no shared state
+    setTimeout(function () {
       el.classList.remove('visible');
-      setTimeout(function () { el.remove(); }, 300);
+      setTimeout(function () { if (el.parentNode) el.remove(); }, 300);
     }, 3000);
   }
 
@@ -650,6 +650,7 @@
           '</label>' +
         '</div>' +
         '<div class="modal-actions">' +
+          '<button class="btn-danger" id="se-delete" style="margin-right:auto;">Delete</button>' +
           '<button class="btn-cancel" id="se-cancel">Cancel</button>' +
           '<button class="btn-save" id="se-save">Save</button>' +
         '</div>' +
@@ -659,6 +660,15 @@
 
     overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
     overlay.querySelector('#se-cancel').onclick = function () { overlay.remove(); };
+    overlay.querySelector('#se-delete').onclick = function () {
+      if (!confirm('Delete this session?')) return;
+      Data.deleteTimeSession(sessionId).then(function () {
+        toast('Session deleted', 'info');
+        overlay.remove();
+        renderTimelineSessions();
+        updateTimelineHeader();
+      });
+    };
     overlay.querySelector('#se-save').onclick = function () {
       var desc = document.getElementById('se-desc').value;
       var projectId = document.getElementById('se-project').value || null;
@@ -1253,10 +1263,16 @@
 
     // Double-click to create new session
     grid.addEventListener('dblclick', function (e) {
+      // If double-clicking on an existing session, open edit modal instead
+      var sessionEl = e.target.closest('.timeline-session');
+      if (sessionEl && sessionEl.dataset.sessionId) {
+        openSessionEditModal(sessionEl.dataset.sessionId);
+        return;
+      }
       var inner = document.getElementById('timeline-inner');
       if (!inner) return;
       var hour = xToHour(inner, e.clientX);
-      var roundedHour = Math.floor(hour * 2) / 2; // snap to half hours
+      var roundedHour = Math.round(hour * 4) / 4; // snap to 15 min
       createSessionAtHour(roundedHour);
     });
 
@@ -1431,26 +1447,23 @@
       newStart.setHours(Math.floor(newHour), Math.round((newHour % 1) * 60), 0, 0);
       var newEnd = new Date(newStart.getTime() + durationMs);
 
-      // Store the manually-set track locally and persist to DB
+      // Store the manually-set track locally
       _sessionTracks[sessionId] = finalTrack;
 
-      Data.deleteTimeSession(sessionId).then(function () {
-        return Data.saveTimeSession({
-          started_at: newStart.toISOString(),
-          ended_at: newEnd.toISOString(),
-          project_id: session.project_id,
-          description: session.description,
-          is_billable: session.is_billable,
-          track: finalTrack
-        });
-      }).then(function (newSession) {
-        // Transfer track to new session ID if save returned one
-        if (newSession && newSession.id && newSession.id !== sessionId) {
-          _sessionTracks[newSession.id] = finalTrack;
-        }
-        renderTimelineSessions();
-        updateTimelineHeader();
-      });
+      // Optimistic: update local state immediately so no flicker
+      session.started_at = newStart.toISOString();
+      session.ended_at = newEnd.toISOString();
+      session.track = finalTrack;
+
+      // Save in background (update, not delete+recreate)
+      Data.saveTimeSession({
+        started_at: newStart.toISOString(),
+        ended_at: newEnd.toISOString(),
+        project_id: session.project_id,
+        description: session.description,
+        is_billable: session.is_billable,
+        track: finalTrack
+      }, sessionId);
     }
 
     document.addEventListener('mousemove', onMove);
@@ -1512,19 +1525,19 @@
       // Preserve the session's track
       var sessionTrack = (session.track !== undefined && session.track !== null) ? session.track : (_sessionTracks[sessionId] !== undefined ? _sessionTracks[sessionId] : 0);
 
-      Data.deleteTimeSession(sessionId).then(function () {
-        return Data.saveTimeSession({
-          started_at: newStart.toISOString(),
-          ended_at: newEnd.toISOString(),
-          project_id: session.project_id,
-          description: session.description,
-          is_billable: session.is_billable,
-          track: sessionTrack
-        });
-      }).then(function () {
-        renderTimelineSessions();
-        updateTimelineHeader();
-      });
+      // Optimistic: update local state immediately
+      session.started_at = newStart.toISOString();
+      session.ended_at = newEnd.toISOString();
+
+      // Save in background (update, not delete+recreate)
+      Data.saveTimeSession({
+        started_at: newStart.toISOString(),
+        ended_at: newEnd.toISOString(),
+        project_id: session.project_id,
+        description: session.description,
+        is_billable: session.is_billable,
+        track: sessionTrack
+      }, sessionId);
     }
 
     document.addEventListener('mousemove', onMove);
