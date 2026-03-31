@@ -51,40 +51,6 @@
     return dt;
   }
 
-  function isoWeek(d) {
-    return isoDate(getMonday(d));
-  }
-
-  function addWeeks(d, n) {
-    var dt = new Date(d);
-    dt.setDate(dt.getDate() + (n * 7));
-    return dt;
-  }
-
-  function daysSince(d) {
-    if (!d) return 0;
-    var dt = d instanceof Date ? d : new Date(d);
-    return Math.floor((Date.now() - dt.getTime()) / 86400000);
-  }
-
-  function formatDate(d) {
-    if (!d) return '';
-    var dt = d instanceof Date ? d : new Date(d);
-    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  function formatWeekShort(d) {
-    var dt = d instanceof Date ? d : new Date(d);
-    return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  function formatWeekLabel(d) {
-    var dt = d instanceof Date ? d : new Date(d);
-    var end = addWeeks(dt, 1);
-    end.setDate(end.getDate() - 1);
-    return formatWeekShort(dt) + ' \u2013 ' + formatWeekShort(end);
-  }
-
   function debounce(fn, ms) {
     var timer;
     return function() {
@@ -141,19 +107,13 @@
   window.Utils = {
     esc: esc,
     isoDate: isoDate,
-    isoWeek: isoWeek,
     dayOfYear: dayOfYear,
     weekNumber: weekNumber,
     getDayName: getDayName,
     formatDateFull: formatDateFull,
-    formatDate: formatDate,
     formatTime: formatTime,
     formatDuration: formatDuration,
-    formatWeekShort: formatWeekShort,
-    formatWeekLabel: formatWeekLabel,
     getMonday: getMonday,
-    addWeeks: addWeeks,
-    daysSince: daysSince,
     debounce: debounce,
     STATUSES: STATUSES,
     STATUS_MAP: STATUS_MAP,
