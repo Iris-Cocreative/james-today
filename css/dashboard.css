@@ -696,6 +696,97 @@ body::after {
   pointer-events: none;
   font-variant-numeric: tabular-nums;
 }
+/* Dragged now-line (second line at drag position) */
+.wc-dragged-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #E8A84C;
+  box-shadow: 0 0 8px rgba(232,168,76,0.3), 0 0 18px rgba(232,168,76,0.15);
+  z-index: 11;
+  border-radius: 1px;
+  pointer-events: none;
+  display: none;
+  cursor: grab;
+}
+.wc-dragged-line.pinned {
+  pointer-events: auto;
+}
+.wc-dragged-line.pinned::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  width: 18px;
+  height: 100%;
+  cursor: grab;
+}
+.wc-dragged-line.dragging-line,
+.wc-dragged-line.dragging-line::before {
+  cursor: grabbing;
+}
+.wc-dragged-line .wc-now-cap {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #E8A84C;
+  left: -1.75px;
+}
+.wc-dragged-line .wc-now-cap.top { top: -2.5px; }
+.wc-dragged-line .wc-now-cap.bottom { bottom: -2.5px; }
+/* Dimmed state for real now-line during drag */
+.wc-now-line.dimmed {
+  opacity: 0.35;
+  box-shadow: none;
+}
+.wc-now-line.dimmed .wc-now-cap {
+  opacity: 0.35;
+  box-shadow: none;
+}
+/* Drag overlay between real and dragged lines */
+.wc-drag-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 8;
+  pointer-events: none;
+}
+.wc-drag-overlay.future {
+  background: rgba(42, 140, 140, 0.15);
+  border-left: 1px solid rgba(42, 140, 140, 0.3);
+  border-right: 1px solid rgba(42, 140, 140, 0.3);
+}
+.wc-drag-overlay.past {
+  background: rgba(200, 80, 70, 0.15);
+  border-left: 1px solid rgba(200, 80, 70, 0.3);
+  border-right: 1px solid rgba(200, 80, 70, 0.3);
+}
+/* Drag duration badge */
+.wc-drag-badge {
+  position: absolute;
+  z-index: 15;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid;
+  pointer-events: none;
+  display: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  background: rgba(20, 24, 40, 0.9);
+}
+.wc-drag-badge.future {
+  color: #2A8C8C;
+  border-color: rgba(42, 140, 140, 0.5);
+}
+.wc-drag-badge.past {
+  color: #C85046;
+  border-color: rgba(200, 80, 70, 0.5);
+}
 .wc-date-marker {
   position: absolute;
   top: 0;
@@ -876,9 +967,13 @@ body::after {
 .timeline-session .session-title {
   font-weight: 400;
   white-space: nowrap;
+  line-height: 1.2;
+}
+/* Only clip title text on tracks 0 and 1 (the top two rows) */
+.timeline-session[data-track="0"] .session-title,
+.timeline-session[data-track="1"] .session-title {
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
 }
 .timeline-session .session-time {
   font-size: 9px;

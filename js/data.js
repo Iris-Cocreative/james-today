@@ -362,44 +362,59 @@
 
   function saveTimeSession(obj, id) {
     try {
-      if (id) {
-        return client
-          .from('time_sessions')
-          .update(obj)
-          .eq('id', id)
-          .select()
-          .single()
-          .then(function(res) {
-            if (res.error) throw res.error;
-            return loadTimeSessions().then(function() {
-              emit('dataChanged', state);
-              return res.data;
+      function attemptSave(payload, retryWithoutTrack) {
+        if (id) {
+          return client
+            .from('time_sessions')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single()
+            .then(function(res) {
+              if (res.error) throw res.error;
+              return loadTimeSessions().then(function() {
+                emit('dataChanged', state);
+                return res.data;
+              });
+            })
+            .catch(function(err) {
+              // If the track column doesn't exist yet, retry without it
+              if (retryWithoutTrack && payload.track !== undefined && err && /track|column/i.test(err.message || '')) {
+                var fallback = Object.assign({}, payload);
+                delete fallback.track;
+                return attemptSave(fallback, false);
+              }
+              console.error('[Data] saveTimeSession update error:', err);
+              toast('Failed to save time session: ' + (err.message || err), 'error');
+              throw err;
             });
-          })
-          .catch(function(err) {
-            console.error('[Data] saveTimeSession update error:', err);
-            toast('Failed to save time session: ' + (err.message || err), 'error');
-            throw err;
-          });
-      } else {
-        return client
-          .from('time_sessions')
-          .insert(obj)
-          .select()
-          .single()
-          .then(function(res) {
-            if (res.error) throw res.error;
-            return loadTimeSessions().then(function() {
-              emit('dataChanged', state);
-              return res.data;
+        } else {
+          return client
+            .from('time_sessions')
+            .insert(payload)
+            .select()
+            .single()
+            .then(function(res) {
+              if (res.error) throw res.error;
+              return loadTimeSessions().then(function() {
+                emit('dataChanged', state);
+                return res.data;
+              });
+            })
+            .catch(function(err) {
+              // If the track column doesn't exist yet, retry without it
+              if (retryWithoutTrack && payload.track !== undefined && err && /track|column/i.test(err.message || '')) {
+                var fallback = Object.assign({}, payload);
+                delete fallback.track;
+                return attemptSave(fallback, false);
+              }
+              console.error('[Data] saveTimeSession insert error:', err);
+              toast('Failed to create time session: ' + (err.message || err), 'error');
+              throw err;
             });
-          })
-          .catch(function(err) {
-            console.error('[Data] saveTimeSession insert error:', err);
-            toast('Failed to create time session: ' + (err.message || err), 'error');
-            throw err;
-          });
+        }
       }
+      return attemptSave(obj, true);
     } catch (err) {
       console.error('[Data] saveTimeSession error:', err);
       toast('Failed to save time session: ' + (err.message || err), 'error');

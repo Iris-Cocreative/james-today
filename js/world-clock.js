@@ -413,108 +413,185 @@
 
   var _isDraggingNowLine = false;
   var _isPinned = false;
+  var _dragHourOffset = 0;
+  var _dragJustPinned = false;
 
   function _setupNowLineDrag(nowLine, barsWrap, container) {
-    var tooltip = null;
+    // Create the dragged line element (second now-line at drag position)
+    var draggedLine = document.createElement('div');
+    draggedLine.className = 'wc-dragged-line';
+    var dragCapTop = document.createElement('div');
+    dragCapTop.className = 'wc-now-cap top';
+    var dragCapBot = document.createElement('div');
+    dragCapBot.className = 'wc-now-cap bottom';
+    draggedLine.appendChild(dragCapTop);
+    draggedLine.appendChild(dragCapBot);
+    barsWrap.appendChild(draggedLine);
 
-    nowLine.addEventListener('mousedown', function (e) {
+    // Create the overlay element (colored region between lines)
+    var overlay = document.createElement('div');
+    overlay.className = 'wc-drag-overlay';
+    overlay.style.display = 'none';
+    barsWrap.appendChild(overlay);
+
+    // Create the badge element (duration offset label)
+    var badge = document.createElement('div');
+    badge.className = 'wc-drag-badge';
+    barsWrap.appendChild(badge);
+
+    var dragStartX = 0;
+    var dragOrigX = 0;
+
+    function getCanvasInfo() {
+      var homeWrap = container.querySelector('.wc-gradient-wrap[data-tz="' + HOME_TZ + '"]');
+      if (!homeWrap) return null;
+      var wrapRect = homeWrap.getBoundingClientRect();
+      var barsRect = barsWrap.getBoundingClientRect();
+      return {
+        wrapRect: wrapRect,
+        barsRect: barsRect,
+        canvasLeft: wrapRect.left - barsRect.left,
+        canvasWidth: wrapRect.width
+      };
+    }
+
+    function getDragDirection(nowX, dragX) {
+      return dragX >= nowX ? 'future' : 'past';
+    }
+
+    function updateOverlay(nowX, dragX) {
+      var leftX = Math.min(nowX, dragX);
+      var rightX = Math.max(nowX, dragX);
+      var direction = getDragDirection(nowX, dragX);
+
+      overlay.style.display = 'block';
+      overlay.style.left = leftX + 'px';
+      overlay.style.width = (rightX - leftX) + 'px';
+      overlay.className = 'wc-drag-overlay ' + direction;
+    }
+
+    function updateBadge(nowX, dragX) {
+      var info = getCanvasInfo();
+      if (!info) return;
+      var pixelDiff = dragX - nowX;
+      var hourDiff = (pixelDiff / info.canvasWidth) * 24;
+      _dragHourOffset = hourDiff;
+      var direction = getDragDirection(nowX, dragX);
+      var sign = hourDiff >= 0 ? '+' : '-';
+      var absHours = Math.abs(hourDiff);
+      var h = Math.floor(absHours);
+      var m = Math.round((absHours - h) * 60);
+      badge.textContent = sign + h + 'h:' + (m < 10 ? '0' : '') + m + 'm';
+      badge.className = 'wc-drag-badge ' + direction;
+      badge.style.display = 'block';
+
+      var midX = (nowX + dragX) / 2;
+      badge.style.left = midX + 'px';
+      badge.style.top = '0px';
+    }
+
+    function clearDragState() {
+      _isPinned = false;
+      _isDraggingNowLine = false;
+      _dragHourOffset = 0;
+      draggedLine.style.display = 'none';
+      draggedLine.classList.remove('pinned', 'dragging-line');
+      overlay.style.display = 'none';
+      badge.style.display = 'none';
+      nowLine.classList.remove('dimmed', 'dragging');
+      _updateNow();
+    }
+
+    function startDrag(e, fromDraggedLine) {
+      _isDraggingNowLine = true;
+      dragStartX = e.clientX;
+      document.body.style.userSelect = 'none';
+
+      if (fromDraggedLine) {
+        dragOrigX = parseFloat(draggedLine.style.left) || 0;
+        draggedLine.classList.add('dragging-line');
+        draggedLine.classList.remove('pinned');
+      } else {
+        dragOrigX = parseFloat(nowLine.style.left) || 0;
+        nowLine.classList.add('dragging');
+      }
+
+      nowLine.classList.add('dimmed');
+      draggedLine.style.display = 'block';
+      draggedLine.style.left = dragOrigX + 'px';
+      _isPinned = false;
+
       e.preventDefault();
       e.stopPropagation();
-      _isDraggingNowLine = true;
-      nowLine.classList.add('dragging');
+    }
 
-      // Create tooltip
-      tooltip = document.createElement('div');
-      tooltip.className = 'wc-drag-tooltip';
-      nowLine.appendChild(tooltip);
-
-      var homeWrap = container.querySelector('.wc-gradient-wrap[data-tz="' + HOME_TZ + '"]');
-      if (!homeWrap) return;
-
-      function updateDragPos(clientX, shiftKey) {
-        var wrapRect = homeWrap.getBoundingClientRect();
-        var barsRect = barsWrap.getBoundingClientRect();
-        var relX = clientX - wrapRect.left;
-        var pct = Math.max(0, Math.min(1, relX / wrapRect.width));
-        var hour = pct * 24;
-
-        // Shift key: snap to 15-minute increments
-        if (shiftKey) {
-          hour = Math.round(hour * 4) / 4;
-          pct = hour / 24;
-          relX = pct * wrapRect.width;
-        }
-
-        var xPos = (wrapRect.left - barsRect.left) + relX;
-        nowLine.style.left = xPos + 'px';
-
-        // Calculate current time for offset
-        var homeNow = getNowInTz(HOME_TZ);
-        var currentHour = homeNow.getHours() + homeNow.getMinutes() / 60 + homeNow.getSeconds() / 3600;
-
-        // Format dragged time
-        var h = Math.floor(hour);
-        var m = Math.round((hour - h) * 60);
-        if (m === 60) { h++; m = 0; }
-        var ampm = h >= 12 ? 'pm' : 'am';
-        var h12 = h % 12 || 12;
-        var timeStr = h12 + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
-
-        // Calculate offset from current time
-        var offsetHours = hour - currentHour;
-        var sign = offsetHours >= 0 ? '+' : '-';
-        var absOffset = Math.abs(offsetHours);
-        var offH = Math.floor(absOffset);
-        var offM = Math.round((absOffset - offH) * 60);
-        if (offM === 60) { offH++; offM = 0; }
-        var offsetStr = sign + offH + 'h';
-        if (offM > 0) offsetStr += ' ' + offM + 'm';
-
-        tooltip.textContent = timeStr + ' (' + offsetStr + ')';
-        // Color offset: green for future, red for past
-        if (offsetHours >= 0) {
-          tooltip.style.color = '#6ac47a';
-        } else {
-          tooltip.style.color = '#c46a6a';
-        }
-      }
-
-      updateDragPos(e.clientX, e.shiftKey);
-
-      function onMove(ev) {
-        updateDragPos(ev.clientX, ev.shiftKey);
-      }
-
-      function onUp() {
-        document.removeEventListener('mousemove', onMove);
-        document.removeEventListener('mouseup', onUp);
-        _isDraggingNowLine = false;
-        nowLine.classList.remove('dragging');
-        // Keep the line pinned at this position
-        _isPinned = true;
-        // Keep tooltip visible while pinned (restyle for pinned state)
-        if (tooltip) {
-          tooltip.style.color = '#E8A84C';
-        }
-      }
-
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
+    // Mousedown on the real now-line
+    nowLine.addEventListener('mousedown', function (e) {
+      if (_isPinned) return; // if pinned, don't start fresh drag from now-line
+      startDrag(e, false);
     });
 
-    // Click anywhere else to un-pin
-    document.addEventListener('mousedown', function (e) {
+    // Mousedown on the dragged line (re-drag from pinned position)
+    draggedLine.addEventListener('mousedown', function (e) {
       if (!_isPinned) return;
-      // If the click is on the now-line itself, don't un-pin (drag will start)
-      if (nowLine.contains(e.target)) return;
-      _isPinned = false;
-      // Remove tooltip if present
-      if (tooltip && tooltip.parentNode) {
-        tooltip.remove();
-        tooltip = null;
+      startDrag(e, true);
+    });
+
+    // Mousemove — update dragged line position
+    document.addEventListener('mousemove', function (e) {
+      if (!_isDraggingNowLine) return;
+      var info = getCanvasInfo();
+      if (!info) return;
+
+      var dx = e.clientX - dragStartX;
+      var newX = dragOrigX + dx;
+      newX = Math.max(info.canvasLeft, Math.min(info.canvasLeft + info.canvasWidth, newX));
+
+      // Shift key: snap to nearest 15-minute mark
+      if (e.shiftKey) {
+        var pxToHour = ((newX - info.canvasLeft) / info.canvasWidth) * 24;
+        var snappedHour = Math.round(pxToHour * 4) / 4;
+        newX = info.canvasLeft + (snappedHour / 24) * info.canvasWidth;
+        newX = Math.max(info.canvasLeft, Math.min(info.canvasLeft + info.canvasWidth, newX));
       }
-      // Return to real time
-      _updateNow();
+
+      draggedLine.style.left = newX + 'px';
+
+      var nowX = parseFloat(nowLine.style.left) || dragOrigX;
+      updateOverlay(nowX, newX);
+      updateBadge(nowX, newX);
+    });
+
+    // Mouseup — pin the dragged position
+    document.addEventListener('mouseup', function (e) {
+      if (!_isDraggingNowLine) return;
+      _isDraggingNowLine = false;
+      nowLine.classList.remove('dragging');
+      document.body.style.userSelect = '';
+
+      draggedLine.classList.remove('dragging-line');
+      var draggedX = parseFloat(draggedLine.style.left);
+      var nowX = parseFloat(nowLine.style.left) || dragOrigX;
+
+      // If barely moved, treat as click — don't pin
+      if (Math.abs(draggedX - nowX) < 3) {
+        clearDragState();
+        return;
+      }
+
+      // Pin the dragged position
+      _isPinned = true;
+      draggedLine.classList.add('pinned');
+      _dragJustPinned = true;
+      setTimeout(function () { _dragJustPinned = false; }, 50);
+    });
+
+    // Click anywhere else to clear pinned state
+    document.addEventListener('mousedown', function (e) {
+      if (!_isPinned || _dragJustPinned) return;
+      if (nowLine.contains(e.target)) return;
+      if (draggedLine.contains(e.target)) return;
+      clearDragState();
     });
   }
 
@@ -597,7 +674,7 @@
    */
   function _updateNow() {
     if (!_containerId) return;
-    if (_isDraggingNowLine || _isPinned) return; // Don't fight drag or pinned state
+    if (_isDraggingNowLine) return; // Don't fight active drag
     var container = document.getElementById(_containerId);
     if (!container) return;
 
@@ -614,7 +691,39 @@
       var barsRect = barsWrap.getBoundingClientRect();
       var xPos = (wrapRect.left - barsRect.left) + wrapRect.width * nowPct;
       nowLine.style.left = xPos + 'px';
+
+      // When pinned, update the overlay and badge to track the moving now-line
+      if (_isPinned) {
+        var draggedLine = barsWrap.querySelector('.wc-dragged-line');
+        var overlayEl = barsWrap.querySelector('.wc-drag-overlay');
+        var badgeEl = barsWrap.querySelector('.wc-drag-badge');
+        if (draggedLine && overlayEl && badgeEl) {
+          var nowX = xPos;
+          var dragX = parseFloat(draggedLine.style.left);
+          if (!isNaN(dragX)) {
+            var leftPx = Math.min(nowX, dragX);
+            var rightPx = Math.max(nowX, dragX);
+            var dir = dragX >= nowX ? 'future' : 'past';
+            overlayEl.style.left = leftPx + 'px';
+            overlayEl.style.width = (rightPx - leftPx) + 'px';
+            overlayEl.className = 'wc-drag-overlay ' + dir;
+            // Update badge
+            var pixelDiff = dragX - nowX;
+            var hourDiff = (pixelDiff / wrapRect.width) * 24;
+            var sign = hourDiff >= 0 ? '+' : '-';
+            var absH = Math.abs(hourDiff);
+            var bH = Math.floor(absH);
+            var bM = Math.round((absH - bH) * 60);
+            badgeEl.textContent = sign + bH + 'h:' + (bM < 10 ? '0' : '') + bM + 'm';
+            badgeEl.className = 'wc-drag-badge ' + dir;
+            badgeEl.style.left = ((nowX + dragX) / 2) + 'px';
+          }
+        }
+        return; // Don't update clock when pinned
+      }
     }
+
+    if (_isPinned) return;
 
     // Update home clock
     var clockEl = container.querySelector('.wc-clock[data-tz="' + HOME_TZ + '"]');

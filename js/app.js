@@ -674,12 +674,16 @@
       var ep = endVal.split(':');
       newEnd.setHours(parseInt(ep[0]), parseInt(ep[1]), 0, 0);
 
+      // Preserve the session's track
+      var sessionTrack = (session.track !== undefined && session.track !== null) ? session.track : (_sessionTracks[sessionId] !== undefined ? _sessionTracks[sessionId] : 0);
+
       Data.saveTimeSession({
         description: desc,
         project_id: projectId,
         started_at: newStart.toISOString(),
         ended_at: newEnd.toISOString(),
-        is_billable: billable
+        is_billable: billable,
+        track: sessionTrack
       }, sessionId).then(function () {
         toast('Session updated', 'success');
         overlay.remove();
@@ -990,8 +994,8 @@
       var sh = sd.getHours() + sd.getMinutes() / 60;
       var eh = ed.getHours() + ed.getMinutes() / 60;
       if (eh - sh < 0.33) eh = sh + 0.33;
-      // Check if this session has a manually-set track
-      var manualTrack = (s.id && _sessionTracks[s.id] !== undefined) ? _sessionTracks[s.id] : -1;
+      // Check if this session has a track (from DB or local override)
+      var manualTrack = (s.track !== undefined && s.track !== null) ? s.track : ((s.id && _sessionTracks[s.id] !== undefined) ? _sessionTracks[s.id] : -1);
       items.push({ session: s, startH: sh, endH: eh, isGhost: false, manualTrack: manualTrack });
     }
     if (ghost) {
@@ -1092,7 +1096,7 @@
     var startTime = Utils.formatTime(s.started_at);
     var endTime = s.ended_at ? Utils.formatTime(s.ended_at) : 'now';
 
-    return '<div class="timeline-session" data-session-id="' + s.id + '" ' +
+    return '<div class="timeline-session" data-session-id="' + s.id + '" data-track="' + track + '" ' +
       'style="left:' + leftPct + '%; width:' + widthPct + '%; top:' + topPx + 'px; ' +
       'background: color-mix(in srgb, ' + color + ' 25%, transparent); border-left: 3px solid ' + color + ';">' +
       '<div class="resize-left"></div>' +
@@ -1415,6 +1419,8 @@
 
       var finalLeftPct = parseFloat(el.style.left);
       var newHour = (finalLeftPct / 100) * 24;
+      // Snap to 15-minute increments
+      newHour = Math.round(newHour * 4) / 4;
       var finalTrack = Math.max(0, Math.round(parseInt(el.style.top, 10) / TRACK_HEIGHT));
 
       var origStart = new Date(session.started_at);
@@ -1425,7 +1431,7 @@
       newStart.setHours(Math.floor(newHour), Math.round((newHour % 1) * 60), 0, 0);
       var newEnd = new Date(newStart.getTime() + durationMs);
 
-      // Store the manually-set track
+      // Store the manually-set track locally and persist to DB
       _sessionTracks[sessionId] = finalTrack;
 
       Data.deleteTimeSession(sessionId).then(function () {
@@ -1434,7 +1440,8 @@
           ended_at: newEnd.toISOString(),
           project_id: session.project_id,
           description: session.description,
-          is_billable: session.is_billable
+          is_billable: session.is_billable,
+          track: finalTrack
         });
       }).then(function (newSession) {
         // Transfer track to new session ID if save returned one
@@ -1492,6 +1499,9 @@
       var finalWidthPct = parseFloat(el.style.width);
       var startHour = (finalLeftPct / 100) * 24;
       var endHour = ((finalLeftPct + finalWidthPct) / 100) * 24;
+      // Snap to 15-minute increments
+      startHour = Math.round(startHour * 4) / 4;
+      endHour = Math.round(endHour * 4) / 4;
 
       var today = new Date();
       var newStart = new Date(today);
@@ -1499,13 +1509,17 @@
       var newEnd = new Date(today);
       newEnd.setHours(Math.floor(endHour), Math.round((endHour % 1) * 60), 0, 0);
 
+      // Preserve the session's track
+      var sessionTrack = (session.track !== undefined && session.track !== null) ? session.track : (_sessionTracks[sessionId] !== undefined ? _sessionTracks[sessionId] : 0);
+
       Data.deleteTimeSession(sessionId).then(function () {
         return Data.saveTimeSession({
           started_at: newStart.toISOString(),
           ended_at: newEnd.toISOString(),
           project_id: session.project_id,
           description: session.description,
-          is_billable: session.is_billable
+          is_billable: session.is_billable,
+          track: sessionTrack
         });
       }).then(function () {
         renderTimelineSessions();
