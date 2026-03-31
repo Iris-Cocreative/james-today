@@ -1006,9 +1006,19 @@
     var container = document.getElementById('timeline-sessions');
     if (!container) return;
 
-    var todayStr = Utils.isoDate(new Date());
+    // Filter to today's sessions using LOCAL date comparison
+    var now = new Date();
+    var todayStr = now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0');
     var sessions = Data.state.timeSessions.filter(function (s) {
-      return s.started_at && s.started_at.slice(0, 10) === todayStr;
+      if (!s.started_at) return false;
+      // Compare using local date of the session start
+      var d = new Date(s.started_at);
+      var localDate = d.getFullYear() + '-' +
+        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+        String(d.getDate()).padStart(2, '0');
+      return localDate === todayStr;
     });
 
     // Build ghost item if timer running

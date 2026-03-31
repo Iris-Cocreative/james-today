@@ -10,7 +10,10 @@
 
   function isoDate(d) {
     var dt = d instanceof Date ? d : new Date(d);
-    return dt.toISOString().slice(0, 10);
+    // Use LOCAL date, not UTC
+    return dt.getFullYear() + '-' +
+      String(dt.getMonth() + 1).padStart(2, '0') + '-' +
+      String(dt.getDate()).padStart(2, '0');
   }
 
   function dayOfYear(d) {
