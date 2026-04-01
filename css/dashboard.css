@@ -328,6 +328,36 @@ body::after {
   transition: opacity 0.25s;
 }
 
+/* Task status filter button */
+.task-status-filter-bar {
+  flex-shrink: 0;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+}
+.task-status-filter-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 14px;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+}
+.task-status-filter-btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-card);
+}
+
+/* Bottom padding on both accordion columns so modals don't get clipped */
+.acc-projects { padding-bottom: 60px; }
+.acc-tasks { padding-bottom: 60px; }
+
 /* ---- Task groups and rows ---- */
 .task-group {
   display: flex;

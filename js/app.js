@@ -147,6 +147,11 @@
   var _newSessionInput = null;
   var _sessionTracks = {}; // sessionId -> track number (local-only, for manual track positioning)
   var _viewDate = new Date(); // currently viewed day (can navigate forward/back)
+  var _taskStatusFilters = {}; // status key -> boolean (true=visible)
+  var _taskStatusFilterModal = null;
+
+  // Initialize task status filters to all visible
+  for (var sf = 0; sf < STATUSES.length; sf++) _taskStatusFilters[STATUSES[sf].key] = true;
 
   // Initialize type filters to all visible
   for (var ti = 0; ti < PROJECT_TYPES.length; ti++) _typeFilters[PROJECT_TYPES[ti]] = true;
@@ -834,6 +839,8 @@
     _colorPickerPopup = null;
     if (_typeFilterModal && _typeFilterModal.parentNode) _typeFilterModal.parentNode.removeChild(_typeFilterModal);
     _typeFilterModal = null;
+    if (_taskStatusFilterModal && _taskStatusFilterModal.parentNode) _taskStatusFilterModal.parentNode.removeChild(_taskStatusFilterModal);
+    _taskStatusFilterModal = null;
   }
 
   /* ================================================================
@@ -873,6 +880,7 @@
 
       for (var j = 0; j < allTasks.length; j++) {
         var t = allTasks[j];
+        if (!taskPassesStatusFilter(t)) continue;
         var statusInfo = STATUS_MAP[t.status] || STATUS_MAP['idea'];
         var isDone = t.status === 'done' || t.status === 'integrated';
         html += '<div class="task-row' + (isDone ? ' done' : '') + '" data-task-id="' + t.id + '" draggable="true">' +
@@ -907,6 +915,7 @@
         '<span class="task-group-label">Unassigned</span>';
       for (var u = 0; u < unassigned.length; u++) {
         var ut = unassigned[u];
+        if (!taskPassesStatusFilter(ut)) continue;
         var us = STATUS_MAP[ut.status] || STATUS_MAP['idea'];
         var uDone = ut.status === 'done' || ut.status === 'integrated';
         html += '<div class="task-row' + (uDone ? ' done' : '') + '" data-task-id="' + ut.id + '" draggable="true">' +
@@ -925,7 +934,59 @@
       html += '</div>';
     }
 
+    // Status filter icon at the bottom
+    html += '<div class="task-status-filter-bar">' +
+      '<button class="task-status-filter-btn" data-action="task-status-filter" title="Filter by status">' +
+        '\u25C9' +
+      '</button>' +
+    '</div>';
+
     container.innerHTML = html;
+  }
+
+  function taskPassesStatusFilter(task) {
+    return _taskStatusFilters[task.status] !== false;
+  }
+
+  function showTaskStatusFilter(anchorEl) {
+    closePopups();
+    if (_taskStatusFilterModal && _taskStatusFilterModal.parentNode) {
+      _taskStatusFilterModal.remove();
+      _taskStatusFilterModal = null;
+      return;
+    }
+
+    var popup = document.createElement('div');
+    popup.className = 'type-filter-modal show';
+    _taskStatusFilterModal = popup;
+
+    var html = '';
+    for (var i = 0; i < STATUSES.length; i++) {
+      var s = STATUSES[i];
+      var active = _taskStatusFilters[s.key] !== false;
+      html += '<div class="type-filter-option' + (active ? ' active' : '') + '" data-status="' + s.key + '">' +
+        squircleSVG(s.color, s.solid, 14) +
+        '<span>' + esc(s.label) + '</span>' +
+        '<span style="margin-left:auto;font-size:11px;">' + (active ? '\u2713' : '') + '</span>' +
+      '</div>';
+    }
+    popup.innerHTML = html;
+
+    var rect = anchorEl.getBoundingClientRect();
+    popup.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+    popup.style.left = rect.left + 'px';
+    document.body.appendChild(popup);
+
+    popup.querySelectorAll('.type-filter-option').forEach(function (opt) {
+      opt.onclick = function () {
+        var status = opt.dataset.status;
+        _taskStatusFilters[status] = !(_taskStatusFilters[status] !== false);
+        opt.classList.toggle('active');
+        var check = opt.querySelector('span:last-child');
+        if (check) check.textContent = _taskStatusFilters[status] ? '\u2713' : '';
+        renderTasks();
+      };
+    });
   }
 
   /* ================================================================
@@ -1660,6 +1721,12 @@
       }
 
       // Type toggle
+      var taskFilterBtn = target.closest('[data-action="task-status-filter"]');
+      if (taskFilterBtn) {
+        showTaskStatusFilter(taskFilterBtn);
+        return;
+      }
+
       var typeBtn = target.closest('[data-action="type-toggle"]');
       if (typeBtn) {
         _typeToggleState = (_typeToggleState + 1) % 3;
