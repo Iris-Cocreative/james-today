@@ -324,8 +324,9 @@
      ================================================================ */
 
   function setupAccordion() {
-    var colP = document.getElementById('col-projects');
-    var colT = document.getElementById('col-tasks');
+    // Target the outer .acc-col wrappers, not the inner scroll divs
+    var colP = document.querySelector('.acc-projects');
+    var colT = document.querySelector('.acc-tasks');
     if (!colP || !colT) return;
 
     colT.addEventListener('mouseenter', function () {
@@ -388,14 +389,13 @@
       '<input type="text" placeholder="New project..." id="project-quick-add" data-action-enter="add-project">' +
     '</div>';
 
-    // Type toggle button
-    html += '<div class="projects-bottom-bar">' +
-      '<button class="type-toggle' + (_typeToggleState > 0 ? ' active' : '') + '" data-action="type-toggle" title="Group / Filter by type">' +
-        '\u25A6' +
-      '</button>' +
-    '</div>';
-
     container.innerHTML = html;
+
+    // Render footer with type toggle (outside scrollable area)
+    var footer = document.getElementById('col-projects-footer');
+    if (footer) {
+      footer.innerHTML = '<button class="type-toggle' + (_typeToggleState > 0 ? ' active' : '') + '" data-action="type-toggle" title="Group / Filter by type">\u25A6</button>';
+    }
   }
 
   function projectCardHTML(p) {
@@ -934,14 +934,13 @@
       html += '</div>';
     }
 
-    // Status filter icon at the bottom
-    html += '<div class="task-status-filter-bar">' +
-      '<button class="task-status-filter-btn" data-action="task-status-filter" title="Filter by status">' +
-        '\u25C9' +
-      '</button>' +
-    '</div>';
-
     container.innerHTML = html;
+
+    // Render footer with filter icon (outside scrollable area)
+    var footer = document.getElementById('col-tasks-footer');
+    if (footer) {
+      footer.innerHTML = '<button class="task-status-filter-btn" data-action="task-status-filter" title="Filter by status">\u25C9</button>';
+    }
   }
 
   function taskPassesStatusFilter(task) {

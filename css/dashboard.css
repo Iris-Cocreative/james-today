@@ -191,9 +191,19 @@ body::after {
   transition: flex 0.5s cubic-bezier(.22,1,.36,1);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+.acc-col-scroll {
+  flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  min-width: 0;
+  padding-bottom: 20px;
+}
+.acc-col-footer {
+  flex-shrink: 0;
+  padding: 6px 8px;
+  border-top: 1px solid var(--border-subtle);
 }
 .acc-projects { flex: 3; }
 .acc-tasks { flex: 0.12; }
@@ -329,12 +339,6 @@ body::after {
 }
 
 /* Task status filter button */
-.task-status-filter-bar {
-  flex-shrink: 0;
-  padding: 6px 8px;
-  display: flex;
-  align-items: center;
-}
 .task-status-filter-btn {
   width: 28px;
   height: 28px;
@@ -354,9 +358,9 @@ body::after {
   background: var(--bg-card);
 }
 
-/* Bottom padding on both accordion columns so modals don't get clipped */
-.acc-projects { padding-bottom: 60px; }
-.acc-tasks { padding-bottom: 60px; }
+/* Footer buttons hidden when column is collapsed */
+.acc-projects.collapsed .acc-col-footer { opacity: 0; pointer-events: none; }
+.acc-tasks:not(.expanded) .acc-col-footer { opacity: 0; pointer-events: none; }
 
 /* ---- Task groups and rows ---- */
 .task-group {
