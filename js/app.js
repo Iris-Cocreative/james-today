@@ -1868,7 +1868,7 @@
     // Close popups on outside click (body level)
     document.addEventListener('click', function (e) {
       if (!e.target.closest('.status-dropdown') && !e.target.closest('.color-picker-popup') && !e.target.closest('.type-filter-modal') &&
-          !e.target.closest('[data-action="status-click"]') && !e.target.closest('[data-action="type-toggle"]') && !e.target.closest('.project-card')) {
+          !e.target.closest('[data-action="status-click"]') && !e.target.closest('[data-action="type-toggle"]') && !e.target.closest('[data-action="task-status-filter"]') && !e.target.closest('.project-card')) {
         closePopups();
       }
     });
