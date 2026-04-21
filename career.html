@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career — james.today</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/career.css">
+</head>
+<body>
+
+<div id="loading" class="loading">
+  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+</div>
+
+<div id="app" class="app" style="display:none;">
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand">
+      <a href="dashboard.html" style="color:inherit;">james<em>.today</em></a>
+      <span style="color: var(--text-tertiary); margin-left: 12px; font-family: var(--font-sans); font-size: 0.85rem;">/ career</span>
+    </div>
+    <div class="topbar-actions">
+      <span id="who" class="who"></span>
+      <button id="signOutBtn" class="ghost">Sign out</button>
+    </div>
+  </header>
+
+  <!-- Wave countdown -->
+  <section class="countdown">
+    <div class="countdown-main">
+      <div>
+        <div class="countdown-days"><em id="countDays">—</em></div>
+        <div class="countdown-label">days to Wave</div>
+      </div>
+      <div class="countdown-target" id="countTarget">May 29, 2026</div>
+    </div>
+    <div class="weeks-strip" id="weeksStrip"></div>
+  </section>
+
+  <!-- Milestones -->
+  <section>
+    <div class="section-title">
+      Milestones
+      <span class="count" id="milestonesDoneCount"></span>
+    </div>
+    <div class="milestones" id="milestones"></div>
+  </section>
+
+  <!-- Opportunities Kanban -->
+  <section class="kanban-wrap">
+    <div class="kanban-header">
+      <div class="section-title" style="margin: 0;">
+        Opportunities
+        <span class="count" id="oppsCount"></span>
+      </div>
+      <button id="addOppBtn" class="primary">+ Add opportunity</button>
+    </div>
+    <div class="kanban" id="kanban"></div>
+  </section>
+
+  <!-- Bottom panels -->
+  <section class="bottom-grid">
+    <div class="panel">
+      <h3>This week</h3>
+      <div class="panel-sub">Next steps coming up</div>
+      <div id="thisWeek"></div>
+    </div>
+    <div class="panel">
+      <h3>Recent conversations</h3>
+      <div class="panel-sub">Last 10 touchpoints</div>
+      <div id="recentConvs"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ─────── Opportunity modal ─────── -->
+<div id="oppModal" class="modal-backdrop">
+  <div class="modal">
+    <button class="modal-close" data-close-modal="oppModal">×</button>
+    <h2 id="oppModalTitle">New <em>opportunity</em></h2>
+    <div class="modal-sub" id="oppModalSub"></div>
+
+    <div class="modal-grid">
+      <div class="full">
+        <label>Company</label>
+        <input id="m_company" type="text" placeholder="e.g. Anthropic" />
+      </div>
+      <div>
+        <label>Role title</label>
+        <input id="m_role_title" type="text" placeholder="Senior Designer" />
+      </div>
+      <div>
+        <label>Source</label>
+        <input id="m_source" type="text" placeholder="LinkedIn, intro from…" />
+      </div>
+      <div>
+        <label>Location</label>
+        <input id="m_location" type="text" placeholder="Remote, NYC, etc." />
+      </div>
+      <div>
+        <label>URL</label>
+        <input id="m_url" type="url" placeholder="https://…" />
+      </div>
+      <div>
+        <label>Comp min (USD)</label>
+        <input id="m_comp_min" type="number" min="0" />
+      </div>
+      <div>
+        <label>Comp max (USD)</label>
+        <input id="m_comp_max" type="number" min="0" />
+      </div>
+      <div>
+        <label>Status</label>
+        <select id="m_status">
+          <option value="researching">Researching</option>
+          <option value="applied">Applied</option>
+          <option value="talking">Talking</option>
+          <option value="interview">Interview</option>
+          <option value="offer">Offer</option>
+          <option value="closed">Closed</option>
+          <option value="declined">Declined</option>
+        </select>
+      </div>
+      <div>
+        <label>Priority</label>
+        <select id="m_priority">
+          <option value="low">Low</option>
+          <option value="med" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div>
+        <label>Fit score (1–10)</label>
+        <input id="m_fit_score" type="number" min="1" max="10" />
+      </div>
+      <div>
+        <label>Next step</label>
+        <input id="m_next_step" type="text" placeholder="e.g. Send intro email" />
+      </div>
+      <div>
+        <label>Next step date</label>
+        <input id="m_next_step_date" type="date" />
+      </div>
+      <div class="full">
+        <label>Notes</label>
+        <textarea id="m_notes" rows="3" placeholder="Initial thoughts, fit notes, what you're researching…"></textarea>
+      </div>
+    </div>
+
+    <!-- Conversation log (only shown when editing existing opportunity) -->
+    <div id="oppConvSection" class="modal-section" style="display:none;">
+      <h3>Conversations</h3>
+      <div id="oppConvLog"></div>
+
+      <div style="margin-top: 16px; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+          <select id="conv_channel">
+            <option value="">Channel…</option>
+            <option value="call">Call</option>
+            <option value="video">Video</option>
+            <option value="email">Email</option>
+            <option value="message">Message</option>
+            <option value="in_person">In person</option>
+            <option value="other">Other</option>
+          </select>
+          <select id="conv_direction">
+            <option value="">Direction…</option>
+            <option value="outbound">Outbound</option>
+            <option value="inbound">Inbound</option>
+          </select>
+          <input id="conv_date" type="date" />
+        </div>
+        <textarea id="conv_summary" rows="2" placeholder="What was discussed, outcomes, vibe…"></textarea>
+        <div style="display:grid; grid-template-columns: 2fr 1fr auto; gap: 8px;">
+          <input id="conv_next" type="text" placeholder="Next step (optional)" />
+          <input id="conv_next_date" type="date" />
+          <button id="addConvBtn" class="primary">Log it</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button id="archiveOppBtn" class="ghost left" style="display:none;">Archive</button>
+      <button data-close-modal="oppModal" class="ghost">Cancel</button>
+      <button id="saveOppBtn" class="primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─────── Milestone modal ─────── -->
+<div id="featureModal" class="modal-backdrop">
+  <div class="modal" style="max-width: 560px;">
+    <button class="modal-close" data-close-modal="featureModal">×</button>
+    <h2 id="featureModalTitle">Milestone</h2>
+    <div class="modal-sub" id="featureModalSub"></div>
+
+    <div class="modal-grid">
+      <div class="full">
+        <label>Title</label>
+        <input id="f_title" type="text" />
+      </div>
+      <div>
+        <label>Status</label>
+        <select id="f_status">
+          <option value="idea">Idea</option>
+          <option value="planning">Planning</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="building">Building</option>
+          <option value="done">Done</option>
+          <option value="integrated">Integrated</option>
+        </select>
+      </div>
+      <div>
+        <label>Target week</label>
+        <input id="f_target_week" type="date" />
+      </div>
+      <div class="full">
+        <label>Description</label>
+        <textarea id="f_description" rows="4"></textarea>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button data-close-modal="featureModal" class="ghost">Cancel</button>
+      <button id="saveFeatureBtn" class="primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Scripts -->
+<script src="js/career.js"></script>
+
+</body>
+</html>
