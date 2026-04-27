@@ -1348,6 +1348,33 @@ body.is-dragging { cursor: grabbing !important; user-select: none; }
 }
 .week-btn:hover { border-color: var(--accent); color: var(--accent); }
 
+/* Show-completed toggle (chip-style button with dot) */
+.week-btn.wk-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.wk-toggle-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex-shrink: 0;
+  transition: background 0.18s;
+}
+.week-btn.wk-toggle[data-active="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.week-btn.wk-toggle[data-active="true"] .wk-toggle-dot {
+  background: var(--accent);
+  box-shadow: 0 0 4px rgba(196,149,106,0.6);
+}
+
+/* Mini-cal drop highlight (dragging a task over a column) */
+.mini-cal-day.drop-target {
+  background: rgba(196,149,106,0.08);
+  outline: 1px dashed var(--accent);
+  outline-offset: -2px;
+}
+
 /* ---- Day cards row ---- */
 .week-cards {
   flex: 0 0 144px;
@@ -1369,6 +1396,7 @@ body.is-dragging { cursor: grabbing !important; user-select: none; }
   padding: 5px;
   transition: background 0.18s, outline 0.12s;
   overflow: hidden;
+  min-height: 100%;
   max-height: 144px;
   align-self: start;
 }
@@ -1578,17 +1606,92 @@ body.is-dragging { cursor: grabbing !important; user-select: none; }
   box-shadow: 0 0 3px rgba(232,168,76,0.6);
 }
 
-.habit-legend {
+/* ---- World-clock hour labels: moved to top of timeline ---- */
+.wc-hour-labels { display: none; }
+
+/* ---- Timeline hour axis (replaces wc-hour-labels) ---- */
+.timeline-hour-axis {
+  position: relative;
+  height: 16px;
   flex-shrink: 0;
-  display: flex; align-items: center; gap: 13px;
-  padding: 5px 13px;
-  border-top: 1px solid var(--border-subtle);
-  font-size: 0.6rem; color: var(--text-tertiary);
-  letter-spacing: 0.06em; text-transform: uppercase;
-  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg);
 }
-.habit-legend-item { display: flex; align-items: center; gap: 5px; }
-.habit-legend-pip { width: 8px; height: 8px; border-radius: 50%; }
+.th-hour {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.th-hour.first { left: 4px !important; transform: none; }
+.th-hour.last  { right: 4px; left: auto !important; transform: none; }
+
+/* ---- Timeline summary box (pie + key, lower-right of #timeline) ---- */
+#timeline-summary {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  width: 220px;
+  z-index: 10;
+  background: rgba(8, 7, 12, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 10px;
+  font-family: neue-kabel, sans-serif;
+}
+.ts-pie {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  align-self: center;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4);
+}
+.ts-key {
+  display: flex; flex-direction: column;
+  font-size: 10px;
+  color: var(--text-secondary);
+  gap: 1px;
+}
+.ts-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 1px 0;
+}
+.ts-pip {
+  width: 7px; height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.ts-lbl { letter-spacing: 0.04em; }
+.ts-h {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-default);
+}
+.ts-work {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 4px;
+  padding-top: 5px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  display: flex; flex-direction: column;
+  gap: 1px;
+}
+.ts-work .ts-row.sub {
+  padding-left: 12px;
+  color: var(--text-tertiary);
+}
+.ts-work .ts-row.sub .ts-h { color: var(--text-secondary); }
 
 /* ---- Journal modal (week-scoped) ---- */
 .wk-modal-backdrop {
