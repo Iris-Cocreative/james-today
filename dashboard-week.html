@@ -157,7 +157,8 @@
        WEEK SECTION (cards + mini cal) — ~32% of vertical
        ========================================================= */
     .week-section {
-      flex: 0 0 320px;            /* fixed-ish height */
+      /* 30 header + 89 cards + 233 mini-cal + 28 legend = 380 */
+      flex: 0 0 380px;
       display: flex; flex-direction: column;
       overflow: hidden; background: var(--bg);
     }
@@ -189,20 +190,22 @@
 
     /* ---- Day cards row ---- */
     .week-cards {
-      flex: 1; min-height: 0;
+      flex: 0 0 89px;             /* default day-card height */
       display: grid; grid-template-columns: repeat(7, 1fr);
       gap: 1px;
       background: var(--border-subtle);     /* gap colour */
       padding: 0;
+      overflow: visible;          /* allow hover-expanded card to overlay */
     }
 
     .day-card {
       background: var(--bg);
       position: relative;
       display: flex; flex-direction: column;
-      padding: 6px 6px 4px 6px;
+      padding: 5px 7px 4px;
       transition: background 0.18s, outline 0.12s;
       overflow: hidden;
+      height: 89px;
     }
     .day-card.today { background: var(--accent-ghost); }
     .day-card.drop-target {
@@ -212,33 +215,40 @@
     }
     .day-card.weekend .dh-name { color: var(--text-tertiary); }
 
-    /* Card top row: day label + journal wheel */
+    /* Card top row: day name | (habits + journal wheel + date) */
     .dh-top {
-      display: flex; align-items: flex-start; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       margin-bottom: 4px;
-    }
-    .dh-label {
-      display: flex; flex-direction: column; line-height: 1; gap: 2px;
+      gap: 6px;
     }
     .dh-name {
       font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.14em;
       color: var(--text-secondary);
+      line-height: 1;
+    }
+    .dh-top-right {
+      display: flex; align-items: center; gap: 6px;
+      flex-shrink: 0;
+    }
+    .dh-habits-row {
+      display: flex; align-items: center; gap: 3px;
     }
     .dh-num {
-      font-family: loretta, serif; font-size: 1.3rem;
+      font-family: loretta, serif; font-size: 1.05rem;
       color: var(--text-primary);
+      line-height: 1;
     }
     .day-card.today .dh-num { color: var(--accent); }
 
-    /* Journal wheel (4 quadrants) */
+    /* Journal wheel (4 quadrants) — half size */
     .journal-wheel {
-      width: 22px; height: 22px; cursor: pointer; flex-shrink: 0;
+      width: 11px; height: 11px; cursor: pointer; flex-shrink: 0;
       transition: transform 0.18s;
     }
-    .journal-wheel:hover { transform: scale(1.15); }
-    .journal-wheel circle.bg { fill: none; stroke: var(--border); stroke-width: 1; }
+    .journal-wheel:hover { transform: scale(1.4); }
+    .journal-wheel circle.bg { fill: none; stroke: var(--border); stroke-width: 1.2; }
     .journal-wheel .q {
-      fill: transparent; stroke: var(--border); stroke-width: 0.5;
+      fill: transparent; stroke: var(--border); stroke-width: 0.6;
       transition: fill 0.2s;
     }
     .journal-wheel .q.done { fill: var(--accent); }
@@ -311,26 +321,16 @@
       letter-spacing: 0.08em;
     }
 
-    /* Habits box bottom-right */
-    .dh-habits {
-      position: absolute;
-      bottom: 4px; right: 4px;
-      background: rgba(0,0,0,0.25);
-      border: 1px solid var(--border-subtle);
-      border-radius: 3px;
-      padding: 4px 3px;
-      display: flex; flex-direction: column; gap: 3px;
-      z-index: 2;
-    }
+    /* Habit pips — now horizontal in the top-right cluster */
     .habit-pip {
-      width: 7px; height: 7px;
+      width: 6px; height: 6px;
       border-radius: 50%;
       border: 1px solid var(--border);
       background: transparent;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .habit-pip:hover { transform: scale(1.3); }
+    .habit-pip:hover { transform: scale(1.5); }
     .habit-pip.done { border-color: transparent; }
     .habit-pip[data-habit="meditation"].done { background: #5b6ec8; box-shadow: 0 0 4px rgba(91,110,200,0.4); }
     .habit-pip[data-habit="movement"].done   { background: #e8744c; box-shadow: 0 0 4px rgba(232,116,76,0.4); }
@@ -341,7 +341,7 @@
     /* ---- Mini calendar strip ---- */
     .week-mini-cal {
       flex-shrink: 0;
-      height: 80px;
+      height: 233px;
       display: grid; grid-template-columns: 40px repeat(7, 1fr);
       gap: 1px;
       background: var(--border-subtle);
@@ -351,8 +351,8 @@
     .mini-cal-hours {
       background: var(--bg);
       display: flex; flex-direction: column; justify-content: space-between;
-      padding: 2px 4px;
-      font-size: 8px; color: var(--text-faint);
+      padding: 4px 4px;
+      font-size: 8.5px; color: var(--text-faint);
       letter-spacing: 0.06em;
       text-align: right;
     }
@@ -471,7 +471,7 @@
 <body>
 
   <div class="proto-banner">
-    <span>◇ Prototype v2 — Week View · drag tasks from left to schedule</span>
+    <span>◇ Prototype v3 — Week View · drag tasks from left to schedule</span>
     <a href="dashboard.html">← back to current dashboard</a>
   </div>
 
@@ -823,20 +823,18 @@
         html += `
           <div class="${cls}" data-day-index="${i}">
             <div class="dh-top">
-              <div class="dh-label">
-                <span class="dh-name">${d.name}</span>
+              <span class="dh-name">${d.name}</span>
+              <div class="dh-top-right">
+                <div class="dh-habits-row">${habitsHtml}</div>
+                ${buildJournalWheel(JOURNAL[i])}
                 <span class="dh-num">${d.date}</span>
               </div>
-              ${buildJournalWheel(JOURNAL[i])}
             </div>
             <div class="dh-tasks">
               ${visibleHtml}
               ${overflowHtml}
             </div>
             ${extrasHtml}
-            <div class="dh-habits">
-              ${habitsHtml}
-            </div>
           </div>
         `;
       });
@@ -852,9 +850,11 @@
 
       let html = `
         <div class="mini-cal-hours">
-          <span>${CAL_HOUR_START}a</span>
-          <span>noon</span>
-          <span>${CAL_HOUR_END - 12}p</span>
+          <span>7a</span>
+          <span>11a</span>
+          <span>3p</span>
+          <span>7p</span>
+          <span>11p</span>
         </div>
       `;
 
