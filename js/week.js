@@ -1,22 +1,15 @@
 /* ============================================================
    week.js — Week section: 7-day cards + mini calendar
    Renders into #week-section. Listens to Data.dataChanged.
-   Drag-from-task → drop-on-day handler uses the existing
-   `text/task-id` payload set by app.js (line 1859).
    ============================================================ */
 (function () {
   'use strict';
-
-  /* ============================================================
-     Constants
-     ============================================================ */
 
   var HABIT_ORDER = ['sleep', 'meditation', 'movement', 'home', 'nutrition', 'learning'];
   var DAY_NAMES = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var WEEKDAYS_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-  // Mini-cal layout
   var HOUR_PX = 26;
   var VISIBLE_START = 9;
   var CONTENT_START = 7;
@@ -24,9 +17,10 @@
   var CONTENT_HEIGHT = (CONTENT_END - CONTENT_START) * HOUR_PX;
   var DEFAULT_SCROLL = (VISIBLE_START - CONTENT_START) * HOUR_PX;
 
-  /* Phosphor habit icons — outlined (todo) and filled (done).
-     For done variants, fill="currentColor" lives on the parent SVG so
-     paths inherit the CSS color while <rect fill="none"> stays transparent. */
+  var LS_HIDE_COMPLETED = 'wk-hide-completed';
+  var hideCompleted = localStorage.getItem(LS_HIDE_COMPLETED) !== 'false'; // default true
+
+  /* Phosphor habit icons (todo + done) */
   var HABIT_ICONS = {
     sleep: {
       todo: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="208" y1="120" x2="208" y2="72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><line x1="232" y1="96" x2="184" y2="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><line x1="160" y1="32" x2="160" y2="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><line x1="176" y1="48" x2="144" y2="48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/><path d="M210.69,158.18A96.78,96.78,0,0,1,192,160,96.08,96.08,0,0,1,97.82,45.31,88,88,0,1,0,210.69,158.18Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"/></svg>',
@@ -59,7 +53,6 @@
      ============================================================ */
 
   function esc(s) { return Utils.esc(s == null ? '' : String(s)); }
-
   function hexToRgba(hex, a) {
     if (!hex) return 'rgba(255,255,255,' + a + ')';
     var c = hex.replace('#', '');
@@ -69,7 +62,6 @@
     var b = parseInt(c.slice(4, 6), 16);
     return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
   }
-
   function formatTime(decimalHours) {
     var hr = Math.floor(decimalHours);
     var m = Math.round((decimalHours - hr) * 60);
@@ -77,25 +69,14 @@
     var h12 = hr % 12 === 0 ? 12 : hr % 12;
     return m === 0 ? (h12 + ampm) : (h12 + ':' + String(m).padStart(2, '0') + ampm);
   }
-
   function projectById(id) {
     if (!id) return null;
     var arr = Data.state.projects || [];
-    for (var i = 0; i < arr.length; i++) {
-      if (arr[i].id === id) return arr[i];
-    }
+    for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i];
     return null;
   }
-
-  function projectColor(id) {
-    var p = projectById(id);
-    return (p && p.color) || '#7c7c8a';
-  }
-
-  function projectLabel(id) {
-    var p = projectById(id);
-    return (p && p.name) || 'Unassigned';
-  }
+  function projectColor(id) { var p = projectById(id); return (p && p.color) || '#7c7c8a'; }
+  function projectLabel(id) { var p = projectById(id); return (p && p.name) || 'Unassigned'; }
 
   function countJournalAnswered(j) {
     if (!j) return 0;
@@ -122,7 +103,7 @@
   }
 
   /* ============================================================
-     Render — shell (built once)
+     Shell
      ============================================================ */
 
   function buildShell() {
@@ -135,22 +116,14 @@
       '    <span class="week-title-range" id="wk-range">—</span>' +
       '  </div>' +
       '  <div class="week-actions">' +
+      '    <button class="week-btn wk-toggle" id="wk-toggle-completed" title="Toggle done & integrated tasks"><span class="wk-toggle-dot"></span>Show done</button>' +
       '    <button class="week-btn" id="wk-prev">‹</button>' +
       '    <button class="week-btn" id="wk-this">This Week</button>' +
       '    <button class="week-btn" id="wk-next">›</button>' +
       '  </div>' +
       '</div>' +
       '<div class="week-cards" id="week-cards"></div>' +
-      '<div class="week-mini-cal" id="week-mini-cal"></div>' +
-      '<div class="habit-legend">' +
-      '  <span style="color:var(--text-faint);">HABITS</span>' +
-      '  <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#4a5fa8"></span>Sleep</span>' +
-      '  <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#9a6ed6"></span>Meditation</span>' +
-      '  <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#ea7e4c"></span>Movement</span>' +
-      '  <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#82a972"></span>Home</span>' +
-      '  <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#e6b830"></span>Nutrition</span>' +
-      '  <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#3eb3c8"></span>Learning</span>' +
-      '</div>';
+      '<div class="week-mini-cal" id="week-mini-cal"></div>';
 
     document.getElementById('wk-prev').addEventListener('click', function () {
       Data.setWeekStart(Data.addDays(Data.state.weekStart, -7));
@@ -160,6 +133,14 @@
     });
     document.getElementById('wk-this').addEventListener('click', function () {
       Data.setWeekStart(new Date());
+    });
+    var toggleBtn = document.getElementById('wk-toggle-completed');
+    toggleBtn.dataset.active = hideCompleted ? 'false' : 'true';
+    toggleBtn.addEventListener('click', function () {
+      hideCompleted = !hideCompleted;
+      localStorage.setItem(LS_HIDE_COMPLETED, hideCompleted ? 'true' : 'false');
+      toggleBtn.dataset.active = hideCompleted ? 'false' : 'true';
+      rerender();
     });
   }
 
@@ -185,8 +166,14 @@
   }
 
   /* ============================================================
-     Render — cards
+     Cards
      ============================================================ */
+
+  function visibleTasksForDate(ds) {
+    var all = Data.tasksForDate(ds);
+    if (!hideCompleted) return all;
+    return all.filter(function (t) { return t.status !== 'done' && t.status !== 'integrated'; });
+  }
 
   function renderWeekCards() {
     var cards = document.getElementById('week-cards');
@@ -204,7 +191,7 @@
       var isToday = ds === todayStr;
       var isWeekend = i >= 5;
 
-      var tasks = Data.tasksForDate(ds);
+      var tasks = visibleTasksForDate(ds);
       var visible = tasks.slice(0, 3);
       var overflow = tasks.slice(3);
       var journal = Data.state.journalsByDate[ds] || {};
@@ -265,7 +252,7 @@
   }
 
   /* ============================================================
-     Render — mini calendar
+     Mini calendar
      ============================================================ */
 
   function renderMiniCal() {
@@ -279,7 +266,6 @@
 
     var html = '';
 
-    // Hour labels
     var hoursHtml = '';
     for (var h = CONTENT_START; h <= CONTENT_END; h++) {
       var top = (h - CONTENT_START) * HOUR_PX;
@@ -346,7 +332,6 @@
 
     cal.innerHTML = html;
 
-    // Default scroll only on first build (preserve scroll position on re-renders)
     if (!cal._scrollInit) {
       cal.scrollTop = DEFAULT_SCROLL;
       cal._scrollInit = true;
@@ -357,26 +342,19 @@
     updateEdgeIndicators();
 
     attachSessionHandlers();
+    attachMiniCalDropHandlers();
   }
 
-  /** Compute decimal hours + pixel box for a session on day `dayDate`.
-      Returns null if session lies entirely outside the rendered window. */
   function sessionBox(s, dayDate) {
     if (!s.started_at) return null;
     var start = new Date(s.started_at);
     var end = s.ended_at ? new Date(s.ended_at) : new Date(start.getTime() + 30 * 60000);
 
-    var startHour, endHour;
-    if (start.getDate() === dayDate.getDate() && start.getMonth() === dayDate.getMonth() && start.getFullYear() === dayDate.getFullYear()) {
-      startHour = start.getHours() + start.getMinutes() / 60;
-    } else {
-      startHour = CONTENT_START;          // started before this day; clip to window top
-    }
-    if (end.getDate() === dayDate.getDate() && end.getMonth() === dayDate.getMonth() && end.getFullYear() === dayDate.getFullYear()) {
-      endHour = end.getHours() + end.getMinutes() / 60;
-    } else {
-      endHour = CONTENT_END;              // ends after this day; clip to window bottom
-    }
+    var sameStart = start.getDate() === dayDate.getDate() && start.getMonth() === dayDate.getMonth() && start.getFullYear() === dayDate.getFullYear();
+    var sameEnd = end.getDate() === dayDate.getDate() && end.getMonth() === dayDate.getMonth() && end.getFullYear() === dayDate.getFullYear();
+
+    var startHour = sameStart ? (start.getHours() + start.getMinutes() / 60) : CONTENT_START;
+    var endHour = sameEnd ? (end.getHours() + end.getMinutes() / 60) : CONTENT_END;
 
     if (endHour <= CONTENT_START || startHour >= CONTENT_END) return null;
     if (startHour < CONTENT_START) startHour = CONTENT_START;
@@ -410,7 +388,7 @@
   }
 
   /* ============================================================
-     Card / session handlers
+     Drop handlers — cards (set scheduled_date) + mini-cal (create session)
      ============================================================ */
 
   function attachCardHandlers() {
@@ -418,8 +396,9 @@
     for (var i = 0; i < cards.length; i++) {
       (function (card) {
         card.addEventListener('dragover', function (e) {
-          // Only highlight if a task is being dragged
-          if (!e.dataTransfer || !Array.from(e.dataTransfer.types || []).includes('text/task-id')) return;
+          // Always preventDefault so the drop fires; some browsers don't
+          // expose dataTransfer.types during dragover for security reasons,
+          // so we can't reliably gate on it here.
           e.preventDefault();
           e.dataTransfer.dropEffect = 'copy';
           card.classList.add('drop-target');
@@ -462,6 +441,60 @@
     }
   }
 
+  function attachMiniCalDropHandlers() {
+    var days = document.querySelectorAll('#week-mini-cal .mini-cal-day');
+    for (var i = 0; i < days.length; i++) {
+      (function (day) {
+        day.addEventListener('dragover', function (e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+          day.classList.add('drop-target');
+        });
+        day.addEventListener('dragleave', function () {
+          day.classList.remove('drop-target');
+        });
+        day.addEventListener('drop', function (e) {
+          day.classList.remove('drop-target');
+          var taskId = e.dataTransfer.getData('text/task-id');
+          if (!taskId) return;
+          e.preventDefault();
+          var ds = day.dataset.dayDate;
+          var rect = day.getBoundingClientRect();
+          // Y in the day's content coordinates (rect.top already accounts for scroll)
+          var contentY = e.clientY - rect.top;
+          var hourFloat = CONTENT_START + (contentY / HOUR_PX);
+          // Snap to nearest 15 min
+          hourFloat = Math.max(CONTENT_START, Math.min(CONTENT_END - 0.25, hourFloat));
+          hourFloat = Math.round(hourFloat * 4) / 4;
+          createSessionFromTask(taskId, ds, hourFloat);
+        });
+      })(days[i]);
+    }
+  }
+
+  function createSessionFromTask(taskId, ds, startHour) {
+    var task = (Data.state.tasks || []).find(function (t) { return t.id === taskId; });
+    if (!task) {
+      Data.toast('Task not found', 'error');
+      return;
+    }
+    var startDate = new Date(ds + 'T00:00:00');
+    var hr = Math.floor(startHour);
+    var mn = Math.round((startHour - hr) * 60);
+    startDate.setHours(hr, mn, 0, 0);
+    var endDate = new Date(startDate.getTime() + 30 * 60000); // default 30 min
+
+    Data.saveTimeSession({
+      description: task.title || task.name || 'Untitled',
+      project_id: task.project_id || null,
+      started_at: startDate.toISOString(),
+      ended_at: endDate.toISOString(),
+      is_billable: false,
+    }).then(function () {
+      Data.toast('Session created on ' + dayLabel(ds) + ' at ' + formatTime(startHour), 'success');
+    });
+  }
+
   function attachSessionHandlers() {
     var els = document.querySelectorAll('#week-mini-cal .mini-block, #week-mini-cal .edge-bar');
     for (var i = 0; i < els.length; i++) {
@@ -473,8 +506,6 @@
             var top = +el.dataset.sessionTop;
             cal.scrollTo({ top: top - 21, behavior: 'smooth' });
           }
-          // Session edit isn't wired into app.js yet — for now, surface info.
-          // Future: dispatch a custom event app.js can listen to.
           var sid = el.dataset.sessionId;
           var s = (Data.state.weekSessions || []).find(function (x) { return x.id === sid; });
           if (s) {
@@ -491,8 +522,12 @@
   }
 
   /* ============================================================
-     Journal modal
+     Journal modal — with dirty-state guard
      ============================================================ */
+
+  var _modalDirty = false;
+  var _modalSnapshot = null;
+  var _modalDate = null;
 
   function ensureJournalModal() {
     var modal = document.getElementById('wk-journal-modal');
@@ -514,14 +549,61 @@
       '  </div>' +
       '</div>';
     document.body.appendChild(modal);
-    modal.addEventListener('click', function (e) {
-      if (e.target.id === 'wk-journal-modal') closeJournalModal();
+
+    // Track dirty state on any textarea input
+    modal.addEventListener('input', function (e) {
+      if (e.target.matches('textarea')) markDirtyIfChanged();
     });
-    modal.querySelector('.wk-btn-cancel').addEventListener('click', closeJournalModal);
+
+    // Backdrop click — guarded
+    modal.addEventListener('click', function (e) {
+      if (e.target.id === 'wk-journal-modal') tryClose();
+    });
+    modal.querySelector('.wk-btn-cancel').addEventListener('click', tryClose);
+
+    // Escape key — guarded
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && modal.classList.contains('show')) closeJournalModal();
+      if (e.key === 'Escape' && modal.classList.contains('show')) {
+        e.preventDefault();
+        tryClose();
+      }
     });
     return modal;
+  }
+
+  function snapshotModal(modal) {
+    var snap = {};
+    modal.querySelectorAll('textarea').forEach(function (ta) {
+      snap[ta.dataset.field] = ta.value || '';
+    });
+    return snap;
+  }
+
+  function markDirtyIfChanged() {
+    var modal = document.getElementById('wk-journal-modal');
+    if (!modal || !_modalSnapshot) return;
+    var current = snapshotModal(modal);
+    var dirty = false;
+    Object.keys(_modalSnapshot).forEach(function (k) {
+      if ((_modalSnapshot[k] || '') !== (current[k] || '')) dirty = true;
+    });
+    _modalDirty = dirty;
+    var cancelBtn = modal.querySelector('.wk-btn-cancel');
+    if (cancelBtn) cancelBtn.textContent = dirty ? 'Discard' : 'Close';
+  }
+
+  function tryClose() {
+    if (!_modalDirty) {
+      closeJournalModal();
+      return;
+    }
+    var ok = confirm('You have unsaved changes. Discard them?');
+    if (ok) {
+      _modalDirty = false;
+      closeJournalModal();
+    } else {
+      Data.toast('Save your journal entry or click Discard to close without saving', 'info');
+    }
   }
 
   function openJournalModal(ds) {
@@ -537,6 +619,11 @@
       if (ta) ta.value = journal[f] || '';
     });
 
+    _modalDate = ds;
+    _modalDirty = false;
+    _modalSnapshot = snapshotModal(modal);
+    modal.querySelector('.wk-btn-cancel').textContent = 'Close';
+
     var saveBtn = modal.querySelector('.wk-btn-save');
     saveBtn.onclick = function () {
       var payload = {};
@@ -545,8 +632,9 @@
         var val = ta ? (ta.value || '').trim() : '';
         payload[f] = val || null;
       });
-      Data.saveJournal(payload, ds).then(function () {
+      Data.saveJournal(payload, _modalDate).then(function () {
         Data.toast('Journal saved', 'success');
+        _modalDirty = false;
         closeJournalModal();
       });
     };
@@ -561,10 +649,12 @@
   function closeJournalModal() {
     var modal = document.getElementById('wk-journal-modal');
     if (modal) modal.classList.remove('show');
+    _modalDate = null;
+    _modalSnapshot = null;
   }
 
   /* ============================================================
-     Init / boot
+     Init
      ============================================================ */
 
   function rerender() {
@@ -582,7 +672,6 @@
     }
     buildShell();
     Data.on('dataChanged', rerender);
-    // If Data already initialized (e.g. after late script load), render now.
     if (Data.state && Data.state.weekStart) rerender();
   }
 
