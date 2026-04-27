@@ -3,11 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>james.today — Week Prototype v2</title>
+  <title>james.today — Week Prototype v4</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="stylesheet" href="https://use.typekit.net/zvp8mfo.css">
   <link rel="stylesheet" href="css/tokens.css">
   <style>
+    /* =========================================================
+       Fibonacci-pixel scale used throughout this prototype:
+       3 5 8 13 21 34 55 89 144 233 377 610
+       ========================================================= */
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       height: 100%; background: var(--bg);
@@ -28,7 +33,7 @@
       position: fixed; top: 0; left: 0; right: 0;
       background: var(--accent-subtle);
       border-bottom: 1px solid var(--accent-line);
-      padding: 4px 16px; font-size: 10px; letter-spacing: 0.14em;
+      padding: 4px 13px; font-size: 10px; letter-spacing: 0.14em;
       text-transform: uppercase; color: var(--accent); z-index: 999;
       display: flex; justify-content: space-between; align-items: center;
     }
@@ -36,82 +41,70 @@
     .proto-banner a:hover { color: var(--accent-hover); }
 
     .app {
-      display: flex; height: 100vh; padding-top: 24px; overflow: hidden;
+      display: flex; height: 100vh; padding-top: 21px; overflow: hidden;
     }
 
-    /* ==== LEFT COLUMN (mock of existing dashboard) ==== */
+    /* ==== LEFT COLUMN ==== */
     .left-col {
-      width: 320px; flex-shrink: 0;
+      width: 233px; flex-shrink: 0;            /* fib */
       border-right: 1px solid var(--border-subtle);
       display: flex; flex-direction: column; overflow: hidden;
     }
     .day-info {
-      padding: 16px 20px 18px;
+      padding: 13px 21px;                      /* fib */
       border-bottom: 1px solid var(--border-subtle); flex-shrink: 0;
     }
-    .day-domain { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .day-domain { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
     .domain-pip { width: 8px; height: 8px; border-radius: 50%; background: var(--domain-moksha); }
     .domain-name { font-family: loretta, serif; font-size: 1.05rem; color: var(--text-primary); }
     .domain-sanskrit { font-size: 0.7rem; color: var(--text-tertiary); font-style: italic; }
-    .day-theme { font-size: 0.65rem; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .day-theme { font-size: 0.65rem; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px; }
     .day-date { font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 2px; }
     .day-numbers { font-size: 0.6rem; color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
     .day-question { font-family: loretta, serif; font-size: 0.78rem; color: var(--text-tertiary); font-style: italic; }
 
-    .projects-list {
-      flex: 1; overflow-y: auto; padding: 8px 0;
-    }
-    .proj-group { padding: 4px 0; }
+    .projects-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .proj-group { padding: 3px 0; }
     .proj-label {
       display: flex; align-items: center; gap: 8px;
-      padding: 6px 16px 4px;
+      padding: 5px 13px 3px;
       font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase;
       font-weight: 500;
     }
-    .proj-bar {
-      width: 4px; height: 14px; border-radius: 2px;
-    }
+    .proj-bar { width: 3px; height: 13px; border-radius: 2px; }
 
     .task-row {
       display: flex; align-items: center; gap: 8px;
-      padding: 4px 16px 4px 24px;
+      padding: 3px 13px 3px 21px;
       font-size: 0.78rem; color: var(--text-default);
       cursor: grab;
       transition: background 0.12s;
       border-left: 3px solid transparent;
     }
-    .task-row:hover {
-      background: var(--bg-hover);
-      border-left-color: var(--accent);
-    }
+    .task-row:hover { background: var(--bg-hover); border-left-color: var(--accent); }
     .task-row[draggable="true"]:active { cursor: grabbing; }
     .task-row.dragging { opacity: 0.4; }
     .task-checkbox {
-      width: 14px; height: 14px;
+      width: 13px; height: 13px;
       border: 1px solid var(--accent);
       border-radius: 3px; flex-shrink: 0;
     }
-    .task-row.scheduled .task-checkbox {
-      background: var(--status-scheduled);
-      border-color: var(--status-scheduled);
-    }
+    .task-row.scheduled .task-checkbox { background: var(--status-scheduled); border-color: var(--status-scheduled); }
     .task-row.idea .task-checkbox { border-color: var(--status-idea); }
     .task-row.planning .task-checkbox { border-color: var(--status-planning); }
     .task-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ==== MAIN AREA ==== */
-    .main-area {
-      flex: 1; display: flex; flex-direction: column; overflow: hidden;
-    }
+    .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* ---- Day strip (existing day timeline) ---- */
+    /* ---- Day strip (existing day timeline mock) ---- */
     .day-strip {
       flex: 1; min-height: 0;
       display: flex; flex-direction: column;
       border-bottom: 1px solid var(--border);
     }
     .world-clock-mock {
-      height: 36px; flex-shrink: 0; position: relative;
+      height: 34px; flex-shrink: 0; position: relative;
       background: linear-gradient(90deg,
         #1a1a2e 0%, #2d2a3a 12%, #c4956a 35%, #f5d09c 50%, #c4956a 65%, #4a3d4f 82%, #1a1a2e 100%);
       opacity: 0.55;
@@ -121,44 +114,39 @@
       background: linear-gradient(180deg, rgba(11,10,15,0) 0%, rgba(11,10,15,0.7) 100%);
     }
     .wc-label {
-      position: absolute; top: 6px; left: 12px; z-index: 2;
+      position: absolute; top: 5px; left: 13px; z-index: 2;
       font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
       color: var(--text-secondary);
     }
     .wc-time {
-      position: absolute; top: 6px; right: 12px; z-index: 2;
+      position: absolute; top: 5px; right: 13px; z-index: 2;
       font-size: 13px; color: var(--text-primary); font-variant-numeric: tabular-nums;
     }
 
-    .day-timeline-mock {
-      flex: 1; position: relative; overflow: hidden;
-    }
+    .day-timeline-mock { flex: 1; position: relative; overflow: hidden; }
     .day-tl-header {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 4px 12px; border-bottom: 1px solid var(--border-subtle);
+      padding: 3px 13px; border-bottom: 1px solid var(--border-subtle);
     }
     .day-tl-title {
       font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
       color: var(--text-tertiary);
     }
-    .day-tl-tracks {
-      position: relative; padding: 8px 0;
-      height: calc(100% - 24px);
-    }
+    .day-tl-tracks { position: relative; padding: 8px 0; height: calc(100% - 21px); }
     .day-tl-block {
-      position: absolute; height: 28px;
-      border-radius: 4px; padding: 4px 10px;
+      position: absolute; height: 21px;
+      border-radius: 3px; padding: 3px 8px;
       font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
       color: var(--text-primary); display: flex; align-items: center;
       border: 1px solid rgba(255,255,255,0.08);
     }
 
     /* =========================================================
-       WEEK SECTION (cards + mini cal) — ~32% of vertical
+       WEEK SECTION
+       header (~24) + cards (144) + mini-cal (233) + legend (~28) ≈ 432px
        ========================================================= */
     .week-section {
-      /* 30 header + 89 cards + 233 mini-cal + 28 legend = 380 */
-      flex: 0 0 380px;
+      flex: 0 0 432px;
       display: flex; flex-direction: column;
       overflow: hidden; background: var(--bg);
     }
@@ -166,10 +154,10 @@
     .week-header {
       flex-shrink: 0;
       display: flex; justify-content: space-between; align-items: center;
-      padding: 6px 14px;
+      padding: 5px 13px;
       border-bottom: 1px solid var(--border-subtle);
     }
-    .week-title { display: flex; align-items: baseline; gap: 12px; }
+    .week-title { display: flex; align-items: baseline; gap: 13px; }
     .week-title-label {
       font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em;
       color: var(--text-tertiary);
@@ -178,7 +166,7 @@
       font-family: loretta, serif; font-size: 0.95rem;
       color: var(--text-default); font-style: italic;
     }
-    .week-actions { display: flex; gap: 6px; }
+    .week-actions { display: flex; gap: 5px; }
     .week-btn {
       background: none; border: 1px solid var(--border);
       border-radius: var(--radius); color: var(--text-secondary);
@@ -189,23 +177,26 @@
     .week-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     /* ---- Day cards row ---- */
+    /* Padding-left = 34px (matches mini-cal hour-label column)
+       Padding-right = 5px (matches mini-cal scrollbar gutter) */
     .week-cards {
-      flex: 0 0 89px;             /* default day-card height */
+      flex: 0 0 144px;                          /* fib */
       display: grid; grid-template-columns: repeat(7, 1fr);
       gap: 1px;
-      background: var(--border-subtle);     /* gap colour */
-      padding: 0;
-      overflow: visible;          /* allow hover-expanded card to overlay */
+      background: var(--border-subtle);
+      padding-left: 34px;
+      padding-right: 5px;
+      overflow: visible;
     }
 
     .day-card {
       background: var(--bg);
       position: relative;
       display: flex; flex-direction: column;
-      padding: 5px 7px 4px;
+      padding: 8px 8px 5px;
       transition: background 0.18s, outline 0.12s;
       overflow: hidden;
-      height: 89px;
+      height: 144px;
     }
     .day-card.today { background: var(--accent-ghost); }
     .day-card.drop-target {
@@ -215,47 +206,28 @@
     }
     .day-card.weekend .dh-name { color: var(--text-tertiary); }
 
-    /* Card top row: day name | (habits + journal wheel + date) */
+    /* Card top row: day name (left) + date (right) */
     .dh-top {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 4px;
-      gap: 6px;
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 5px;
     }
     .dh-name {
-      font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.14em;
+      font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em;
       color: var(--text-secondary);
       line-height: 1;
     }
-    .dh-top-right {
-      display: flex; align-items: center; gap: 6px;
-      flex-shrink: 0;
-    }
-    .dh-habits-row {
-      display: flex; align-items: center; gap: 3px;
-    }
     .dh-num {
-      font-family: loretta, serif; font-size: 1.05rem;
+      font-family: loretta, serif; font-size: 1.5rem;
       color: var(--text-primary);
       line-height: 1;
     }
     .day-card.today .dh-num { color: var(--accent); }
 
-    /* Journal wheel (4 quadrants) — half size */
-    .journal-wheel {
-      width: 11px; height: 11px; cursor: pointer; flex-shrink: 0;
-      transition: transform 0.18s;
+    /* Tasks area: tasks + extras pinned bottom-left */
+    .dh-tasks-wrap {
+      flex: 1; min-height: 0;
+      display: flex; flex-direction: column;
     }
-    .journal-wheel:hover { transform: scale(1.4); }
-    .journal-wheel circle.bg { fill: none; stroke: var(--border); stroke-width: 1.2; }
-    .journal-wheel .q {
-      fill: transparent; stroke: var(--border); stroke-width: 0.6;
-      transition: fill 0.2s;
-    }
-    .journal-wheel .q.done { fill: var(--accent); }
-    .journal-wheel circle.hole { fill: var(--bg); }
-    .day-card.today .journal-wheel circle.hole { fill: #18141a; }
-
-    /* Tasks list within card */
     .dh-tasks {
       display: flex; flex-direction: column; gap: 2px;
       flex: 1; min-height: 0;
@@ -273,10 +245,7 @@
       cursor: pointer;
     }
     .dh-task:hover { background: rgba(255,255,255,0.04); }
-    .dh-task.done {
-      color: var(--text-faint);
-      text-decoration: line-through;
-    }
+    .dh-task.done { color: var(--text-faint); text-decoration: line-through; }
     .dh-task-status {
       width: 7px; height: 7px;
       border-radius: 50%; flex-shrink: 0;
@@ -292,88 +261,190 @@
       flex: 1; min-width: 0; overflow: hidden;
       text-overflow: ellipsis; white-space: nowrap;
     }
+    .dh-task.overflow { display: none; }
 
-    /* Hidden overflow tasks shown on hover */
-    .dh-task.overflow {
-      display: none;
-    }
-    .day-card:hover .dh-task.overflow {
-      display: flex;
-    }
-    .day-card:hover {
-      z-index: 10;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-    }
-    .day-card:hover .dh-extras { display: none; }
-
-    /* Project color boxes (when more than 3 tasks) */
+    /* Extras pinned bottom-left of task list — 3:1 boxes */
     .dh-extras {
       display: flex; gap: 3px; align-items: center;
-      margin-top: 4px;
-      padding: 3px 5px 0 4px;
+      margin-top: 5px;
     }
     .dh-extras-pip {
-      width: 8px; height: 8px;
+      width: 13px; height: 4px;       /* ~3:1 */
       border-radius: 1px;
     }
     .dh-extras-count {
       font-size: 0.55rem; color: var(--text-tertiary);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.08em; margin-left: 3px;
     }
 
-    /* Habit pips — now horizontal in the top-right cluster */
+    /* Bottom mini-card: habits row (left) + journal wheel (right) */
+    .dh-bottom {
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border-subtle);
+      border-radius: 3px;
+      padding: 5px 6px;
+      margin-top: 5px;
+    }
+    .dh-habits-row { display: flex; align-items: center; gap: 3px; }
+
+    /* Habit pips */
     .habit-pip {
-      width: 6px; height: 6px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       border: 1px solid var(--border);
       background: transparent;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .habit-pip:hover { transform: scale(1.5); }
+    .habit-pip:hover { transform: scale(1.4); }
     .habit-pip.done { border-color: transparent; }
-    .habit-pip[data-habit="meditation"].done { background: #5b6ec8; box-shadow: 0 0 4px rgba(91,110,200,0.4); }
+    .habit-pip[data-habit="sleep"].done      { background: #2a3f7c; box-shadow: 0 0 4px rgba(42,63,124,0.55); }
+    .habit-pip[data-habit="meditation"].done { background: #7c4eb6; box-shadow: 0 0 4px rgba(124,78,182,0.5); }
     .habit-pip[data-habit="movement"].done   { background: #e8744c; box-shadow: 0 0 4px rgba(232,116,76,0.4); }
     .habit-pip[data-habit="home"].done       { background: #6a8e5a; box-shadow: 0 0 4px rgba(106,142,90,0.4); }
     .habit-pip[data-habit="nutrition"].done  { background: #d4a017; box-shadow: 0 0 4px rgba(212,160,23,0.4); }
     .habit-pip[data-habit="learning"].done   { background: #279daf; box-shadow: 0 0 4px rgba(39,157,175,0.4); }
 
-    /* ---- Mini calendar strip ---- */
+    /* Journal wheel */
+    .journal-wheel {
+      width: 13px; height: 13px; cursor: pointer; flex-shrink: 0;
+      transition: transform 0.18s;
+    }
+    .journal-wheel:hover { transform: scale(1.3); }
+    .journal-wheel circle.bg { fill: none; stroke: var(--border); stroke-width: 1.2; }
+    .journal-wheel .q {
+      fill: transparent; stroke: var(--border); stroke-width: 0.6;
+      transition: fill 0.2s;
+    }
+    .journal-wheel .q.done { fill: var(--accent); }
+    .journal-wheel circle.hole { fill: var(--bg-raised); }
+
+    /* Hover-expand: card grows to fit ALL tasks; floats above neighbors */
+    .day-card:hover {
+      z-index: 10;
+      height: auto;
+      min-height: 144px;
+      box-shadow: 0 8px 21px rgba(0,0,0,0.55);
+      overflow: visible;
+    }
+    .day-card:hover .dh-task.overflow { display: flex; }
+    .day-card:hover .dh-extras { display: none; }
+
+    /* =========================================================
+       MINI CALENDAR
+       Visible window 9a–6p (9 hours) over 233px → 25.9px/hour
+       Full content 7a–midnight (17 hours) → 442px scrollable
+       ========================================================= */
     .week-mini-cal {
       flex-shrink: 0;
-      height: 233px;
-      display: grid; grid-template-columns: 40px repeat(7, 1fr);
+      height: 233px;                           /* fib */
+      display: grid;
+      grid-template-columns: 34px repeat(7, 1fr);
       gap: 1px;
       background: var(--border-subtle);
       border-top: 1px solid var(--border);
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-gutter: stable;
       position: relative;
     }
+
     .mini-cal-hours {
       background: var(--bg);
-      display: flex; flex-direction: column; justify-content: space-between;
-      padding: 4px 4px;
+      position: relative;
+    }
+    .mini-cal-hour-label {
+      position: absolute;
+      right: 4px;
+      transform: translateY(-50%);
       font-size: 8.5px; color: var(--text-faint);
       letter-spacing: 0.06em;
       text-align: right;
+      pointer-events: none;
     }
+    /* The first label sits just below the top edge */
+    .mini-cal-hour-label.first { transform: translateY(0); }
+
     .mini-cal-day {
       background: var(--bg);
       position: relative;
     }
     .mini-cal-day.today { background: rgba(196,149,106,0.04); }
+
+    /* Hour gridlines per column */
+    .hour-line {
+      position: absolute; left: 0; right: 0;
+      height: 1px;
+      background: rgba(196,149,106,0.05);
+      pointer-events: none;
+    }
+
+    /* Session blocks */
     .mini-block {
       position: absolute;
-      left: 2px; right: 2px;
-      border-radius: 1.5px;
-      opacity: 0.85;
-      transition: opacity 0.15s, transform 0.15s;
+      left: 3px; right: 3px;
+      border-radius: 2px;
+      padding: 2px 5px 2px 6px;
+      font-size: 9.5px;
+      color: var(--text-primary);
       cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.15s;
+      display: flex; flex-direction: column;
+      justify-content: center;
+      line-height: 1.15;
+    }
+    .mini-block::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 2px;
     }
     .mini-block:hover {
-      opacity: 1;
-      transform: scaleX(1.1);
+      transform: translateX(1px);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
       z-index: 4;
     }
+    .mini-block-label {
+      font-weight: 400;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: 0.02em;
+    }
+    .mini-block-time {
+      font-size: 8.5px;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.04em;
+    }
+
+    /* Off-screen edge indicators (sticky to viewport) */
+    .edge-indicator {
+      position: sticky;
+      left: 0; right: 0;
+      height: 0;
+      z-index: 6;
+      pointer-events: none;
+    }
+    .edge-top { top: 0; }
+    .edge-bottom { bottom: 0; }
+    .edge-bar {
+      position: absolute;
+      left: 3px; right: 3px;
+      height: 3px;
+      border-radius: 1.5px;
+      opacity: 0.85;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: opacity 0.15s, height 0.15s;
+    }
+    .edge-bar.top    { top: 0; }
+    .edge-bar.bottom { bottom: 0; }
+    .edge-bar:hover  { opacity: 1; height: 5px; }
+
+    /* "Now" marker */
     .mini-now-line {
       position: absolute; left: 0; right: 0;
       height: 1px; background: #E8A84C;
@@ -384,34 +455,33 @@
     /* ---- Habits legend (footer) ---- */
     .habit-legend {
       flex-shrink: 0;
-      display: flex; align-items: center; gap: 16px;
-      padding: 4px 14px;
+      display: flex; align-items: center; gap: 13px;
+      padding: 5px 13px;
       border-top: 1px solid var(--border-subtle);
       font-size: 0.6rem; color: var(--text-tertiary);
       letter-spacing: 0.06em; text-transform: uppercase;
+      flex-wrap: wrap;
     }
     .habit-legend-item { display: flex; align-items: center; gap: 5px; }
     .habit-legend-pip { width: 8px; height: 8px; border-radius: 50%; }
 
     /* ---- Toast ---- */
     .toast {
-      position: fixed; bottom: 20px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
+      position: fixed; bottom: 21px; left: 50%;
+      transform: translateX(-50%) translateY(13px);
       background: var(--bg-raised);
       border: 1px solid var(--accent-line);
       color: var(--text-primary);
-      padding: 8px 16px; border-radius: var(--radius);
+      padding: 8px 13px; border-radius: var(--radius);
       font-size: 0.75rem; letter-spacing: 0.04em;
       box-shadow: var(--shadow-lg);
       opacity: 0; pointer-events: none;
       transition: all 0.25s;
       z-index: 2000;
     }
-    .toast.show {
-      opacity: 1; transform: translateX(-50%) translateY(0);
-    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ---- Journal modal (placeholder) ---- */
+    /* ---- Journal modal ---- */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,0.6);
       display: none; align-items: center; justify-content: center;
@@ -422,62 +492,57 @@
       background: var(--bg-raised);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      width: 460px; max-width: 90vw;
-      padding: 24px;
-      transform: translateY(12px);
+      width: 466px; max-width: 90vw;
+      padding: 21px;
+      transform: translateY(13px);
       transition: transform 0.25s;
     }
     .modal-backdrop.show .modal { transform: translateY(0); }
     .modal h2 {
       font-family: loretta, serif; font-weight: 400;
       font-size: 1.4rem; color: var(--text-primary);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .modal-sub {
       font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--text-tertiary); margin-bottom: 18px;
+      color: var(--text-tertiary); margin-bottom: 13px;
     }
-    .journal-q {
-      margin-bottom: 12px;
-    }
+    .journal-q { margin-bottom: 13px; }
     .journal-q label {
       display: block; font-size: 0.7rem; color: var(--text-secondary);
-      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px;
+      letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px;
     }
     .journal-q textarea {
-      width: 100%; min-height: 50px;
+      width: 100%; min-height: 55px;
       background: var(--bg-input); color: var(--text-default);
       border: 1px solid var(--border-subtle); border-radius: var(--radius);
-      padding: 8px 10px; font-size: 0.78rem; font-family: inherit;
+      padding: 8px; font-size: 0.78rem; font-family: inherit;
       resize: vertical;
     }
     .journal-q textarea:focus { outline: none; border-color: var(--accent); }
     .modal-actions {
-      display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;
+      display: flex; justify-content: flex-end; gap: 8px; margin-top: 13px;
     }
     .modal-actions button {
       background: none; border: 1px solid var(--border);
-      color: var(--text-secondary); padding: 6px 14px;
+      color: var(--text-secondary); padding: 5px 13px;
       border-radius: var(--radius); cursor: pointer; font-size: 0.7rem;
       letter-spacing: 0.06em; text-transform: uppercase;
       font-family: neue-kabel, sans-serif;
     }
-    .modal-actions button.primary {
-      border-color: var(--accent); color: var(--accent);
-    }
+    .modal-actions button.primary { border-color: var(--accent); color: var(--accent); }
     .modal-actions button:hover { background: var(--accent-ghost); }
   </style>
 </head>
 <body>
 
   <div class="proto-banner">
-    <span>◇ Prototype v3 — Week View · drag tasks from left to schedule</span>
+    <span>◇ Prototype v4 — Week View · drag tasks · scroll calendar to see hidden hours</span>
     <a href="dashboard.html">← back to current dashboard</a>
   </div>
 
   <div class="app">
 
-    <!-- LEFT COLUMN -->
     <aside class="left-col">
       <div class="day-info">
         <div class="day-domain">
@@ -493,10 +558,8 @@
       <div class="projects-list" id="projects-list"></div>
     </aside>
 
-    <!-- MAIN AREA -->
     <main class="main-area">
 
-      <!-- Day strip (existing day timeline, mock) -->
       <section class="day-strip">
         <div class="world-clock-mock">
           <span class="wc-label">Philadelphia · EDT · Home</span>
@@ -511,13 +574,12 @@
             <div class="day-tl-block" style="left:2%;  width:42%; background:rgba(120,140,200,0.18); border-color:rgba(120,140,200,0.3); top:8px;">Sleep</div>
             <div class="day-tl-block" style="left:55%; width:6%;  background:rgba(196,149,106,0.18); border-color:var(--accent-line); top:8px;">Lunch</div>
             <div class="day-tl-block" style="left:75%; width:6%;  background:rgba(196,149,106,0.18); border-color:var(--accent-line); top:8px;">Dinner</div>
-            <div class="day-tl-block" style="left:33%; width:8%;  background:rgba(160,86,143,0.18); border-color:rgba(160,86,143,0.3); top:44px;">C-Lab Logo</div>
-            <div class="day-tl-block" style="left:42%; width:10%; background:rgba(232,160,191,0.15); border-color:rgba(232,160,191,0.3); top:44px;">Yoga Follow Up</div>
+            <div class="day-tl-block" style="left:33%; width:8%;  background:rgba(160,86,143,0.18); border-color:rgba(160,86,143,0.3); top:34px;">C-Lab Logo</div>
+            <div class="day-tl-block" style="left:42%; width:10%; background:rgba(232,160,191,0.15); border-color:rgba(232,160,191,0.3); top:34px;">Yoga Follow Up</div>
           </div>
         </div>
       </section>
 
-      <!-- Week section -->
       <section class="week-section">
         <div class="week-header">
           <div class="week-title">
@@ -536,21 +598,20 @@
 
         <div class="habit-legend">
           <span style="color:var(--text-faint);">HABITS</span>
-          <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#5b6ec8"></span>Meditation</span>
+          <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#2a3f7c"></span>Sleep</span>
+          <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#7c4eb6"></span>Meditation</span>
           <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#e8744c"></span>Movement</span>
           <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#6a8e5a"></span>Home</span>
           <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#d4a017"></span>Nutrition</span>
           <span class="habit-legend-item"><span class="habit-legend-pip" style="background:#279daf"></span>Learning</span>
-          <span style="margin-left:auto; color:var(--text-faint);">click any pip to log</span>
+          <span style="margin-left:auto; color:var(--text-faint);">scroll calendar to reveal hidden hours · click peek bars</span>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <!-- Journal modal -->
   <div class="modal-backdrop" id="modal-backdrop">
     <div class="modal">
       <h2 id="modal-day-title">Sunday, April 26</h2>
@@ -586,36 +647,34 @@
     const PROJECTS = {
       moksha:    { color: '#E8A84C', label: 'Moksha' },
       clab:      { color: '#a0568f', label: 'C-Lab' },
-      yoga:      { color: '#e8a0bf', label: 'Yoga with Kaya' },
+      yoga:      { color: '#e8a0bf', label: 'Yoga w/ Kaya' },
       gaia:      { color: '#27ae60', label: 'Gaia Warriors' },
-      graton:    { color: '#c0392b', label: 'Graton Station' },
+      graton:    { color: '#c0392b', label: 'Graton Stn' },
       light:     { color: '#d4a017', label: 'Light Creators' },
       sosf:      { color: '#3a6bbb', label: 'SOSF' },
       endemic:   { color: '#b8784a', label: 'Endemic' },
       personal:  { color: '#7c7c8a', label: 'Personal' },
-      revillage: { color: '#8e44ad', label: 'Revillage Earth' },
-      prosocial: { color: '#27ae60', label: 'Prosocial Market' },
+      revillage: { color: '#8e44ad', label: 'Revillage' },
+      prosocial: { color: '#27ae60', label: 'Prosocial' },
     };
 
-    // Tasks shown in the LEFT column (like the existing dashboard)
-    // Each task: id, project, text, status
     let LEFT_TASKS = [
-      { id: 't1',  project: 'moksha',    text: 'Zenka Respond!', status: 'idea' },
-      { id: 't2',  project: 'clab',      text: 'Artifact', status: 'planning' },
-      { id: 't3',  project: 'clab',      text: 'Evolve Logo Ideas', status: 'planning' },
+      { id: 't1',  project: 'moksha',    text: 'Zenka Respond!',                       status: 'idea' },
+      { id: 't2',  project: 'clab',      text: 'Artifact',                             status: 'planning' },
+      { id: 't3',  project: 'clab',      text: 'Evolve Logo Ideas',                    status: 'planning' },
       { id: 't4',  project: 'clab',      text: 'Create Git Repo for draft of website', status: 'idea' },
-      { id: 't5',  project: 'yoga',      text: 'Follow Up', status: 'idea' },
-      { id: 't6',  project: 'gaia',      text: 'Start designing directory given content', status: 'planning' },
-      { id: 't7',  project: 'graton',    text: 'Send Logo Update', status: 'planning' },
-      { id: 't8',  project: 'light',     text: 'Updates to Discovery Call Page', status: 'idea' },
-      { id: 't9',  project: 'light',     text: 'Podcast Page', status: 'idea' },
-      { id: 't10', project: 'sosf',      text: 'Final changes', status: 'planning' },
-      { id: 't11', project: 'sosf',      text: 'Respond to email!', status: 'idea' },
-      { id: 't12', project: 'endemic',   text: 'Book Cover', status: 'idea' },
-      { id: 't13', project: 'personal',  text: 'Follow up with Val!', status: 'idea' },
-      { id: 't14', project: 'revillage', text: 'Graton Station Logo!', status: 'planning' },
-      { id: 't15', project: 'revillage', text: 'Follow Up + Invoice!', status: 'idea' },
-      { id: 't16', project: 'prosocial', text: 'Follow Up email with Homework', status: 'idea' },
+      { id: 't5',  project: 'yoga',      text: 'Follow Up',                            status: 'idea' },
+      { id: 't6',  project: 'gaia',      text: 'Start designing directory',            status: 'planning' },
+      { id: 't7',  project: 'graton',    text: 'Send Logo Update',                     status: 'planning' },
+      { id: 't8',  project: 'light',     text: 'Updates to Discovery Call Page',       status: 'idea' },
+      { id: 't9',  project: 'light',     text: 'Podcast Page',                         status: 'idea' },
+      { id: 't10', project: 'sosf',      text: 'Final changes',                        status: 'planning' },
+      { id: 't11', project: 'sosf',      text: 'Respond to email!',                    status: 'idea' },
+      { id: 't12', project: 'endemic',   text: 'Book Cover',                           status: 'idea' },
+      { id: 't13', project: 'personal',  text: 'Follow up with Val!',                  status: 'idea' },
+      { id: 't14', project: 'revillage', text: 'Graton Station Logo!',                 status: 'planning' },
+      { id: 't15', project: 'revillage', text: 'Follow Up + Invoice!',                 status: 'idea' },
+      { id: 't16', project: 'prosocial', text: 'Follow Up email with Homework',        status: 'idea' },
     ];
 
     const DAYS = [
@@ -629,50 +688,42 @@
     ];
     const TODAY_INDEX = 6;
 
-    // Tasks scheduled per day (some days have >3 to demo overflow)
     let WEEK_TASKS = [
-      // MON
       [
-        { id: 'd1a', project: 'sosf',   text: 'Final changes',          status: 'done' },
-        { id: 'd1b', project: 'light',  text: 'Discovery Call updates', status: 'done' },
-        { id: 'd1c', project: 'graton', text: 'Send logo update',       status: 'building' },
-        { id: 'd1d', project: 'personal', text: 'Therapy 6pm',          status: 'scheduled' },
+        { id: 'd1a', project: 'sosf',     text: 'Final changes',          status: 'done' },
+        { id: 'd1b', project: 'light',    text: 'Discovery Call updates', status: 'done' },
+        { id: 'd1c', project: 'graton',   text: 'Send logo update',       status: 'building' },
+        { id: 'd1d', project: 'personal', text: 'Therapy 6pm',            status: 'scheduled' },
       ],
-      // TUE
       [
         { id: 'd2a', project: 'clab',     text: 'Artifact concept',  status: 'building' },
         { id: 'd2b', project: 'yoga',     text: 'Follow up Kaya',    status: 'planning' },
         { id: 'd2c', project: 'personal', text: 'EL Intro Call',     status: 'scheduled' },
       ],
-      // WED
       [
-        { id: 'd3a', project: 'gaia',    text: 'Directory design',     status: 'building' },
-        { id: 'd3b', project: 'clab',    text: 'Evolve logo',          status: 'planning' },
-        { id: 'd3c', project: 'endemic', text: 'Book cover sketch',    status: 'idea' },
-        { id: 'd3d', project: 'moksha',  text: 'LP3 Review prep',      status: 'scheduled' },
-        { id: 'd3e', project: 'prosocial', text: 'Iris call',          status: 'scheduled' },
+        { id: 'd3a', project: 'gaia',      text: 'Directory design',     status: 'building' },
+        { id: 'd3b', project: 'clab',      text: 'Evolve logo',          status: 'planning' },
+        { id: 'd3c', project: 'endemic',   text: 'Book cover sketch',    status: 'idea' },
+        { id: 'd3d', project: 'moksha',    text: 'LP3 Review prep',      status: 'scheduled' },
+        { id: 'd3e', project: 'prosocial', text: 'Iris call',            status: 'scheduled' },
       ],
-      // THU
       [
         { id: 'd4a', project: 'revillage', text: 'Graton Station Logo', status: 'done' },
         { id: 'd4b', project: 'sosf',      text: 'Respond to email',    status: 'done' },
         { id: 'd4c', project: 'moksha',    text: 'Zenka respond',       status: 'planning' },
       ],
-      // FRI
       [
-        { id: 'd5a', project: 'clab',     text: 'Git repo for site',   status: 'planning' },
-        { id: 'd5b', project: 'light',    text: 'Podcast Page',        status: 'idea' },
-        { id: 'd5c', project: 'personal', text: 'Follow up Val',       status: 'idea' },
-        { id: 'd5d', project: 'clab',     text: 'CLab — IRIS call',    status: 'scheduled' },
-        { id: 'd5e', project: 'moksha',   text: 'Project Weave',       status: 'scheduled' },
-        { id: 'd5f', project: 'revillage', text: 'Tess Athena call',   status: 'scheduled' },
+        { id: 'd5a', project: 'clab',      text: 'Git repo for site',   status: 'planning' },
+        { id: 'd5b', project: 'light',     text: 'Podcast Page',        status: 'idea' },
+        { id: 'd5c', project: 'personal',  text: 'Follow up Val',       status: 'idea' },
+        { id: 'd5d', project: 'clab',      text: 'CLab — IRIS call',    status: 'scheduled' },
+        { id: 'd5e', project: 'moksha',    text: 'Project Weave',       status: 'scheduled' },
+        { id: 'd5f', project: 'revillage', text: 'Tess Athena call',    status: 'scheduled' },
       ],
-      // SAT
       [
         { id: 'd6a', project: 'personal', text: 'Garden time',         status: 'done' },
         { id: 'd6b', project: 'endemic',  text: 'Read · Endemic ch.4', status: 'done' },
       ],
-      // SUN — today
       [
         { id: 'd7a', project: 'revillage', text: 'Follow up + invoice', status: 'planning' },
         { id: 'd7b', project: 'prosocial', text: 'Homework email',      status: 'planning' },
@@ -681,59 +732,61 @@
       ],
     ];
 
-    // Journal: 4 questions per day, count answered (0-4)
     const JOURNAL = [4, 3, 2, 4, 3, 0, 2];
 
-    // Habits per day: 5 booleans in fixed order
-    // [meditation, movement, home, nutrition, learning]
-    const HABIT_ORDER = ['meditation', 'movement', 'home', 'nutrition', 'learning'];
+    const HABIT_ORDER = ['sleep', 'meditation', 'movement', 'home', 'nutrition', 'learning'];
     const HABITS = [
-      [true,  true,  true,  false, true ],  // MON
-      [true,  true,  false, true,  true ],  // TUE
-      [true,  false, true,  true,  false],  // WED
-      [true,  true,  true,  true,  true ],  // THU
-      [true,  true,  false, false, true ],  // FRI
-      [false, true,  false, false, false],  // SAT
-      [true,  true,  true,  false, false],  // SUN
+      [true,  true,  true,  true,  false, true ],   // MON
+      [true,  true,  true,  false, true,  true ],   // TUE
+      [false, true,  false, true,  true,  false],   // WED
+      [true,  true,  true,  true,  true,  true ],   // THU
+      [true,  true,  true,  false, false, true ],   // FRI
+      [true,  false, true,  false, false, false],   // SAT
+      [true,  true,  true,  true,  false, false],   // SUN
     ];
 
-    // Time sessions per day for the mini-cal strip
-    // start/end in decimal hours; project key
+    /* Sessions: include some early/late items to demo edge indicators */
     const SESSIONS = [
-      // MON
-      [ {start: 14, end: 15, project:'moksha'}, {start: 18, end: 19, project:'personal'}, {start: 22, end: 23, project:'sosf'} ],
-      // TUE
-      [ {start: 13, end: 14, project:'personal'}, {start: 15.5, end: 16.5, project:'gaia'} ],
-      // WED
-      [ {start: 9, end: 10, project:'moksha'}, {start: 11, end: 12, project:'prosocial'}, {start: 15, end: 16.33, project:'personal'} ],
-      // THU
-      [ {start: 15, end: 16.5, project:'moksha'}, {start: 18.5, end: 21.5, project:'personal'} ],
-      // FRI
-      [ {start: 13, end: 14, project:'clab'}, {start: 14, end: 15, project:'moksha'}, {start: 15, end: 16.5, project:'revillage'} ],
-      // SAT
-      [ {start: 17, end: 19, project:'personal'} ],
-      // SUN — today
-      [ {start: 11, end: 12, project:'moksha'}, {start: 19, end: 20, project:'personal'} ],
+      [ {start:7.5, end:8.5,  project:'personal'},
+        {start:14,  end:15,   project:'moksha'},
+        {start:18,  end:19,   project:'personal'},
+        {start:22,  end:23,   project:'sosf'} ],
+      [ {start:13,  end:14,   project:'personal'},
+        {start:15.5,end:16.5, project:'gaia'} ],
+      [ {start:9,   end:10,   project:'moksha'},
+        {start:11,  end:12,   project:'prosocial'},
+        {start:15,  end:16.33,project:'personal'},
+        {start:20,  end:21,   project:'clab'} ],
+      [ {start:8,   end:9,    project:'yoga'},
+        {start:15,  end:16.5, project:'moksha'},
+        {start:18.5,end:21.5, project:'personal'} ],
+      [ {start:13,  end:14,   project:'clab'},
+        {start:14,  end:15,   project:'moksha'},
+        {start:15,  end:16.5, project:'revillage'} ],
+      [ {start:17,  end:19,   project:'personal'},
+        {start:21,  end:22.5, project:'endemic'} ],
+      [ {start:11,  end:12,   project:'moksha'},
+        {start:19,  end:20,   project:'personal'} ],
     ];
 
-    const CAL_HOUR_START = 7;
-    const CAL_HOUR_END = 24;
-    const CAL_NOW = 23.55; // matches 11:33 pm
+    /* Mini-calendar window */
+    const HOUR_PX = 26;
+    const VISIBLE_START = 9;     // 9 AM at top of viewport when scrolled to default
+    const CONTENT_START = 7;     // earliest hour rendered
+    const CONTENT_END = 24;      // midnight
+    const CONTENT_HEIGHT = (CONTENT_END - CONTENT_START) * HOUR_PX;
+    const DEFAULT_SCROLL = (VISIBLE_START - CONTENT_START) * HOUR_PX;
+    const NOW_HOUR = 23.55;      // 11:33 pm
 
     /* ============================================================
        Render
        ============================================================ */
 
     function buildJournalWheel(answered) {
-      // 4 quadrant paths over a circle; r=10, cx=cy=12
       const slices = [
-        // top-right
         'M12 12 L12 2 A10 10 0 0 1 22 12 Z',
-        // bottom-right
         'M12 12 L22 12 A10 10 0 0 1 12 22 Z',
-        // bottom-left
         'M12 12 L12 22 A10 10 0 0 1 2 12 Z',
-        // top-left
         'M12 12 L2 12 A10 10 0 0 1 12 2 Z',
       ];
       const paths = slices.map((d, i) =>
@@ -743,7 +796,7 @@
         <svg class="journal-wheel" viewBox="0 0 24 24">
           <circle class="bg" cx="12" cy="12" r="10"/>
           ${paths}
-          <circle class="hole" cx="12" cy="12" r="2"/>
+          <circle class="hole" cx="12" cy="12" r="2.5"/>
         </svg>
       `;
     }
@@ -789,25 +842,8 @@
         const visible = tasks.slice(0, 3);
         const overflow = tasks.slice(3);
 
-        const visibleHtml = visible.map(t => {
-          const proj = PROJECTS[t.project];
-          return `
-            <div class="dh-task ${t.status}" style="border-left-color:${proj.color}; background: ${hexToRgba(proj.color, 0.06)};">
-              <span class="dh-task-status"></span>
-              <span class="dh-task-text">${t.text}</span>
-            </div>
-          `;
-        }).join('');
-
-        const overflowHtml = overflow.map(t => {
-          const proj = PROJECTS[t.project];
-          return `
-            <div class="dh-task overflow ${t.status}" style="border-left-color:${proj.color}; background: ${hexToRgba(proj.color, 0.06)};">
-              <span class="dh-task-status"></span>
-              <span class="dh-task-text">${t.text}</span>
-            </div>
-          `;
-        }).join('');
+        const visibleHtml = visible.map(t => taskRowHtml(t)).join('');
+        const overflowHtml = overflow.map(t => taskRowHtml(t, 'overflow')).join('');
 
         const extrasHtml = overflow.length > 0 ? `
           <div class="dh-extras">
@@ -817,24 +853,28 @@
         ` : '';
 
         const habitsHtml = HABIT_ORDER.map((h, hi) => `
-          <span class="habit-pip ${HABITS[i][hi] ? 'done' : ''}" data-habit="${h}" data-day="${i}" data-habit-idx="${hi}" title="${h}"></span>
+          <span class="habit-pip ${HABITS[i][hi] ? 'done' : ''}"
+                data-habit="${h}" data-day="${i}" data-habit-idx="${hi}"
+                title="${h}"></span>
         `).join('');
 
         html += `
           <div class="${cls}" data-day-index="${i}">
             <div class="dh-top">
               <span class="dh-name">${d.name}</span>
-              <div class="dh-top-right">
-                <div class="dh-habits-row">${habitsHtml}</div>
-                ${buildJournalWheel(JOURNAL[i])}
-                <span class="dh-num">${d.date}</span>
+              <span class="dh-num">${d.date}</span>
+            </div>
+            <div class="dh-tasks-wrap">
+              <div class="dh-tasks">
+                ${visibleHtml}
+                ${overflowHtml}
               </div>
+              ${extrasHtml}
             </div>
-            <div class="dh-tasks">
-              ${visibleHtml}
-              ${overflowHtml}
+            <div class="dh-bottom">
+              <div class="dh-habits-row">${habitsHtml}</div>
+              ${buildJournalWheel(JOURNAL[i])}
             </div>
-            ${extrasHtml}
           </div>
         `;
       });
@@ -844,44 +884,124 @@
       attachHabitHandlers();
     }
 
-    function renderMiniCal() {
-      const root = document.getElementById('week-mini-cal');
-      const span = CAL_HOUR_END - CAL_HOUR_START;
-
-      let html = `
-        <div class="mini-cal-hours">
-          <span>7a</span>
-          <span>11a</span>
-          <span>3p</span>
-          <span>7p</span>
-          <span>11p</span>
+    function taskRowHtml(t, extraCls = '') {
+      const proj = PROJECTS[t.project];
+      return `
+        <div class="dh-task ${t.status} ${extraCls}"
+             style="border-left-color:${proj.color}; background:${hexToRgba(proj.color, 0.06)};">
+          <span class="dh-task-status"></span>
+          <span class="dh-task-text">${t.text}</span>
         </div>
       `;
+    }
 
+    function renderMiniCal() {
+      const root = document.getElementById('week-mini-cal');
+      let html = '';
+
+      // Hour-label column
+      let hoursHtml = '';
+      for (let h = CONTENT_START; h <= CONTENT_END; h++) {
+        const top = (h - CONTENT_START) * HOUR_PX;
+        const lbl = h === 12 ? 'noon'
+                  : h === 24 ? '12a'
+                  : h < 12   ? `${h}a`
+                  :            `${h - 12}p`;
+        const firstCls = h === CONTENT_START ? 'first' : '';
+        hoursHtml += `<div class="mini-cal-hour-label ${firstCls}" style="top:${top}px;">${lbl}</div>`;
+      }
+      html += `<div class="mini-cal-hours" style="height:${CONTENT_HEIGHT}px;">${hoursHtml}</div>`;
+
+      // 7 day columns
       DAYS.forEach((d, i) => {
         const isToday = i === TODAY_INDEX;
-        const blocks = (SESSIONS[i] || []).map(s => {
-          const top = ((s.start - CAL_HOUR_START) / span) * 100;
-          const height = ((s.end - s.start) / span) * 100;
-          const proj = PROJECTS[s.project];
-          return `<div class="mini-block" style="top:${top}%; height:${height}%; background:${proj.color};" title="${proj.label} · ${formatTime(s.start)}–${formatTime(s.end)}"></div>`;
-        }).join('');
+        let dayHtml = '';
 
-        let nowLine = '';
-        if (isToday && CAL_NOW >= CAL_HOUR_START && CAL_NOW <= CAL_HOUR_END) {
-          const top = ((CAL_NOW - CAL_HOUR_START) / span) * 100;
-          nowLine = `<div class="mini-now-line" style="top:${top}%;"></div>`;
+        // hour gridlines
+        for (let h = CONTENT_START + 1; h < CONTENT_END; h++) {
+          const top = (h - CONTENT_START) * HOUR_PX;
+          dayHtml += `<div class="hour-line" style="top:${top}px;"></div>`;
         }
 
-        html += `
-          <div class="mini-cal-day ${isToday ? 'today' : ''}" data-day-index="${i}">
-            ${blocks}
-            ${nowLine}
-          </div>
-        `;
+        // session blocks
+        (SESSIONS[i] || []).forEach((s, si) => {
+          const proj = PROJECTS[s.project];
+          const top = (s.start - CONTENT_START) * HOUR_PX;
+          const height = (s.end - s.start) * HOUR_PX - 2;
+          const bg = hexToRgba(proj.color, 0.18);
+          const border = hexToRgba(proj.color, 0.3);
+          const showTime = height >= 24;
+          dayHtml += `
+            <div class="mini-block"
+                 data-session-top="${top}"
+                 data-session-height="${height}"
+                 data-session-key="${i}-${si}"
+                 style="top:${top}px; height:${height}px; background:${bg}; border:1px solid ${border}; box-shadow: inset 2px 0 0 ${proj.color};">
+              <span class="mini-block-label">${proj.label}</span>
+              ${showTime ? `<span class="mini-block-time">${formatTime(s.start)}–${formatTime(s.end)}</span>` : ''}
+            </div>
+          `;
+        });
+
+        // Sticky edge bars (one of each per session; JS toggles which is shown)
+        let edgeTop = '';
+        let edgeBottom = '';
+        (SESSIONS[i] || []).forEach((s, si) => {
+          const proj = PROJECTS[s.project];
+          const top = (s.start - CONTENT_START) * HOUR_PX;
+          const height = (s.end - s.start) * HOUR_PX - 2;
+          edgeTop += `<div class="edge-bar top"
+                          data-session-top="${top}" data-session-height="${height}"
+                          data-session-key="${i}-${si}"
+                          style="background:${proj.color}; display:none;"
+                          title="${proj.label} — scroll up to view"></div>`;
+          edgeBottom += `<div class="edge-bar bottom"
+                          data-session-top="${top}" data-session-height="${height}"
+                          data-session-key="${i}-${si}"
+                          style="background:${proj.color}; display:none;"
+                          title="${proj.label} — scroll down to view"></div>`;
+        });
+        dayHtml = `<div class="edge-indicator edge-top">${edgeTop}</div>${dayHtml}<div class="edge-indicator edge-bottom">${edgeBottom}</div>`;
+
+        // Now line on today
+        if (isToday && NOW_HOUR >= CONTENT_START && NOW_HOUR <= CONTENT_END) {
+          const top = (NOW_HOUR - CONTENT_START) * HOUR_PX;
+          dayHtml += `<div class="mini-now-line" style="top:${top}px;"></div>`;
+        }
+
+        html += `<div class="mini-cal-day ${isToday ? 'today' : ''}" data-day-index="${i}" style="height:${CONTENT_HEIGHT}px;">${dayHtml}</div>`;
       });
 
       root.innerHTML = html;
+      root.scrollTop = DEFAULT_SCROLL;
+
+      attachSessionClickHandlers();
+      root.addEventListener('scroll', updateEdgeIndicators);
+      updateEdgeIndicators();
+    }
+
+    /* ============================================================
+       Edge indicator visibility (off-screen sessions)
+       ============================================================ */
+
+    function updateEdgeIndicators() {
+      const cal = document.getElementById('week-mini-cal');
+      const scrollTop = cal.scrollTop;
+      const viewBottom = scrollTop + cal.clientHeight;
+
+      document.querySelectorAll('.edge-bar').forEach(bar => {
+        const top = +bar.dataset.sessionTop;
+        const h = +bar.dataset.sessionHeight;
+        const bottom = top + h;
+        const isAbove = bottom <= scrollTop;
+        const isBelow = top >= viewBottom;
+
+        if (bar.classList.contains('top')) {
+          bar.style.display = isAbove ? '' : 'none';
+        } else {
+          bar.style.display = isBelow ? '' : 'none';
+        }
+      });
     }
 
     /* ============================================================
@@ -939,9 +1059,7 @@
           e.dataTransfer.dropEffect = 'move';
           card.classList.add('drop-target');
         });
-        card.addEventListener('dragleave', () => {
-          card.classList.remove('drop-target');
-        });
+        card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
         card.addEventListener('drop', e => {
           e.preventDefault();
           card.classList.remove('drop-target');
@@ -950,32 +1068,24 @@
           const task = LEFT_TASKS.find(t => t.id === tid);
           if (!task) return;
 
-          // Remove from left list
           LEFT_TASKS = LEFT_TASKS.filter(t => t.id !== tid);
-
-          // Status transition: idea/planning → scheduled
           const newStatus = (task.status === 'idea' || task.status === 'planning')
             ? 'scheduled' : task.status;
-
-          // Add to target day
           const dayIndex = +card.dataset.dayIndex;
-          WEEK_TASKS[dayIndex].push({
-            id: task.id, project: task.project, text: task.text, status: newStatus
-          });
+          WEEK_TASKS[dayIndex].push({ id: task.id, project: task.project, text: task.text, status: newStatus });
 
           renderProjectsList();
           renderWeekCards();
-          renderMiniCal();
 
           const day = DAYS[dayIndex];
-          const statusNote = newStatus !== task.status ? ` (status → scheduled)` : '';
-          showToast(`Scheduled "${task.text}" for ${day.name} ${day.date}${statusNote}`);
+          const note = newStatus !== task.status ? ` (status → scheduled)` : '';
+          showToast(`Scheduled "${task.text}" for ${day.name} ${day.date}${note}`);
         });
       });
     }
 
     /* ============================================================
-       Journal modal
+       Journal modal + habits + session click
        ============================================================ */
 
     function attachJournalHandlers() {
@@ -987,8 +1097,7 @@
       });
     }
     function openJournal(dayIdx) {
-      const d = DAYS[dayIdx];
-      document.getElementById('modal-day-title').textContent = d.dateStr;
+      document.getElementById('modal-day-title').textContent = DAYS[dayIdx].dateStr;
       document.getElementById('modal-backdrop').classList.add('show');
     }
     function closeJournal() {
@@ -997,10 +1106,6 @@
     document.getElementById('modal-backdrop').addEventListener('click', e => {
       if (e.target.id === 'modal-backdrop') closeJournal();
     });
-
-    /* ============================================================
-       Habit pip toggling (visual demo)
-       ============================================================ */
 
     function attachHabitHandlers() {
       document.querySelectorAll('.habit-pip').forEach(pip => {
@@ -1013,6 +1118,27 @@
           showToast(`${HABIT_ORDER[idx]} ${HABITS[day][idx] ? 'logged' : 'cleared'} for ${DAYS[day].name}`);
         });
       });
+    }
+
+    function attachSessionClickHandlers() {
+      const handler = el => {
+        el.addEventListener('click', e => {
+          e.stopPropagation();
+          const key = el.dataset.sessionKey;
+          const [d, s] = key.split('-').map(Number);
+          const sess = SESSIONS[d][s];
+          const proj = PROJECTS[sess.project];
+          const cal = document.getElementById('week-mini-cal');
+
+          // If this was an edge bar, scroll the session into view first
+          if (el.classList.contains('edge-bar')) {
+            const top = +el.dataset.sessionTop;
+            cal.scrollTo({ top: top - 21, behavior: 'smooth' });
+          }
+          showToast(`Open session: ${proj.label} · ${formatTime(sess.start)}–${formatTime(sess.end)} · ${DAYS[d].dateStr}`);
+        });
+      };
+      document.querySelectorAll('.mini-block, .edge-bar').forEach(handler);
     }
 
     /* ============================================================
