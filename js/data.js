@@ -11,7 +11,10 @@
     projects: [],
     tasks: [],
     timeSessions: [],
-    journal: null,
+    journal: null,            // shortcut: today's journal record
+    journalsByDate: {},       // map: 'YYYY-MM-DD' -> journal record (week range)
+    weekSessions: [],         // time_sessions for the visible week
+    weekStart: null,          // Date — Monday of the visible week
     user: null,
   };
 
@@ -49,13 +52,36 @@
     el.style.cssText = 'padding:10px 18px;border-radius:8px;color:#fff;font-size:14px;pointer-events:auto;opacity:0;transition:opacity 0.3s;background:' + (bgMap[type] || bgMap.info) + ';';
     el.textContent = msg;
     container.appendChild(el);
-    // fade in
     requestAnimationFrame(function() { el.style.opacity = '1'; });
-    // auto-dismiss
     setTimeout(function() {
       el.style.opacity = '0';
       setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 300);
     }, 3000);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Date helpers (week-aware)
+  // ---------------------------------------------------------------------------
+
+  /** Monday of the week containing `date`. Returns a new Date at 00:00 local. */
+  function startOfWeek(date) {
+    var d = new Date(date);
+    var day = d.getDay();                  // 0=Sun..6=Sat
+    var diff = day === 0 ? -6 : 1 - day;   // Monday-based week start
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  function addDays(date, n) {
+    var d = new Date(date);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+
+  /** YYYY-MM-DD in local time (matches Utils.isoDate semantics). */
+  function dateStr(d) {
+    return Utils.isoDate(d);
   }
 
   // ---------------------------------------------------------------------------
@@ -106,11 +132,15 @@
   // ---------------------------------------------------------------------------
 
   function loadAll() {
+    state.weekStart = startOfWeek(new Date());
+    var sunday = addDays(state.weekStart, 6);
     return Promise.all([
       loadProjects(),
       loadTasks(),
       loadTimeSessions(),
       loadTodayJournal(),
+      loadJournalRange(dateStr(state.weekStart), dateStr(sunday)),
+      loadSessionsRange(state.weekStart, sunday),
     ]);
   }
 
@@ -169,8 +199,8 @@
       });
   }
 
-  function loadTodayJournal(dateStr) {
-    var today = dateStr || Utils.isoDate(new Date());
+  function loadTodayJournal(d) {
+    var today = d || dateStr(new Date());
     return client
       .from('journal')
       .select('*')
@@ -179,12 +209,62 @@
       .then(function(res) {
         if (res.error) throw res.error;
         state.journal = res.data || null;
+        if (state.journal) state.journalsByDate[today] = state.journal;
         return state.journal;
       })
       .catch(function(err) {
         console.error('[Data] loadTodayJournal error:', err);
         toast('Failed to load journal: ' + (err.message || err), 'error');
         state.journal = null;
+      });
+  }
+
+  /** Load all journal rows in [startDate, endDate] (YYYY-MM-DD inclusive). */
+  function loadJournalRange(startDate, endDate) {
+    return client
+      .from('journal')
+      .select('*')
+      .gte('entry_date', startDate)
+      .lte('entry_date', endDate)
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.journalsByDate = {};
+        (res.data || []).forEach(function(j) {
+          state.journalsByDate[j.entry_date] = j;
+        });
+        // Keep `state.journal` shortcut in sync if today is in range
+        var today = dateStr(new Date());
+        if (state.journalsByDate[today]) state.journal = state.journalsByDate[today];
+        return state.journalsByDate;
+      })
+      .catch(function(err) {
+        console.error('[Data] loadJournalRange error:', err);
+        toast('Failed to load journal range: ' + (err.message || err), 'error');
+        state.journalsByDate = {};
+      });
+  }
+
+  /** Load time_sessions in [startDate, endDate] (Date objects, inclusive).
+      Uses a 1-day buffer on each side to absorb timezone edges; final filter
+      happens client-side via local date matching in render code. */
+  function loadSessionsRange(startDate, endDate) {
+    var lo = addDays(startDate, -1);
+    var hi = addDays(endDate, 2);  // exclusive upper bound = day after end+1
+    return client
+      .from('time_sessions')
+      .select('*')
+      .gte('started_at', lo.toISOString())
+      .lt('started_at', hi.toISOString())
+      .order('started_at', { ascending: true })
+      .then(function(res) {
+        if (res.error) throw res.error;
+        state.weekSessions = res.data || [];
+        return state.weekSessions;
+      })
+      .catch(function(err) {
+        console.error('[Data] loadSessionsRange error:', err);
+        toast('Failed to load week sessions: ' + (err.message || err), 'error');
+        state.weekSessions = [];
       });
   }
 
@@ -356,6 +436,20 @@
       });
   }
 
+  /** Pin a task to a specific date. If status is idea/planning, transition to
+      scheduled. Pass `null` to unset. */
+  function setTaskScheduledDate(taskId, dateStrOrNull) {
+    var task = null;
+    for (var i = 0; i < state.tasks.length; i++) {
+      if (state.tasks[i].id === taskId) { task = state.tasks[i]; break; }
+    }
+    var payload = { scheduled_date: dateStrOrNull };
+    if (dateStrOrNull && task && (task.status === 'idea' || task.status === 'planning')) {
+      payload.status = 'scheduled';
+    }
+    return saveTask(payload, taskId);
+  }
+
   // ---------------------------------------------------------------------------
   // CRUD — Time Sessions
   // ---------------------------------------------------------------------------
@@ -372,13 +466,12 @@
             .single()
             .then(function(res) {
               if (res.error) throw res.error;
-              return loadTimeSessions().then(function() {
+              return Promise.all([loadTimeSessions(), reloadWeekSessions()]).then(function() {
                 emit('dataChanged', state);
                 return res.data;
               });
             })
             .catch(function(err) {
-              // If the track column doesn't exist yet, retry without it
               if (retryWithoutTrack && payload.track !== undefined && err && /track|column/i.test(err.message || '')) {
                 var fallback = Object.assign({}, payload);
                 delete fallback.track;
@@ -396,13 +489,12 @@
             .single()
             .then(function(res) {
               if (res.error) throw res.error;
-              return loadTimeSessions().then(function() {
+              return Promise.all([loadTimeSessions(), reloadWeekSessions()]).then(function() {
                 emit('dataChanged', state);
                 return res.data;
               });
             })
             .catch(function(err) {
-              // If the track column doesn't exist yet, retry without it
               if (retryWithoutTrack && payload.track !== undefined && err && /track|column/i.test(err.message || '')) {
                 var fallback = Object.assign({}, payload);
                 delete fallback.track;
@@ -429,7 +521,7 @@
       .eq('id', id)
       .then(function(res) {
         if (res.error) throw res.error;
-        return loadTimeSessions().then(function() {
+        return Promise.all([loadTimeSessions(), reloadWeekSessions()]).then(function() {
           emit('dataChanged', state);
         });
       })
@@ -440,30 +532,67 @@
       });
   }
 
+  function reloadWeekSessions() {
+    if (!state.weekStart) return Promise.resolve();
+    return loadSessionsRange(state.weekStart, addDays(state.weekStart, 6));
+  }
+
   // ---------------------------------------------------------------------------
-  // CRUD — Journal
+  // CRUD — Journal (extended for any date)
   // ---------------------------------------------------------------------------
 
-  function saveJournal(obj) {
-    var today = Utils.isoDate(new Date());
-    obj.entry_date = today;
+  /** Save a journal entry for `dateStrParam` (defaults to today).
+      UPSERT: only the columns provided are written; existing fields preserved
+      on conflict by entry_date. */
+  function saveJournal(obj, dateStrParam) {
+    var entryDate = dateStrParam || dateStr(new Date());
+    var payload = Object.assign({}, obj, { entry_date: entryDate });
 
     return client
       .from('journal')
-      .upsert(obj, { onConflict: 'entry_date' })
+      .upsert(payload, { onConflict: 'entry_date' })
       .select()
       .single()
       .then(function(res) {
         if (res.error) throw res.error;
-        state.journal = res.data;
+        var saved = res.data;
+        state.journalsByDate[saved.entry_date] = saved;
+        if (saved.entry_date === dateStr(new Date())) state.journal = saved;
         emit('dataChanged', state);
-        return res.data;
+        return saved;
       })
       .catch(function(err) {
         console.error('[Data] saveJournal error:', err);
         toast('Failed to save journal: ' + (err.message || err), 'error');
         throw err;
       });
+  }
+
+  /** Toggle a habit boolean for a specific date. */
+  function toggleHabit(dateStrParam, habitKey) {
+    var existing = state.journalsByDate[dateStrParam] || {};
+    var field = habitKey + '_done';
+    var newValue = !existing[field];
+    var payload = {};
+    payload[field] = newValue;
+    return saveJournal(payload, dateStrParam);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Week navigation
+  // ---------------------------------------------------------------------------
+
+  /** Jump to the week containing `date`. Reloads journals + sessions. */
+  function setWeekStart(date) {
+    var monday = startOfWeek(date);
+    state.weekStart = monday;
+    var sunday = addDays(monday, 6);
+    return Promise.all([
+      loadJournalRange(dateStr(monday), dateStr(sunday)),
+      loadSessionsRange(monday, sunday),
+    ]).then(function() {
+      emit('dataChanged', state);
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -481,9 +610,23 @@
   }
 
   function todaySessions() {
-    var today = Utils.isoDate(new Date());
+    var today = dateStr(new Date());
     return state.timeSessions.filter(function(s) {
-      return s.started_at && Utils.isoDate(s.started_at) === today;
+      return s.started_at && dateStr(new Date(s.started_at)) === today;
+    });
+  }
+
+  /** Tasks scheduled to a given local date. */
+  function tasksForDate(dateStrParam) {
+    return state.tasks.filter(function(t) {
+      return t.scheduled_date === dateStrParam;
+    });
+  }
+
+  /** Sessions whose started_at falls on `dateStrParam` in local time. */
+  function weekSessionsForDate(dateStrParam) {
+    return state.weekSessions.filter(function(s) {
+      return s.started_at && dateStr(new Date(s.started_at)) === dateStrParam;
     });
   }
 
@@ -500,17 +643,27 @@
     loadTasks: loadTasks,
     loadTimeSessions: loadTimeSessions,
     loadTodayJournal: loadTodayJournal,
+    loadJournalRange: loadJournalRange,
+    loadSessionsRange: loadSessionsRange,
     saveProject: saveProject,
     archiveProject: archiveProject,
     reorderProjects: reorderProjects,
     saveTask: saveTask,
     archiveTask: archiveTask,
+    setTaskScheduledDate: setTaskScheduledDate,
     saveTimeSession: saveTimeSession,
     deleteTimeSession: deleteTimeSession,
     saveJournal: saveJournal,
+    toggleHabit: toggleHabit,
+    setWeekStart: setWeekStart,
     projectTasks: projectTasks,
     activeProjects: activeProjects,
     todaySessions: todaySessions,
+    tasksForDate: tasksForDate,
+    weekSessionsForDate: weekSessionsForDate,
+    startOfWeek: startOfWeek,
+    addDays: addDays,
+    dateStr: dateStr,
     on: on,
     emit: emit,
     toast: toast,
