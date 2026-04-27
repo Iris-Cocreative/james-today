@@ -193,10 +193,10 @@
       background: var(--bg);
       position: relative;
       display: flex; flex-direction: column;
-      padding: 8px 8px 5px;
+      padding: 5px;
       transition: background 0.18s, outline 0.12s;
       overflow: hidden;
-      height: 144px;
+      max-height: 144px;
     }
     .day-card.today { background: var(--accent-ghost); }
     .day-card.drop-target {
@@ -208,7 +208,7 @@
 
     /* Card top row: day name (left) + date (right) */
     .dh-top {
-      display: flex; align-items: baseline; justify-content: space-between;
+      display: flex; align-items: flex-start; justify-content: space-between;
       margin-bottom: 5px;
     }
     .dh-name {
@@ -220,6 +220,7 @@
       font-family: loretta, serif; font-size: 1.5rem;
       color: var(--text-primary);
       line-height: 1;
+      margin: -0.4em 0 0.4em;
     }
     .day-card.today .dh-num { color: var(--accent); }
 
@@ -247,8 +248,10 @@
     .dh-task:hover { background: rgba(255,255,255,0.04); }
     .dh-task.done { color: var(--text-faint); text-decoration: line-through; }
     .dh-task-status {
-      width: 7px; height: 7px;
-      border-radius: 50%; flex-shrink: 0;
+      width: 8px; height: 8px;
+      border-radius: 35%;
+      corner-shape: squircle;
+      flex-shrink: 0;
       border: 1px solid currentColor;
     }
     .dh-task.idea       .dh-task-status { background: var(--status-idea); border-color: var(--status-idea); }
@@ -277,28 +280,30 @@
       letter-spacing: 0.08em; margin-left: 3px;
     }
 
-    /* Bottom mini-card: habits row (left) + journal wheel (right) */
+    /* Bottom mini-card: habits row (left) + journal wheel (absolute, right) */
     .dh-bottom {
       flex-shrink: 0;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center;
       background: rgba(255,255,255,0.025);
       border: 1px solid var(--border-subtle);
       border-radius: 3px;
-      padding: 5px 6px;
-      margin-top: 5px;
+      padding: 3px;
+      margin-top: 3px;
+      position: relative;
     }
     .dh-habits-row { display: flex; align-items: center; gap: 3px; }
 
-    /* Habit pips */
+    /* Habit pips — squircles */
     .habit-pip {
-      width: 8px; height: 8px;
-      border-radius: 50%;
+      width: 13px; height: 8px;
+      border-radius: 30%;
+      corner-shape: squircle;
       border: 1px solid var(--border);
       background: transparent;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .habit-pip:hover { transform: scale(1.4); }
+    .habit-pip:hover { transform: scale(1.25); }
     .habit-pip.done { border-color: transparent; }
     .habit-pip[data-habit="sleep"].done      { background: #2a3f7c; box-shadow: 0 0 4px rgba(42,63,124,0.55); }
     .habit-pip[data-habit="meditation"].done { background: #7c4eb6; box-shadow: 0 0 4px rgba(124,78,182,0.5); }
@@ -307,12 +312,16 @@
     .habit-pip[data-habit="nutrition"].done  { background: #d4a017; box-shadow: 0 0 4px rgba(212,160,23,0.4); }
     .habit-pip[data-habit="learning"].done   { background: #279daf; box-shadow: 0 0 4px rgba(39,157,175,0.4); }
 
-    /* Journal wheel */
+    /* Journal wheel — anchored to right edge of .dh-bottom */
     .journal-wheel {
       width: 13px; height: 13px; cursor: pointer; flex-shrink: 0;
+      position: absolute;
+      right: 1px;
+      top: 50%;
+      transform: translateY(-50%);
       transition: transform 0.18s;
     }
-    .journal-wheel:hover { transform: scale(1.3); }
+    .journal-wheel:hover { transform: translateY(-50%) scale(1.3); }
     .journal-wheel circle.bg { fill: none; stroke: var(--border); stroke-width: 1.2; }
     .journal-wheel .q {
       fill: transparent; stroke: var(--border); stroke-width: 0.6;
@@ -321,16 +330,16 @@
     .journal-wheel .q.done { fill: var(--accent); }
     .journal-wheel circle.hole { fill: var(--bg-raised); }
 
-    /* Hover-expand: card grows to fit ALL tasks; floats above neighbors */
-    .day-card:hover {
+    /* Hover-expand: only when the TASK LIST is hovered — overlap calendar below.
+       Uses :has() so hover on .dh-tasks-wrap propagates to .day-card.            */
+    .day-card:has(.dh-tasks-wrap:hover) {
       z-index: 10;
-      height: auto;
-      min-height: 144px;
+      max-height: none;
       box-shadow: 0 8px 21px rgba(0,0,0,0.55);
       overflow: visible;
     }
-    .day-card:hover .dh-task.overflow { display: flex; }
-    .day-card:hover .dh-extras { display: none; }
+    .day-card:has(.dh-tasks-wrap:hover) .dh-task.overflow { display: flex; }
+    .day-card:has(.dh-tasks-wrap:hover) .dh-extras { display: none; }
 
     /* =========================================================
        MINI CALENDAR
@@ -420,29 +429,29 @@
       letter-spacing: 0.04em;
     }
 
-    /* Off-screen edge indicators (sticky to viewport) */
+    /* Off-screen edge indicators (sticky to viewport) — bars stack via flex */
     .edge-indicator {
       position: sticky;
-      left: 0; right: 0;
-      height: 0;
       z-index: 6;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
       pointer-events: none;
     }
-    .edge-top { top: 0; }
+    .edge-top    { top: 0; }
     .edge-bottom { bottom: 0; }
     .edge-bar {
-      position: absolute;
-      left: 3px; right: 3px;
+      position: relative;
       height: 3px;
+      margin: 0 3px;
       border-radius: 1.5px;
       opacity: 0.85;
       pointer-events: auto;
       cursor: pointer;
       transition: opacity 0.15s, height 0.15s;
+      flex-shrink: 0;
     }
-    .edge-bar.top    { top: 0; }
-    .edge-bar.bottom { bottom: 0; }
-    .edge-bar:hover  { opacity: 1; height: 5px; }
+    .edge-bar:hover { opacity: 1; height: 5px; }
 
     /* "Now" marker */
     .mini-now-line {
@@ -537,7 +546,7 @@
 <body>
 
   <div class="proto-banner">
-    <span>◇ Prototype v4 — Week View · drag tasks · scroll calendar to see hidden hours</span>
+    <span>◇ Prototype v5 — Week View · drag tasks · scroll calendar · hover task list to expand</span>
     <a href="dashboard.html">← back to current dashboard</a>
   </div>
 
