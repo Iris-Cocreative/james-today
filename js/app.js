@@ -1003,13 +1003,22 @@
     // Header bar
     html += '<div class="timeline-header">' +
       '<span class="timeline-header-title">Timeline</span>' +
-      '<span class="timeline-header-total" id="timeline-total"></span>' +
       '<div class="timeline-header-actions">' +
         '<button class="timer-btn" id="timer-btn" data-action="toggle-timer">' +
           '\u25B6 Start' +
         '</button>' +
       '</div>' +
     '</div>';
+
+    // Hour axis (every hour, moved here from world-clock)
+    html += '<div class="timeline-hour-axis">';
+    for (var ha = 0; ha <= 24; ha++) {
+      var haPct = (ha / 24) * 100;
+      var haLbl = ha === 0 || ha === 24 ? '12a' : ha === 12 ? '12p' : ha < 12 ? (ha + 'a') : ((ha - 12) + 'p');
+      var haCls = ha === 0 ? ' first' : ha === 24 ? ' last' : '';
+      html += '<span class="th-hour' + haCls + '" style="left:' + haPct + '%">' + haLbl + '</span>';
+    }
+    html += '</div>';
 
     // Horizontal inner (width matches world clock)
     html += '<div class="timeline-inner" id="timeline-inner">';
@@ -1040,6 +1049,9 @@
     html += '<div class="schedule-block meal" style="left:' + (19/24*100) + '%; width:' + (0.75/24*100) + '%;">' +
       '<span class="schedule-label">Dinner</span></div>';
     html += '</div>';
+
+    // Day-summary box (pie + key) — lower-right of timeline
+    html += '<div id="timeline-summary"></div>';
 
     html += '</div>'; // end timeline-inner
 
@@ -1199,16 +1211,141 @@
     '</div>';
   }
 
+  /* ----------------------------------------------------------
+     Timeline summary — pie chart of how the 24-hour viewed day
+     is allocated, plus a work-breakdown key. Replaces the old
+     timeline-header-total simple total.
+
+     Pie segments (sum = 24h):
+       sleep     — fixed 1am-9am block
+       meals     — fixed lunch + dinner blocks
+       work      — minutes covered by sessions and NOT by sleep/meals
+       openDay   — uncommitted minutes before 6pm
+       openEve   — uncommitted minutes from 6pm onwards
+     Work breakdown:
+       workTotal — sum of session durations on the viewed day
+       workDone  — portion already in the past (capped at "now")
+       workLeft  — the remainder
+     ---------------------------------------------------------- */
   function updateTimelineHeader() {
-    var totalEl = document.getElementById('timeline-total');
-    if (totalEl) {
-      var sessions = Data.todaySessions();
-      var mins = 0;
-      for (var i = 0; i < sessions.length; i++) {
-        mins += parseFloat(sessions[i].duration_min || 0);
-      }
-      totalEl.textContent = Utils.formatDuration(mins) + ' today';
+    var box = document.getElementById('timeline-summary');
+    if (!box) return;
+    var data = calcDaySummary(_viewDate);
+
+    var segments = [
+      { key: 'sleep',   color: '#4a5fa8',                 hours: data.sleepH,   label: 'Sleep' },
+      { key: 'meals',   color: '#d4a017',                 hours: data.mealsH,   label: 'Meals' },
+      { key: 'work',    color: '#c4956a',                 hours: data.workH,    label: 'Work' },
+      { key: 'openDay', color: 'rgba(255,240,220,0.18)',  hours: data.openDayH, label: 'Open · day' },
+      { key: 'openEve', color: 'rgba(255,240,220,0.06)',  hours: data.openEveH, label: 'Open · eve' }
+    ];
+
+    var deg = 0, stops = [];
+    for (var s = 0; s < segments.length; s++) {
+      var seg = segments[s];
+      var nextDeg = deg + (seg.hours / 24) * 360;
+      stops.push(seg.color + ' ' + deg.toFixed(2) + 'deg ' + nextDeg.toFixed(2) + 'deg');
+      deg = nextDeg;
     }
+    var pieBg = stops.length ? ('conic-gradient(' + stops.join(', ') + ')') : '#222';
+
+    var keyHtml = '';
+    for (var k = 0; k < segments.length; k++) {
+      var sg = segments[k];
+      keyHtml += '<div class="ts-row">' +
+        '<span class="ts-pip" style="background:' + sg.color + '"></span>' +
+        '<span class="ts-lbl">' + sg.label + '</span>' +
+        '<span class="ts-h">' + fmtH(sg.hours) + '</span>' +
+        '</div>';
+    }
+
+    box.innerHTML =
+      '<div class="ts-pie" style="background:' + pieBg + '"></div>' +
+      '<div class="ts-key">' + keyHtml + '</div>' +
+      '<div class="ts-work">' +
+        '<div class="ts-row"><span class="ts-lbl">Work today</span><span class="ts-h">' + fmtH(data.workTotalH) + '</span></div>' +
+        '<div class="ts-row sub"><span class="ts-lbl">Done</span><span class="ts-h">' + fmtH(data.workDoneH) + '</span></div>' +
+        '<div class="ts-row sub"><span class="ts-lbl">Left</span><span class="ts-h">' + fmtH(data.workRemainingH) + '</span></div>' +
+      '</div>';
+  }
+
+  function fmtH(hours) {
+    if (!hours || hours < 0.01) return '0h';
+    var h = Math.floor(hours);
+    var m = Math.round((hours - h) * 60);
+    if (m === 60) { h += 1; m = 0; }
+    if (m === 0) return h + 'h';
+    if (h === 0) return m + 'm';
+    return h + 'h ' + m + 'm';
+  }
+
+  function calcDaySummary(viewDate) {
+    var viewStr = Utils.isoDate(viewDate);
+    var sessions = (Data.state.timeSessions || []).filter(function (s) {
+      return s.started_at && Utils.isoDate(new Date(s.started_at)) === viewStr;
+    });
+
+    function rangeMin(date) { return date.getHours() * 60 + date.getMinutes(); }
+    var sessionRanges = [];
+    for (var i = 0; i < sessions.length; i++) {
+      var ses = sessions[i];
+      var sd = new Date(ses.started_at);
+      var ed = ses.ended_at ? new Date(ses.ended_at) : new Date();
+      var sm = rangeMin(sd);
+      var em = rangeMin(ed);
+      if (em <= sm) em = sm + 5;          // safety floor
+      if (em > 1440) em = 1440;
+      sessionRanges.push([sm, em]);
+    }
+
+    // Schedule blocks (matches renderTimeline lines 1034-1041)
+    var sleepRange  = [60, 540];
+    var lunchRange  = [780, 825];
+    var dinnerRange = [1140, 1185];
+
+    function inRange(m, r) { return m >= r[0] && m < r[1]; }
+    function inAny(m, ranges) {
+      for (var j = 0; j < ranges.length; j++) if (inRange(m, ranges[j])) return true;
+      return false;
+    }
+
+    // Categorize each minute (priority: sleep > meals > work > open)
+    var counts = { sleep: 0, meals: 0, work: 0, openDay: 0, openEve: 0 };
+    for (var m = 0; m < 1440; m++) {
+      if (inRange(m, sleepRange)) counts.sleep++;
+      else if (inRange(m, lunchRange) || inRange(m, dinnerRange)) counts.meals++;
+      else if (inAny(m, sessionRanges)) counts.work++;
+      else if (m < 18 * 60) counts.openDay++;
+      else counts.openEve++;
+    }
+
+    // Work breakdown — sum of session durations (overlaps double-counted on
+    // purpose; this matches what people mean by "scheduled work today")
+    var nowDate = new Date();
+    var nowStr = Utils.isoDate(nowDate);
+    var nowMin;
+    if (viewStr < nowStr) nowMin = 1440;
+    else if (viewStr > nowStr) nowMin = 0;
+    else nowMin = nowDate.getHours() * 60 + nowDate.getMinutes();
+
+    var workTotalM = 0, workDoneM = 0;
+    for (var r = 0; r < sessionRanges.length; r++) {
+      var rs = sessionRanges[r][0], re = sessionRanges[r][1];
+      workTotalM += (re - rs);
+      if (re <= nowMin) workDoneM += (re - rs);
+      else if (rs < nowMin) workDoneM += (nowMin - rs);
+    }
+
+    return {
+      sleepH:   counts.sleep   / 60,
+      mealsH:   counts.meals   / 60,
+      workH:    counts.work    / 60,
+      openDayH: counts.openDay / 60,
+      openEveH: counts.openEve / 60,
+      workTotalH:     workTotalM / 60,
+      workDoneH:      workDoneM  / 60,
+      workRemainingH: (workTotalM - workDoneM) / 60
+    };
   }
 
   function updateNowMarker() {
