@@ -248,6 +248,23 @@
     Data.loadTodayJournal(Utils.isoDate(_viewDate));
   }
 
+  /** Public: jump the day-timeline to a specific date.
+      Accepts a Date or 'YYYY-MM-DD' string. */
+  function setViewDate(d) {
+    if (typeof d === 'string') {
+      // Parse as local date so we don't shift by timezone.
+      var parts = d.split('-');
+      _viewDate = new Date(+parts[0], +parts[1] - 1, +parts[2]);
+    } else {
+      _viewDate = new Date(d);
+    }
+    renderDayInfo();
+    renderTimelineSessions();
+    updateTimelineHeader();
+    updateNowMarker();
+    Data.loadTodayJournal(Utils.isoDate(_viewDate));
+  }
+
   /* ================================================================
      Journal Modal
      ================================================================ */
@@ -621,7 +638,9 @@
     }
 
     var startDt = new Date(session.started_at);
-    var endDt = session.ended_at ? new Date(session.ended_at) : new Date();
+    // Fall back to startDt's date (not "today") so editing a past session
+    // without ended_at doesn't pull the day forward.
+    var endDt = session.ended_at ? new Date(session.ended_at) : new Date(startDt);
     var startTime = String(startDt.getHours()).padStart(2,'0') + ':' + String(startDt.getMinutes()).padStart(2,'0');
     var endTime = String(endDt.getHours()).padStart(2,'0') + ':' + String(endDt.getMinutes()).padStart(2,'0');
 
@@ -1713,10 +1732,12 @@
       startHour = Math.round(startHour * 4) / 4;
       endHour = Math.round(endHour * 4) / 4;
 
-      var today = new Date();
-      var newStart = new Date(today);
+      // Use the session's own date so resizing a past day's session doesn't
+      // shift its date to today.
+      var origStart = new Date(session.started_at);
+      var newStart = new Date(origStart);
       newStart.setHours(Math.floor(startHour), Math.round((startHour % 1) * 60), 0, 0);
-      var newEnd = new Date(today);
+      var newEnd = new Date(origStart);
       newEnd.setHours(Math.floor(endHour), Math.round((endHour % 1) * 60), 0, 0);
 
       // Preserve the session's track
@@ -2138,7 +2159,8 @@
     toast: toast,
     renderProjects: renderProjects,
     renderTasks: renderTasks,
-    renderTimeline: renderTimeline
+    renderTimeline: renderTimeline,
+    setViewDate: setViewDate
   };
 
   /* ---- Left column resize ---- */
