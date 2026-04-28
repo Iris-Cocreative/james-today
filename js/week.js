@@ -439,6 +439,21 @@
         });
       })(wheels[k]);
     }
+
+    // Click the day-name/date header → navigate the main day-timeline to it
+    var topRows = document.querySelectorAll('#week-cards .dh-top');
+    for (var t = 0; t < topRows.length; t++) {
+      (function (top) {
+        top.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var card = top.closest('.day-card');
+          if (!card) return;
+          if (window.App && window.App.setViewDate) {
+            window.App.setViewDate(card.dataset.dayDate);
+          }
+        });
+      })(topRows[t]);
+    }
   }
 
   function attachMiniCalDropHandlers() {
