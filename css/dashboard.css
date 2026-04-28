@@ -1411,7 +1411,12 @@ body.is-dragging { cursor: grabbing !important; user-select: none; }
 .dh-top {
   display: flex; align-items: flex-start; justify-content: space-between;
   margin-bottom: 5px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 0.15s;
 }
+.dh-top:hover { background: var(--accent-ghost); }
+.dh-top:hover .dh-name { color: var(--accent); }
 .dh-name {
   font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em;
   color: var(--text-secondary);
@@ -1608,6 +1613,30 @@ body.is-dragging { cursor: grabbing !important; user-select: none; }
 
 /* ---- World-clock hour labels: moved to top of timeline ---- */
 .wc-hour-labels { display: none; }
+
+/* ---- World-clock collapse toggle ---- */
+.wc-collapse-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-tertiary);
+  padding: 1px 6px 2px;
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: color 0.18s, border-color 0.18s, background 0.18s;
+  font-family: neue-kabel, sans-serif;
+}
+.wc-collapse-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-ghost);
+}
+.world-clock.wc-collapsed .wc-bar:not(.home) { display: none; }
+/* In collapsed mode, the home bar's gradient + the hour-labels container
+   are still useful (they're hidden via .wc-hour-labels rule above), so the
+   home bar alone shows as a thin strip with city / abbr / clock. */
 
 /* ---- Timeline hour axis (replaces wc-hour-labels) ---- */
 .timeline-hour-axis {
