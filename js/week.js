@@ -12,7 +12,7 @@
 
   var HOUR_PX = 26;
   var VISIBLE_START = 9;
-  var CONTENT_START = 7;
+  var CONTENT_START = 0;        // full 24h scrollable; scroll up to see pre-9am
   var CONTENT_END = 24;
   var CONTENT_HEIGHT = (CONTENT_END - CONTENT_START) * HOUR_PX;
   var DEFAULT_SCROLL = (VISIBLE_START - CONTENT_START) * HOUR_PX;
@@ -245,9 +245,11 @@
     var color = projectColor(t.project_id);
     var bg = hexToRgba(color, 0.06);
     var status = t.status || 'idea';
+    // Status pip uses the same data-action="status-click" hook as the main
+    // task list, so app.js's existing showStatusDropdown handles it.
     return '<div class="dh-task ' + status + ' ' + (extraCls || '') +
            '" data-task-id="' + t.id + '" style="border-left-color:' + color + '; background:' + bg + ';">' +
-           '<span class="dh-task-status"></span>' +
+           '<span class="dh-task-status" data-action="status-click" data-task-id="' + t.id + '"></span>' +
            '<span class="dh-task-text">' + esc(t.title || t.name || '') + '</span></div>';
   }
 
