@@ -359,6 +359,21 @@
         hTag.textContent = 'HOME';
         homeRow.appendChild(hTag);
 
+        // Collapse / expand toggle (left of the clock)
+        var hToggle = document.createElement('button');
+        hToggle.className = 'wc-collapse-btn';
+        hToggle.setAttribute('type', 'button');
+        hToggle.setAttribute('title', 'Toggle full / compact world clock');
+        hToggle.innerHTML = '▤';   // ▤  (small box w/ horizontal lines)
+        (function (containerRef) {
+          hToggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var collapsed = containerRef.classList.toggle('wc-collapsed');
+            try { localStorage.setItem('wc-collapsed', collapsed ? 'true' : 'false'); } catch (e2) {}
+          });
+        })(container);
+        homeRow.appendChild(hToggle);
+
         var hClock = document.createElement('span');
         hClock.className = 'wc-clock';
         hClock.setAttribute('data-tz', city.tz);
@@ -402,6 +417,13 @@
     barsWrap.appendChild(nowLine);
 
     container.appendChild(barsWrap);
+
+    // Restore collapsed state from localStorage
+    try {
+      if (localStorage.getItem('wc-collapsed') === 'true') {
+        container.classList.add('wc-collapsed');
+      }
+    } catch (e) {}
 
     // Initial draw
     _drawAll();
