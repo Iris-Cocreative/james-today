@@ -1515,7 +1515,9 @@
         if (!inner) return;
         var hour = Math.floor(xToHour(inner, e.clientX) * 2) / 2;
 
-        var startDate = new Date();
+        // Use the currently-viewed date so dropping on a future/past day's
+        // timeline lands the session on that day, not today.
+        var startDate = new Date(_viewDate);
         startDate.setHours(Math.floor(hour), (hour % 1) * 60, 0, 0);
         var endDate = new Date(startDate.getTime() + 3600000); // 1 hour
 
@@ -1555,7 +1557,8 @@
   }
 
   function createSessionAtHour(hour) {
-    var startDate = new Date();
+    // Anchor to the currently-viewed date, not today.
+    var startDate = new Date(_viewDate);
     startDate.setHours(Math.floor(hour), (hour % 1) * 60, 0, 0);
     var endDate = new Date(startDate.getTime() + 3600000);
 
