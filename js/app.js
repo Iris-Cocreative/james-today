@@ -149,9 +149,44 @@
   var _viewDate = new Date(); // currently viewed day (can navigate forward/back)
   var _taskStatusFilters = {}; // status key -> boolean (true=visible)
   var _taskStatusFilterModal = null;
+  var _urgencyFlagModal = null;
+  var _projectUrgency = {}; // projectId -> 'red'|'orange'|'yellow'|null (browser-only, localStorage)
+  var _groupCollapsed = {}; // projectId -> bool (browser-only, localStorage)
+  var _sortByUrgency = false;
+  var _summaryVisible = false;
 
-  // Initialize task status filters to all visible
-  for (var sf = 0; sf < STATUSES.length; sf++) _taskStatusFilters[STATUSES[sf].key] = true;
+  // Initialize task status filters: hide done & integrated by default; show others
+  for (var sf = 0; sf < STATUSES.length; sf++) {
+    var sfKey = STATUSES[sf].key;
+    _taskStatusFilters[sfKey] = (sfKey !== 'done' && sfKey !== 'integrated');
+  }
+  // Restore from localStorage
+  try {
+    var lsFilt = localStorage.getItem('jt-task-status-filters');
+    if (lsFilt) {
+      var parsedFilt = JSON.parse(lsFilt);
+      for (var fk in parsedFilt) if (parsedFilt.hasOwnProperty(fk)) _taskStatusFilters[fk] = !!parsedFilt[fk];
+    }
+    var lsUrg = localStorage.getItem('jt-urgency');
+    if (lsUrg) _projectUrgency = JSON.parse(lsUrg) || {};
+    var lsGC = localStorage.getItem('jt-group-collapsed');
+    if (lsGC) _groupCollapsed = JSON.parse(lsGC) || {};
+    _sortByUrgency = localStorage.getItem('jt-sort-urgency') === '1';
+    _summaryVisible = localStorage.getItem('jt-summary-visible') === '1';
+  } catch (e) { /* ignore */ }
+
+  function persistFilterState() {
+    try { localStorage.setItem('jt-task-status-filters', JSON.stringify(_taskStatusFilters)); } catch (e) {}
+  }
+  function persistUrgency() {
+    try { localStorage.setItem('jt-urgency', JSON.stringify(_projectUrgency)); } catch (e) {}
+  }
+  function persistGroupCollapsed() {
+    try { localStorage.setItem('jt-group-collapsed', JSON.stringify(_groupCollapsed)); } catch (e) {}
+  }
+  var URGENCY_RANK = { red: 3, orange: 2, yellow: 1 };
+  function urgencyRank(pid) { return URGENCY_RANK[_projectUrgency[pid]] || 0; }
+  var URGENCY_COLORS = { red: '#e35d5d', orange: '#f0a04b', yellow: '#f3d04e' };
 
   // Initialize type filters to all visible
   for (var ti = 0; ti < PROJECT_TYPES.length; ti++) _typeFilters[PROJECT_TYPES[ti]] = true;
@@ -233,7 +268,10 @@
       '<div class="day-numbers">Day ' + dayOfYear(_viewDate) + ' \u00B7 Week ' + weekNumber(_viewDate) +
         (isToday ? '' : ' <span class="day-back-link" data-action="day-today" style="cursor:pointer;color:var(--accent);margin-left:6px;font-size:10px;">today</span>') +
       '</div>' +
-      '<div class="day-question">\u201C' + esc(d.question) + '\u201D</div>';
+      '<div class="day-question">\u201C' + esc(d.question) + '\u201D</div>' +
+      '<button class="day-sort-btn' + (_sortByUrgency ? ' active' : '') + '" data-action="toggle-sort-urgency" title="' + (_sortByUrgency ? 'Sorted by urgency' : 'Sort task groups by urgency') + '">' +
+        flagSvg(_sortByUrgency ? 'red' : null) +
+      '</button>';
     container.querySelector('.day-domain').onclick = function () { openJournalModal(); };
   }
 
@@ -860,6 +898,8 @@
     _typeFilterModal = null;
     if (_taskStatusFilterModal && _taskStatusFilterModal.parentNode) _taskStatusFilterModal.parentNode.removeChild(_taskStatusFilterModal);
     _taskStatusFilterModal = null;
+    if (_urgencyFlagModal && _urgencyFlagModal.parentNode) _urgencyFlagModal.parentNode.removeChild(_urgencyFlagModal);
+    _urgencyFlagModal = null;
   }
 
   /* ================================================================
@@ -870,19 +910,16 @@
     var container = document.getElementById('col-tasks');
     if (!container) return;
 
+    // Build groups: each = { project, color, tasks, isUnassigned, urgencyRank }
+    var groups = [];
     var projects = projectsArray();
-    var html = '';
-
     for (var i = 0; i < projects.length; i++) {
       var p = projects[i];
       var c = projectColor(p);
       var tasks = Data.projectTasks(p.id);
-
-      // Also include tasks that have a feature_id under this project
       var featureTasks = [];
       Data.state.tasks.forEach(function (t) {
         if (t.project_id === p.id) {
-          // Check not already in projectTasks (which excludes feature tasks)
           var found = false;
           for (var x = 0; x < tasks.length; x++) {
             if (tasks[x].id === t.id) { found = true; break; }
@@ -892,74 +929,78 @@
       });
       var allTasks = tasks.concat(featureTasks);
       allTasks.sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); });
-
-      var groupFlex = allTasks.length || 1;
-      html += '<div class="task-group" style="--c:' + c + '; --group-flex:' + groupFlex + '" data-project-id="' + p.id + '">' +
-        '<span class="task-group-label">' + esc(p.name) + '</span>';
-
-      for (var j = 0; j < allTasks.length; j++) {
-        var t = allTasks[j];
-        if (!taskPassesStatusFilter(t)) continue;
-        var statusInfo = STATUS_MAP[t.status] || STATUS_MAP['idea'];
-        var isDone = t.status === 'done' || t.status === 'integrated';
-        html += '<div class="task-row' + (isDone ? ' done' : '') + '" data-task-id="' + t.id + '" draggable="true">' +
-          '<span class="squircle-btn" data-action="status-click" data-task-id="' + t.id + '">' +
-            squircleSVG(statusInfo.color, statusInfo.solid, 16) +
-          '</span>' +
-          '<span class="task-label">' + esc(t.title || t.name || '') + '</span>' +
-          '<span class="task-edit-icon" data-action="edit-task" data-task-id="' + t.id + '" title="Edit">\u270E</span>' +
-          '<span class="task-delete-icon" data-action="delete-task" data-task-id="' + t.id + '" title="Delete">\u00D7</span>' +
-        '</div>';
-      }
-
-      if (allTasks.length === 0) {
-        html += '<div class="task-row task-empty" style="min-height:8px"></div>';
-      }
-
-      // Per-group quick-add
-      html += '<div class="task-quick-add">' +
-        '<input type="text" placeholder="+ Add task..." data-project-id="' + p.id + '" data-action-enter="add-task-to-project">' +
-      '</div>';
-
-      html += '</div>';
+      groups.push({ project: p, color: c, tasks: allTasks, isUnassigned: false });
     }
 
-    // Unassigned tasks
     var unassigned = [];
-    Data.state.tasks.forEach(function (t) {
-      if (!t.project_id) unassigned.push(t);
-    });
+    Data.state.tasks.forEach(function (t) { if (!t.project_id) unassigned.push(t); });
     if (unassigned.length > 0) {
-      html += '<div class="task-group" style="--c:#706b62; --group-flex:' + unassigned.length + '">' +
-        '<span class="task-group-label">Unassigned</span>';
-      for (var u = 0; u < unassigned.length; u++) {
-        var ut = unassigned[u];
-        if (!taskPassesStatusFilter(ut)) continue;
-        var us = STATUS_MAP[ut.status] || STATUS_MAP['idea'];
-        var uDone = ut.status === 'done' || ut.status === 'integrated';
-        html += '<div class="task-row' + (uDone ? ' done' : '') + '" data-task-id="' + ut.id + '" draggable="true">' +
-          '<span class="squircle-btn" data-action="status-click" data-task-id="' + ut.id + '">' +
-            squircleSVG(us.color, us.solid, 16) +
-          '</span>' +
-          '<span class="task-label">' + esc(ut.title || ut.name || '') + '</span>' +
-          '<span class="task-edit-icon" data-action="edit-task" data-task-id="' + ut.id + '" title="Edit">\u270E</span>' +
-          '<span class="task-delete-icon" data-action="delete-task" data-task-id="' + ut.id + '" title="Delete">\u00D7</span>' +
+      groups.push({ project: { id: '__unassigned', name: 'Unassigned' }, color: '#706b62', tasks: unassigned, isUnassigned: true });
+    }
+
+    if (_sortByUrgency) {
+      groups.sort(function (a, b) { return urgencyRank(b.project.id) - urgencyRank(a.project.id); });
+    }
+
+    var html = '';
+    for (var gi = 0; gi < groups.length; gi++) {
+      var g = groups[gi];
+      var pid = g.project.id;
+      var collapsed = !!_groupCollapsed[pid];
+      var groupFlex = collapsed ? 1 : (g.tasks.length || 1);
+      var urg = _projectUrgency[pid] || null;
+      html += '<div class="task-group' + (collapsed ? ' collapsed' : '') +
+        '" style="--c:' + g.color + '; --group-flex:' + groupFlex + '" data-project-id="' + pid + '">' +
+        '<div class="task-group-header">' +
+          '<span class="task-group-caret" data-action="task-group-toggle" data-project-id="' + pid + '" title="' + (collapsed ? 'Expand' : 'Collapse') + '">' + (collapsed ? '\u25B8' : '\u25BE') + '</span>' +
+          '<span class="task-group-label">' + esc(g.project.name) + '</span>' +
+          (g.isUnassigned ? '' :
+            '<span class="task-group-flag' + (urg ? ' urg-' + urg : '') + '" data-action="urgency-flag" data-project-id="' + pid + '" title="Set urgency">' +
+              flagSvg(urg) +
+            '</span>') +
+        '</div>';
+
+      if (!collapsed) {
+        for (var j = 0; j < g.tasks.length; j++) {
+          var t = g.tasks[j];
+          if (!taskPassesStatusFilter(t)) continue;
+          var statusInfo = STATUS_MAP[t.status] || STATUS_MAP['idea'];
+          var isDone = t.status === 'done' || t.status === 'integrated';
+          html += '<div class="task-row' + (isDone ? ' done' : '') + '" data-task-id="' + t.id + '" draggable="true">' +
+            '<span class="squircle-btn" data-action="status-click" data-task-id="' + t.id + '">' +
+              squircleSVG(statusInfo.color, statusInfo.solid, 16) +
+            '</span>' +
+            '<span class="task-label">' + esc(t.title || t.name || '') + '</span>' +
+            '<span class="task-edit-icon" data-action="edit-task" data-task-id="' + t.id + '" title="Edit">\u270E</span>' +
+            '<span class="task-delete-icon" data-action="delete-task" data-task-id="' + t.id + '" title="Delete">\u00D7</span>' +
+          '</div>';
+        }
+        if (g.tasks.length === 0) {
+          html += '<div class="task-row task-empty" style="min-height:8px"></div>';
+        }
+        html += '<div class="task-quick-add">' +
+          '<input type="text" placeholder="+ Add task..." data-project-id="' + (g.isUnassigned ? '' : pid) + '" data-action-enter="add-task-to-project">' +
         '</div>';
       }
-      // Per-group quick-add for unassigned
-      html += '<div class="task-quick-add">' +
-        '<input type="text" placeholder="+ Add task..." data-project-id="" data-action-enter="add-task-to-project">' +
-      '</div>';
+
       html += '</div>';
     }
 
     container.innerHTML = html;
 
-    // Render footer with filter icon (outside scrollable area)
     var footer = document.getElementById('col-tasks-footer');
     if (footer) {
       footer.innerHTML = '<button class="task-status-filter-btn" data-action="task-status-filter" title="Filter by status">\u25C9</button>';
     }
+  }
+
+  function flagSvg(state) {
+    var fill = state ? URGENCY_COLORS[state] : 'none';
+    var stroke = state ? URGENCY_COLORS[state] : 'currentColor';
+    return '<svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<path d="M4 2 V 14.5" stroke="' + stroke + '" stroke-width="1.3" stroke-linecap="round"/>' +
+      '<path d="M4 2 H 12 L 10 5 L 12 8 H 4 Z" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.3" stroke-linejoin="round"/>' +
+    '</svg>';
   }
 
   function taskPassesStatusFilter(task) {
@@ -1002,6 +1043,55 @@
         opt.classList.toggle('active');
         var check = opt.querySelector('span:last-child');
         if (check) check.textContent = _taskStatusFilters[status] ? '\u2713' : '';
+        persistFilterState();
+        renderTasks();
+      };
+    });
+  }
+
+  function showUrgencyFlagModal(anchorEl) {
+    closePopups();
+    if (_urgencyFlagModal && _urgencyFlagModal.parentNode) {
+      _urgencyFlagModal.remove();
+      _urgencyFlagModal = null;
+      return;
+    }
+    var pid = anchorEl.dataset.projectId;
+    var popup = document.createElement('div');
+    popup.className = 'urgency-flag-modal show';
+    _urgencyFlagModal = popup;
+
+    var states = [
+      { key: null,     label: 'None',   color: 'transparent' },
+      { key: 'yellow', label: 'Yellow', color: URGENCY_COLORS.yellow },
+      { key: 'orange', label: 'Orange', color: URGENCY_COLORS.orange },
+      { key: 'red',    label: 'Red',    color: URGENCY_COLORS.red }
+    ];
+    var currentUrg = _projectUrgency[pid] || null;
+    var html = '';
+    for (var i = 0; i < states.length; i++) {
+      var st = states[i];
+      var isActive = (st.key === currentUrg);
+      html += '<div class="urgency-flag-option' + (isActive ? ' active' : '') + '" data-urgency="' + (st.key || '') + '">' +
+        flagSvg(st.key) +
+        '<span>' + st.label + '</span>' +
+      '</div>';
+    }
+    popup.innerHTML = html;
+
+    var rect = anchorEl.getBoundingClientRect();
+    popup.style.top = (rect.bottom + 4) + 'px';
+    popup.style.left = (rect.right - 110) + 'px';
+    document.body.appendChild(popup);
+
+    popup.querySelectorAll('.urgency-flag-option').forEach(function (opt) {
+      opt.onclick = function () {
+        var v = opt.dataset.urgency || null;
+        if (v) _projectUrgency[pid] = v;
+        else delete _projectUrgency[pid];
+        persistUrgency();
+        if (_urgencyFlagModal && _urgencyFlagModal.parentNode) _urgencyFlagModal.remove();
+        _urgencyFlagModal = null;
         renderTasks();
       };
     });
@@ -1023,6 +1113,7 @@
     html += '<div class="timeline-header">' +
       '<span class="timeline-header-title">Timeline</span>' +
       '<div class="timeline-header-actions">' +
+        '<button class="tl-summary-toggle" data-action="toggle-summary" title="Toggle day summary">\u25CE</button>' +
         '<button class="timer-btn" id="timer-btn" data-action="toggle-timer">' +
           '\u25B6 Start' +
         '</button>' +
@@ -1246,27 +1337,47 @@
        workDone  — portion already in the past (capped at "now")
        workLeft  — the remainder
      ---------------------------------------------------------- */
+  function applySummaryVisibility() {
+    var box = document.getElementById('timeline-summary');
+    if (box) box.style.display = _summaryVisible ? '' : 'none';
+    var btn = document.querySelector('.tl-summary-toggle');
+    if (btn) btn.classList.toggle('active', _summaryVisible);
+  }
+
   function updateTimelineHeader() {
+    applySummaryVisibility();
     var box = document.getElementById('timeline-summary');
     if (!box) return;
+    if (!_summaryVisible) return;
     var data = calcDaySummary(_viewDate);
 
+    // 8 segments: 3 booleans (work/open · day/eve · past/future).
+    // Day = warmer hue (~35°), eve = cooler hue (~220°).
+    // Work = lighter L, open = darker L. Past = higher S, future = lower S.
     var segments = [
-      { key: 'sleep',   color: '#4a5fa8',                 hours: data.sleepH,   label: 'Sleep' },
-      { key: 'meals',   color: '#d4a017',                 hours: data.mealsH,   label: 'Meals' },
-      { key: 'work',    color: '#c4956a',                 hours: data.workH,    label: 'Work' },
-      { key: 'openDay', color: 'rgba(255,240,220,0.18)',  hours: data.openDayH, label: 'Open · day' },
-      { key: 'openEve', color: 'rgba(255,240,220,0.06)',  hours: data.openEveH, label: 'Open · eve' }
+      { color: 'hsl(35, 65%, 68%)',  hours: data.workDayPastH,    label: 'Work · day · done' },
+      { color: 'hsl(35, 25%, 68%)',  hours: data.workDayFutureH,  label: 'Work · day · left' },
+      { color: 'hsl(220, 60%, 68%)', hours: data.workEvePastH,    label: 'Work · eve · done' },
+      { color: 'hsl(220, 25%, 68%)', hours: data.workEveFutureH,  label: 'Work · eve · left' },
+      { color: 'hsl(35, 65%, 32%)',  hours: data.openDayPastH,    label: 'Open · day · done' },
+      { color: 'hsl(35, 25%, 32%)',  hours: data.openDayFutureH,  label: 'Open · day · left' },
+      { color: 'hsl(220, 60%, 32%)', hours: data.openEvePastH,    label: 'Open · eve · done' },
+      { color: 'hsl(220, 25%, 32%)', hours: data.openEveFutureH,  label: 'Open · eve · left' }
     ];
 
     var deg = 0, stops = [];
     for (var s = 0; s < segments.length; s++) {
       var seg = segments[s];
-      var nextDeg = deg + (seg.hours / 24) * 360;
-      stops.push(seg.color + ' ' + deg.toFixed(2) + 'deg ' + nextDeg.toFixed(2) + 'deg');
-      deg = nextDeg;
+      var span = (seg.hours / 24) * 360;
+      if (span > 0.001) {
+        var nextDeg = deg + span;
+        stops.push(seg.color + ' ' + deg.toFixed(2) + 'deg ' + nextDeg.toFixed(2) + 'deg');
+        deg = nextDeg;
+      }
     }
-    var pieBg = stops.length ? ('conic-gradient(' + stops.join(', ') + ')') : '#222';
+    // Fill the rest with transparent gap (sleep + meals)
+    if (deg < 359.99) stops.push('transparent ' + deg.toFixed(2) + 'deg 360deg');
+    var pieBg = stops.length ? ('conic-gradient(' + stops.join(', ') + ')') : 'transparent';
 
     var keyHtml = '';
     for (var k = 0; k < segments.length; k++) {
@@ -1278,13 +1389,23 @@
         '</div>';
     }
 
+    var workTotal = data.workDayPastH + data.workDayFutureH + data.workEvePastH + data.workEveFutureH;
+    var workDone  = data.workDayPastH + data.workEvePastH;
+    var workLeft  = data.workDayFutureH + data.workEveFutureH;
+    var openTotal = data.openDayPastH + data.openDayFutureH + data.openEvePastH + data.openEveFutureH;
+    var openDone  = data.openDayPastH + data.openEvePastH;
+    var openLeft  = data.openDayFutureH + data.openEveFutureH;
+
     box.innerHTML =
       '<div class="ts-pie" style="background:' + pieBg + '"></div>' +
       '<div class="ts-key">' + keyHtml + '</div>' +
       '<div class="ts-work">' +
-        '<div class="ts-row"><span class="ts-lbl">Work today</span><span class="ts-h">' + fmtH(data.workTotalH) + '</span></div>' +
-        '<div class="ts-row sub"><span class="ts-lbl">Done</span><span class="ts-h">' + fmtH(data.workDoneH) + '</span></div>' +
-        '<div class="ts-row sub"><span class="ts-lbl">Left</span><span class="ts-h">' + fmtH(data.workRemainingH) + '</span></div>' +
+        '<div class="ts-row"><span class="ts-lbl">Work today</span><span class="ts-h">' + fmtH(workTotal) + '</span></div>' +
+        '<div class="ts-row sub"><span class="ts-lbl">Done</span><span class="ts-h">' + fmtH(workDone) + '</span></div>' +
+        '<div class="ts-row sub"><span class="ts-lbl">Left</span><span class="ts-h">' + fmtH(workLeft) + '</span></div>' +
+        '<div class="ts-row"><span class="ts-lbl">Open today</span><span class="ts-h">' + fmtH(openTotal) + '</span></div>' +
+        '<div class="ts-row sub"><span class="ts-lbl">Done</span><span class="ts-h">' + fmtH(openDone) + '</span></div>' +
+        '<div class="ts-row sub"><span class="ts-lbl">Left</span><span class="ts-h">' + fmtH(openLeft) + '</span></div>' +
       '</div>';
   }
 
@@ -1312,12 +1433,11 @@
       var ed = ses.ended_at ? new Date(ses.ended_at) : new Date();
       var sm = rangeMin(sd);
       var em = rangeMin(ed);
-      if (em <= sm) em = sm + 5;          // safety floor
+      if (em <= sm) em = sm + 5;
       if (em > 1440) em = 1440;
       sessionRanges.push([sm, em]);
     }
 
-    // Schedule blocks (matches renderTimeline lines 1034-1041)
     var sleepRange  = [60, 540];
     var lunchRange  = [780, 825];
     var dinnerRange = [1140, 1185];
@@ -1328,18 +1448,6 @@
       return false;
     }
 
-    // Categorize each minute (priority: sleep > meals > work > open)
-    var counts = { sleep: 0, meals: 0, work: 0, openDay: 0, openEve: 0 };
-    for (var m = 0; m < 1440; m++) {
-      if (inRange(m, sleepRange)) counts.sleep++;
-      else if (inRange(m, lunchRange) || inRange(m, dinnerRange)) counts.meals++;
-      else if (inAny(m, sessionRanges)) counts.work++;
-      else if (m < 18 * 60) counts.openDay++;
-      else counts.openEve++;
-    }
-
-    // Work breakdown — sum of session durations (overlaps double-counted on
-    // purpose; this matches what people mean by "scheduled work today")
     var nowDate = new Date();
     var nowStr = Utils.isoDate(nowDate);
     var nowMin;
@@ -1347,23 +1455,35 @@
     else if (viewStr > nowStr) nowMin = 0;
     else nowMin = nowDate.getHours() * 60 + nowDate.getMinutes();
 
-    var workTotalM = 0, workDoneM = 0;
-    for (var r = 0; r < sessionRanges.length; r++) {
-      var rs = sessionRanges[r][0], re = sessionRanges[r][1];
-      workTotalM += (re - rs);
-      if (re <= nowMin) workDoneM += (re - rs);
-      else if (rs < nowMin) workDoneM += (nowMin - rs);
+    var DAY_END = 18 * 60; // 6pm boundary between day and eve
+
+    var b = {
+      workDayPast: 0, workDayFuture: 0,
+      workEvePast: 0, workEveFuture: 0,
+      openDayPast: 0, openDayFuture: 0,
+      openEvePast: 0, openEveFuture: 0
+    };
+
+    for (var m = 0; m < 1440; m++) {
+      // Exclude sleep & meals from the pie
+      if (inRange(m, sleepRange)) continue;
+      if (inRange(m, lunchRange) || inRange(m, dinnerRange)) continue;
+      var isWork = inAny(m, sessionRanges);
+      var isDay  = m < DAY_END;
+      var isPast = m < nowMin;
+      var key = (isWork ? 'work' : 'open') + (isDay ? 'Day' : 'Eve') + (isPast ? 'Past' : 'Future');
+      b[key]++;
     }
 
     return {
-      sleepH:   counts.sleep   / 60,
-      mealsH:   counts.meals   / 60,
-      workH:    counts.work    / 60,
-      openDayH: counts.openDay / 60,
-      openEveH: counts.openEve / 60,
-      workTotalH:     workTotalM / 60,
-      workDoneH:      workDoneM  / 60,
-      workRemainingH: (workTotalM - workDoneM) / 60
+      workDayPastH:   b.workDayPast   / 60,
+      workDayFutureH: b.workDayFuture / 60,
+      workEvePastH:   b.workEvePast   / 60,
+      workEveFutureH: b.workEveFuture / 60,
+      openDayPastH:   b.openDayPast   / 60,
+      openDayFutureH: b.openDayFuture / 60,
+      openEvePastH:   b.openEvePast   / 60,
+      openEveFutureH: b.openEveFuture / 60
     };
   }
 
@@ -1887,6 +2007,42 @@
         return;
       }
 
+      // Collapse/expand a task group
+      var caretBtn = target.closest('[data-action="task-group-toggle"]');
+      if (caretBtn) {
+        var cpid = caretBtn.dataset.projectId;
+        _groupCollapsed[cpid] = !_groupCollapsed[cpid];
+        persistGroupCollapsed();
+        renderTasks();
+        return;
+      }
+
+      // Urgency flag picker
+      var flagBtn = target.closest('[data-action="urgency-flag"]');
+      if (flagBtn) {
+        showUrgencyFlagModal(flagBtn);
+        return;
+      }
+
+      // Sort task groups by urgency
+      var sortBtn = target.closest('[data-action="toggle-sort-urgency"]');
+      if (sortBtn) {
+        _sortByUrgency = !_sortByUrgency;
+        try { localStorage.setItem('jt-sort-urgency', _sortByUrgency ? '1' : '0'); } catch (e) {}
+        renderDayInfo();
+        renderTasks();
+        return;
+      }
+
+      // Toggle timeline summary box
+      var summaryBtn = target.closest('[data-action="toggle-summary"]');
+      if (summaryBtn) {
+        _summaryVisible = !_summaryVisible;
+        try { localStorage.setItem('jt-summary-visible', _summaryVisible ? '1' : '0'); } catch (e) {}
+        applySummaryVisibility();
+        return;
+      }
+
       var typeBtn = target.closest('[data-action="type-toggle"]');
       if (typeBtn) {
         _typeToggleState = (_typeToggleState + 1) % 3;
@@ -2029,7 +2185,8 @@
     // Close popups on outside click (body level)
     document.addEventListener('click', function (e) {
       if (!e.target.closest('.status-dropdown') && !e.target.closest('.color-picker-popup') && !e.target.closest('.type-filter-modal') &&
-          !e.target.closest('[data-action="status-click"]') && !e.target.closest('[data-action="type-toggle"]') && !e.target.closest('[data-action="task-status-filter"]') && !e.target.closest('.project-card')) {
+          !e.target.closest('.urgency-flag-modal') &&
+          !e.target.closest('[data-action="status-click"]') && !e.target.closest('[data-action="type-toggle"]') && !e.target.closest('[data-action="task-status-filter"]') && !e.target.closest('[data-action="urgency-flag"]') && !e.target.closest('.project-card')) {
         closePopups();
       }
     });
