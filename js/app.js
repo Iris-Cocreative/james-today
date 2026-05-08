@@ -1349,7 +1349,17 @@
     var box = document.getElementById('timeline-summary');
     if (!box) return;
     if (!_summaryVisible) return;
-    var data = calcDaySummary(_viewDate);
+    var data;
+    try { data = calcDaySummary(_viewDate); }
+    catch (err) {
+      console.error('[timeline-summary] calcDaySummary failed:', err);
+      box.innerHTML = '<div style="padding:8px;color:#e35d5d;font-size:11px;">Error: ' + (err && err.message || err) + '</div>';
+      return;
+    }
+    if (!data) {
+      box.innerHTML = '<div style="padding:8px;color:#e35d5d;font-size:11px;">No data returned from calcDaySummary</div>';
+      return;
+    }
 
     // 8 segments: 3 booleans (work/open · day/eve · past/future).
     // Day = warmer hue (~35°), eve = cooler hue (~220°).
