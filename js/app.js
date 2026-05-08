@@ -2039,7 +2039,7 @@
       if (summaryBtn) {
         _summaryVisible = !_summaryVisible;
         try { localStorage.setItem('jt-summary-visible', _summaryVisible ? '1' : '0'); } catch (e) {}
-        applySummaryVisibility();
+        updateTimelineHeader();
         return;
       }
 
