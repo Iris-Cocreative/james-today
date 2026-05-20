@@ -305,6 +305,12 @@
 
   .work-entry:first-of-type { border-top: 0; padding-top: 0; }
 
+  .work-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
   .work-dates {
     font-family: var(--sans);
     font-size: 0.7rem;
@@ -312,7 +318,6 @@
     text-transform: uppercase;
     letter-spacing: 0.16em;
     color: var(--text-faint);
-    padding-top: 8px;
     line-height: 1.5;
   }
 
@@ -326,18 +331,17 @@
 
   .work-logo {
     display: block;
-    height: 42px;
+    height: 52px;
     width: auto;
-    max-width: 220px;
-    margin-bottom: 18px;
+    max-width: 100%;
     opacity: 0.92;
     object-fit: contain;
-    object-position: left center;
+    object-position: left top;
   }
 
   .work-logo.is-mark {
-    height: 48px;
-    max-width: 64px;
+    height: 110px;
+    max-width: 100%;
   }
 
   .work-body h3 {
@@ -501,10 +505,6 @@
     font-size: 1.1rem;
     line-height: 1.7;
     color: var(--text);
-  }
-
-  .practice-block .pl span {
-    white-space: nowrap;
   }
 
   .practice-block .pl span + span::before {
@@ -723,9 +723,6 @@
 <header class="topbar">
   <div class="topbar-inner">
     <a href="/" class="topbar-home">james<em>.today</em></a>
-    <div class="topbar-actions">
-      <button class="download-btn" type="button" onclick="window.print()" aria-label="Download CV as PDF">Download PDF</button>
-    </div>
   </div>
 </header>
 
@@ -782,12 +779,14 @@
     </div>
 
     <article class="work-entry">
-      <div class="work-dates">
-        2022 — present
-        <span class="loc">Philadelphia</span>
+      <div class="work-meta">
+        <img class="work-logo" src="logos/iris.svg" alt="Iris Cocreative">
+        <div class="work-dates">
+          2022 — present
+          <span class="loc">Philadelphia</span>
+        </div>
       </div>
       <div class="work-body">
-        <img class="work-logo" src="logos/iris.svg" alt="Iris Cocreative">
         <h3><a href="https://www.iriscocreative.com" target="_blank" rel="noopener">Iris Cocreative</a></h3>
         <div class="work-role">Founder &amp; Creative Director</div>
         <p>
@@ -800,12 +799,14 @@
     </article>
 
     <article class="work-entry">
-      <div class="work-dates">
-        2017 — 2022
-        <span class="loc">Distributed</span>
+      <div class="work-meta">
+        <img class="work-logo" src="logos/montaia.png" alt="Montaia">
+        <div class="work-dates">
+          2017 — 2022
+          <span class="loc">Distributed</span>
+        </div>
       </div>
       <div class="work-body">
-        <img class="work-logo" src="logos/montaia.png" alt="Montaia">
         <h3>Montaia</h3>
         <div class="work-role">Co-Founder · CEO</div>
         <p>
@@ -818,12 +819,14 @@
     </article>
 
     <article class="work-entry">
-      <div class="work-dates">
-        2015 — present
-        <span class="loc">Global</span>
+      <div class="work-meta">
+        <img class="work-logo" src="logos/evolve-world.png" alt="Evolve World">
+        <div class="work-dates">
+          2015 — present
+          <span class="loc">Global</span>
+        </div>
       </div>
       <div class="work-body">
-        <img class="work-logo" src="logos/evolve-world.png" alt="Evolve World">
         <h3>Evolve World</h3>
         <div class="work-role">Artistic Director</div>
         <p>
@@ -836,12 +839,14 @@
     </article>
 
     <article class="work-entry">
-      <div class="work-dates">
-        2015 — 2017
-        <span class="loc">Philadelphia</span>
+      <div class="work-meta">
+        <img class="work-logo" src="logos/being-design.png" alt="Being Design">
+        <div class="work-dates">
+          2015 — 2017
+          <span class="loc">Philadelphia</span>
+        </div>
       </div>
       <div class="work-body">
-        <img class="work-logo" src="logos/being-design.png" alt="Being Design">
         <h3>Being Design</h3>
         <div class="work-role">Founder · Co-Owner · Creative Director</div>
         <p>
@@ -854,12 +859,14 @@
     </article>
 
     <article class="work-entry">
-      <div class="work-dates">
-        2008 — present
-        <span class="loc">Here, now</span>
+      <div class="work-meta">
+        <img class="work-logo is-mark" src="logos/art.png" alt="">
+        <div class="work-dates">
+          2008 — present
+          <span class="loc">Here, now</span>
+        </div>
       </div>
       <div class="work-body">
-        <img class="work-logo is-mark" src="logos/art.png" alt="">
         <h3>Independent Studio &amp; Art Practice</h3>
         <div class="work-role">Artist · Multi-disciplinary Designer</div>
         <p>
