@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>James Bolden — CV</title>
+<meta name="description" content="James Bolden — designer, builder, connector. Founder of Iris Cocreative. Working at the intersection of design, consciousness, and collaborative intelligence.">
+<link rel="icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0a0f;
+    --bg-raised: #141319;
+    --text: #e8e4dc;
+    --text-bright: #f5f0e6;
+    --text-dim: #a8a39b;
+    --text-faint: #706b62;
+    --accent: #c4956a;
+    --accent-soft: rgba(196, 149, 106, 0.55);
+    --line: rgba(196, 149, 106, 0.18);
+    --line-soft: rgba(196, 149, 106, 0.08);
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ─── Film grain (matches landing) ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.025;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ─── Top bar ─── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(11, 10, 15, 0.72);
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .topbar-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .topbar-home {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    color: var(--text-bright);
+    text-decoration: none;
+    letter-spacing: 0;
+  }
+
+  .topbar-home em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .topbar-actions {
+    display: flex;
+    gap: 22px;
+    align-items: center;
+  }
+
+  .download-btn {
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--accent-soft);
+    padding: 8px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-feature-settings: "kern";
+  }
+
+  .download-btn:hover {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* ─── Layout container ─── */
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 80px 40px 120px;
+    position: relative;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 56px;
+    align-items: start;
+    margin-bottom: 96px;
+    position: relative;
+  }
+
+  .portrait {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    position: relative;
+  }
+
+  .portrait img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: saturate(0.92) contrast(1.02);
+  }
+
+  .hero-text {
+    padding-top: 8px;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.6rem, 5vw, 3.6rem);
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 18px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero .role {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+  }
+
+  .hero .role .sep {
+    color: var(--accent-soft);
+    margin: 0 8px;
+  }
+
+  .hero .bio {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--text);
+    line-height: 1.55;
+    margin-bottom: 32px;
+    max-width: 38ch;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    margin-bottom: 28px;
+  }
+
+  .meta span {
+    font-size: 0.74rem;
+    color: var(--text-faint);
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+
+  .meta .dot {
+    color: var(--accent-soft);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 22px;
+    margin-top: 8px;
+  }
+
+  .links a {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 4px 0;
+    position: relative;
+    transition: color 0.25s ease;
+  }
+
+  .links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--accent);
+    opacity: 0;
+    transform: scaleX(0.4);
+    transition: all 0.3s ease;
+  }
+
+  .links a:hover { color: var(--text-bright); }
+  .links a:hover::after { opacity: 0.5; transform: scaleX(1); }
+
+  /* ─── Section ─── */
+  section {
+    margin-bottom: 88px;
+    position: relative;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .section-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+
+  .section-title {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--text-dim);
+  }
+
+  /* ─── Practice intro ─── */
+  .practice-intro p {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    line-height: 1.55;
+    color: var(--text);
+    max-width: 30em;
+    margin-bottom: 1.2em;
+    font-weight: 400;
+  }
+
+  .practice-intro p:last-child { margin-bottom: 0; }
+
+  .practice-intro em {
+    color: var(--accent);
+  }
+
+  /* ─── Work entries ─── */
+  .work-entry {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 40px;
+    padding: 28px 0;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .work-entry:first-of-type { border-top: 0; padding-top: 0; }
+
+  .work-dates {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+    padding-top: 8px;
+    line-height: 1.5;
+  }
+
+  .work-dates .loc {
+    display: block;
+    margin-top: 6px;
+    color: var(--text-faint);
+    opacity: 0.7;
+    letter-spacing: 0.1em;
+  }
+
+  .work-body h3 {
+    font-family: var(--serif);
+    font-size: 1.55rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.2;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+
+  .work-body h3 a {
+    color: inherit;
+    text-decoration: none;
+    background-image: linear-gradient(var(--accent-soft), var(--accent-soft));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 1px;
+    transition: background-size 0.3s ease;
+  }
+
+  .work-body h3 a:hover { background-size: 100% 1px; }
+
+  .work-role {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .work-body p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text);
+    max-width: 38em;
+    margin-bottom: 0.8em;
+  }
+
+  .work-body p:last-child { margin-bottom: 0; }
+
+  .work-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    margin-top: 14px;
+  }
+
+  .work-tags span {
+    font-size: 0.68rem;
+    color: var(--text-faint);
+    letter-spacing: 0.08em;
+  }
+
+  .work-tags span + span::before {
+    content: '·';
+    margin-right: 14px;
+    color: var(--accent-soft);
+  }
+
+  /* ─── Earlier (compact list) ─── */
+  .earlier-list {
+    display: grid;
+    gap: 18px;
+  }
+
+  .earlier-row {
+    display: grid;
+    grid-template-columns: 130px 1fr auto;
+    gap: 28px;
+    align-items: baseline;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .earlier-row:last-child { border-bottom: 0; padding-bottom: 0; }
+
+  .earlier-row .dates {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+  }
+
+  .earlier-row .title {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    color: var(--text-bright);
+  }
+
+  .earlier-row .org {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: normal;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── Education ─── */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 56px;
+  }
+
+  .edu-item h4 {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .edu-item .edu-degree {
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .edu-item .edu-dates {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+  }
+
+  .edu-item .edu-note {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.92rem;
+    color: var(--text-faint);
+    margin-top: 8px;
+  }
+
+  /* ─── Practice & tools ─── */
+  .practice-block {
+    margin-bottom: 32px;
+  }
+
+  .practice-block:last-child { margin-bottom: 0; }
+
+  .practice-block h5 {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .practice-block .pl {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .practice-block .pl span {
+    white-space: nowrap;
+  }
+
+  .practice-block .pl span + span::before {
+    content: ' · ';
+    color: var(--accent-soft);
+    margin: 0 4px;
+  }
+
+  /* ─── Closing ─── */
+  .closing {
+    margin-top: 96px;
+    padding-top: 56px;
+    border-top: 1px solid var(--line-soft);
+    text-align: center;
+  }
+
+  .closing-quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.25rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 32em;
+    margin: 0 auto 40px;
+  }
+
+  .closing .links {
+    justify-content: center;
+  }
+
+  .closing-footer {
+    margin-top: 56px;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--text-faint);
+  }
+
+  /* ─── Decorative seed mark in closing ─── */
+  .seed-mark {
+    display: block;
+    margin: 0 auto 40px;
+    width: 64px;
+    height: 64px;
+    opacity: 0.5;
+  }
+
+  .seed-mark circle {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 0.5;
+    opacity: 0.7;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 720px) {
+    .topbar-inner { padding: 14px 24px; }
+    .page { padding: 56px 24px 80px; }
+
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 32px;
+      margin-bottom: 64px;
+    }
+    .portrait { width: 140px; height: 140px; }
+    .hero h1 { font-size: 2.4rem; }
+    .hero .bio { font-size: 1.1rem; }
+
+    .work-entry,
+    .earlier-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .work-dates { padding-top: 0; }
+    .work-dates .loc { display: inline; margin-top: 0; margin-left: 8px; }
+    .earlier-row .dates { margin-bottom: 4px; }
+    .earlier-row .org { margin-top: 2px; }
+
+    section { margin-bottom: 64px; }
+    .section-head { margin-bottom: 28px; }
+    .practice-intro p { font-size: 1.15rem; }
+
+    .edu-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+  }
+
+  /* ─── Print stylesheet ─── */
+  @media print {
+    @page { margin: 0.5in; size: letter; }
+
+    body {
+      background: #ffffff;
+      color: #1c1b19;
+      font-size: 10pt;
+      line-height: 1.45;
+    }
+
+    body::after { display: none; }
+
+    .topbar,
+    .download-btn,
+    .closing-footer { display: none !important; }
+
+    .page {
+      max-width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+
+    .hero {
+      grid-template-columns: 100px 1fr;
+      gap: 28px;
+      margin-bottom: 32px;
+      page-break-inside: avoid;
+    }
+
+    .portrait {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #ccc;
+    }
+
+    .portrait img { filter: none; }
+
+    .hero h1 {
+      font-size: 28pt;
+      color: #1c1b19;
+      margin-bottom: 8px;
+    }
+    .hero h1 em { color: #8a6539; }
+
+    .hero .role {
+      font-size: 8pt;
+      color: #555;
+      margin-bottom: 14px;
+    }
+
+    .hero .bio {
+      font-size: 12pt;
+      color: #2a2925;
+      margin-bottom: 14px;
+    }
+
+    .meta span,
+    .meta .dot { color: #666; font-size: 8.5pt; }
+
+    .links a {
+      color: #8a6539;
+      font-size: 8.5pt;
+      letter-spacing: 0.12em;
+    }
+    .links a::after { display: none; }
+
+    section { margin-bottom: 28px; page-break-inside: avoid; }
+
+    .section-head {
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #d0c8b8;
+    }
+    .section-num { color: #8a6539; font-size: 11pt; }
+    .section-title { color: #555; font-size: 8pt; }
+
+    .practice-intro p {
+      font-size: 13pt;
+      color: #2a2925;
+      max-width: 100%;
+    }
+    .practice-intro em { color: #8a6539; }
+
+    .work-entry {
+      grid-template-columns: 100px 1fr;
+      gap: 24px;
+      padding: 14px 0;
+      border-top: 1px solid #e8e2d4;
+      page-break-inside: avoid;
+    }
+    .work-dates { color: #777; font-size: 8pt; padding-top: 4px; }
+    .work-dates .loc { color: #888; }
+    .work-body h3 { font-size: 14pt; color: #1c1b19; }
+    .work-role { color: #8a6539; font-size: 8pt; margin-bottom: 8px; }
+    .work-body p { font-size: 10pt; color: #2a2925; }
+    .work-tags span { color: #888; font-size: 7.5pt; }
+
+    .earlier-row {
+      grid-template-columns: 90px 1fr auto;
+      gap: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e8e2d4;
+    }
+    .earlier-row .dates { color: #777; font-size: 8pt; }
+    .earlier-row .title { font-size: 11pt; color: #1c1b19; }
+    .earlier-row .org { color: #666; font-size: 9pt; }
+
+    .edu-grid { gap: 18px 40px; }
+    .edu-item h4 { font-size: 12pt; color: #1c1b19; }
+    .edu-item .edu-degree { color: #555; font-size: 9pt; }
+    .edu-item .edu-dates { color: #777; font-size: 8pt; }
+    .edu-item .edu-note { color: #888; font-size: 9pt; }
+
+    .practice-block h5 { color: #8a6539; font-size: 8pt; }
+    .practice-block .pl { color: #2a2925; font-size: 10.5pt; }
+
+    .closing { margin-top: 28px; padding-top: 18px; border-top: 1px solid #d0c8b8; }
+    .closing-quote { font-size: 11pt; color: #555; }
+    .seed-mark { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Top bar ─── -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="topbar-home">james<em>.today</em></a>
+    <div class="topbar-actions">
+      <button class="download-btn" type="button" onclick="window.print()" aria-label="Download CV as PDF">Download PDF</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ─── Hero ─── -->
+  <div class="hero">
+    <div class="portrait">
+      <img src="portrait.jpg" alt="James Bolden" loading="eager">
+    </div>
+    <div class="hero-text">
+      <h1>James <em>Bolden</em></h1>
+      <p class="role">
+        Designer<span class="sep">·</span>Builder<span class="sep">·</span>Connector
+      </p>
+      <p class="bio">
+        Working at the intersection of design, consciousness, and collaborative intelligence.
+      </p>
+      <div class="meta">
+        <span>Philadelphia, PA</span>
+        <span class="dot">·</span>
+        <span>Available for select engagements</span>
+      </div>
+      <div class="links">
+        <a href="https://www.iriscocreative.com" target="_blank" rel="noopener">Iris Cocreative</a>
+        <a href="https://www.linkedin.com/in/james-redenbaugh-07ab732ab/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://instagram.com/" target="_blank" rel="noopener" data-fill="instagram">Instagram</a>
+        <a href="mailto:james@iris-cocreative.com">james@iris-cocreative.com</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Practice ─── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">i.</span>
+      <span class="section-title">Practice</span>
+    </div>
+    <div class="practice-intro">
+      <p>
+        I lead creative direction for organizations working on <em>connection, collaboration, communication, culture, and consciousness</em>. Brand visioning, web systems, and design facilitation for thought leaders, impact-driven companies, and NGOs.
+      </p>
+      <p>
+        Trained as a sculptor and architect; practicing as a designer, builder, and creative director for fifteen years. Most days I am somewhere between the visual, the spatial, and the strategic — looking for the pattern that connects.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Selected Work ─── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">ii.</span>
+      <span class="section-title">Selected Work</span>
+    </div>
+
+    <article class="work-entry">
+      <div class="work-dates">
+        2022 — present
+        <span class="loc">Philadelphia</span>
+      </div>
+      <div class="work-body">
+        <h3><a href="https://www.iriscocreative.com" target="_blank" rel="noopener">Iris Cocreative</a></h3>
+        <div class="work-role">Founder &amp; Creative Director</div>
+        <p>
+          An international design and development studio serving organizations focused on connection, collaboration, communication, culture, and consciousness. I direct branding, web design, web development, and creative facilitation across a small team of designers and engineers.
+        </p>
+        <div class="work-tags">
+          <span>Creative direction</span><span>Brand systems</span><span>Web platforms</span><span>AI development</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="work-entry">
+      <div class="work-dates">
+        2017 — 2022
+        <span class="loc">Distributed</span>
+      </div>
+      <div class="work-body">
+        <h3>Montaia</h3>
+        <div class="work-role">Co-Founder · CEO</div>
+        <p>
+          A collaborative ecosystem of initiatives in loving service of purposeful projects and people around the world. I co-founded the company and led it first as Chief Design Officer, then as CEO — running the creative studio, the global community of purpose-driven creatives, and the collective co-engineering the next generation of collaborative tools.
+        </p>
+        <div class="work-tags">
+          <span>Company leadership</span><span>Product design</span><span>Community design</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="work-entry">
+      <div class="work-dates">
+        2015 — present
+        <span class="loc">Global</span>
+      </div>
+      <div class="work-body">
+        <h3>Evolve World</h3>
+        <div class="work-role">Artistic Director</div>
+        <p>
+          A decade of creative direction for a global intercultural-dialogue initiative — shaping visual language, gathering aesthetics, and the experiential frame for cross-cultural exchange.
+        </p>
+        <div class="work-tags">
+          <span>Art direction</span><span>Convening design</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="work-entry">
+      <div class="work-dates">
+        2015 — 2017
+        <span class="loc">Philadelphia</span>
+      </div>
+      <div class="work-body">
+        <h3>Being Design</h3>
+        <div class="work-role">Founder · Co-Owner · Creative Director</div>
+        <p>
+          A small global design agency I co-founded, focused on web development and digital systems for conscious businesses. Led client-facing strategy for web identity and business design, alongside systems integrations, analytics, and project delivery.
+        </p>
+        <div class="work-tags">
+          <span>Founding</span><span>Web strategy</span><span>Client direction</span>
+        </div>
+      </div>
+    </article>
+
+    <article class="work-entry">
+      <div class="work-dates">
+        2008 — present
+        <span class="loc">Here, now</span>
+      </div>
+      <div class="work-body">
+        <h3>Independent Studio &amp; Art Practice</h3>
+        <div class="work-role">Artist · Multi-disciplinary Designer</div>
+        <p>
+          A through-line beneath every other engagement: a personal studio practice spanning sculpture, drawing, architectural concepting, brand visioning, and what I sometimes call <em>soul mapping</em> — the work of helping a person or organization find the shape of what they're actually here to do.
+        </p>
+        <p>
+          I like to make things that educate, liberate, and inspire.
+        </p>
+        <div class="work-tags">
+          <span>Sculpture</span><span>Drawing</span><span>Architectural concept</span><span>Brand visioning</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ─── Earlier ─── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">iii.</span>
+      <span class="section-title">Earlier</span>
+    </div>
+    <div class="earlier-list">
+      <div class="earlier-row">
+        <span class="dates">2012 — 2014</span>
+        <span class="title">3D Designer</span>
+        <span class="org">Revive Holistic Design · Oakland</span>
+      </div>
+      <div class="earlier-row">
+        <span class="dates">2011</span>
+        <span class="title">Graphic Designer</span>
+        <span class="org">EnlightenNext · Lenox, MA</span>
+      </div>
+      <div class="earlier-row">
+        <span class="dates">2007</span>
+        <span class="title">Architecture Intern</span>
+        <span class="org">EwingCole · Philadelphia</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Education ─── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">iv.</span>
+      <span class="section-title">Education</span>
+    </div>
+    <div class="edu-grid">
+      <div class="edu-item">
+        <h4>Syracuse University</h4>
+        <p class="edu-degree">B.A., Sculpture &amp; Architecture</p>
+        <p class="edu-dates">2008 — 2012</p>
+        <p class="edu-note">Founder, Syracuse Parkour Club.</p>
+      </div>
+      <div class="edu-item">
+        <h4>Rhode Island School of Design</h4>
+        <p class="edu-degree">Pre-college, Architecture</p>
+        <p class="edu-dates">2007 — 2008</p>
+      </div>
+      <div class="edu-item">
+        <h4>Ten Directions</h4>
+        <p class="edu-degree">Integral Facilitator Certificate Program</p>
+        <p class="edu-dates">2019 — 2021</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Practice & Tools ─── -->
+  <section>
+    <div class="section-head">
+      <span class="section-num">v.</span>
+      <span class="section-title">Practice &amp; Tools</span>
+    </div>
+
+    <div class="practice-block">
+      <h5>Disciplines</h5>
+      <p class="pl">
+        <span>Creative direction</span><span>Brand identity</span><span>Web design</span><span>Web development</span><span>Information architecture</span><span>Design facilitation</span><span>Integral facilitation</span><span>Architectural concept</span><span>Sculpture &amp; drawing</span><span>Art direction</span>
+      </p>
+    </div>
+
+    <div class="practice-block">
+      <h5>Tools</h5>
+      <p class="pl">
+        <span>Figma</span><span>Webflow</span><span>HTML / CSS / JavaScript</span><span>Supabase</span><span>n8n</span><span>Claude</span><span>GitHub</span><span>Photoshop</span><span>Illustrator</span><span>InDesign</span><span>After Effects</span><span>Cinema 4D</span><span>Blender</span><span>Rhino</span><span>Grasshopper</span><span>Pencil &amp; paper</span>
+      </p>
+    </div>
+
+    <div class="practice-block">
+      <h5>Ways of working</h5>
+      <p class="pl">
+        <span>Small teams</span><span>Long horizons</span><span>Sacred geometry as design principle</span><span>AI as creative partner</span><span>Studio-not-factory</span><span>Rapid evolutions</span><span>Emergent solutions</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── Closing ─── -->
+  <footer class="closing">
+    <svg class="seed-mark" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="100" cy="100" r="30"/>
+      <circle cx="100" cy="70" r="30"/>
+      <circle cx="125.98" cy="85" r="30"/>
+      <circle cx="125.98" cy="115" r="30"/>
+      <circle cx="100" cy="130" r="30"/>
+      <circle cx="74.02" cy="115" r="30"/>
+      <circle cx="74.02" cy="85" r="30"/>
+    </svg>
+    <p class="closing-quote">
+      "Design is a practice of making room — for connection, for emergence, for the intelligence that arises in the space between us."
+    </p>
+    <div class="links">
+      <a href="mailto:james@iris-cocreative.com">Get in touch</a>
+      <a href="https://www.iriscocreative.com" target="_blank" rel="noopener">Iris Cocreative</a>
+      <a href="https://www.linkedin.com/in/james-redenbaugh-07ab732ab/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+    <p class="closing-footer">james.today · 2026</p>
+  </footer>
+
+</main>
+
+</body>
+</html>
