@@ -563,6 +563,21 @@
 
   .pub-item:hover .pub-arrow { transform: translateX(5px); }
 
+  .pub-item.is-soon { opacity: 0.72; }
+  .pub-item.is-soon:hover { background: none; padding-left: 4px; cursor: default; }
+
+  .pub-soon {
+    align-self: center;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent-2);
+    border: 1px solid var(--accent-2-soft);
+    border-radius: 20px;
+    padding: 3px 10px;
+    white-space: nowrap;
+  }
+
   /* ─── Closing ─── */
   .closing {
     margin-top: var(--s7);
@@ -615,6 +630,10 @@
   }
 
   .closing-links a:hover { color: var(--accent-2); }
+
+  .social-row { margin-top: var(--s2); }
+  .social-row a { color: var(--text-dim); }
+  .social-row a:hover { color: var(--accent-2); }
 
   .closing-footer {
     margin-top: var(--s5);
@@ -696,7 +715,7 @@
     </p>
     <div class="hero-links">
       <a href="#work">Selected Work</a>
-      <a href="#publications">Publications</a>
+      <a href="#publications">Press</a>
       <a href="/cv/">CV</a>
       <a href="/blog/">Blog</a>
       <a href="mailto:james@iris-cocreative.com">Get in touch</a>
@@ -814,7 +833,7 @@
   <section id="publications">
     <div class="section-head">
       <span class="section-num">ii.</span>
-      <span class="section-title">Publications</span>
+      <span class="section-title">Press &amp; Publications</span>
     </div>
 
     <div class="pub-list">
@@ -828,6 +847,71 @@
         <div class="pub-body">
           <h3 class="pub-title">Awakening Together — Featured Artist</h3>
           <p class="pub-excerpt">A featured profile and artist statement on art as mirror and portal, the illusion of separate selfhood, and AI as part of humanity's collective awakening — published by Emergence Education.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <!-- The Integral Stage — Layman Pascal -->
+      <a class="pub-item" href="https://www.youtube.com/watch?v=sHpLCqL2gNs" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">The Integral Stage</span>
+          <span class="pub-date">Video · with Layman Pascal</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">Love the System — Ep. 22</h3>
+          <p class="pub-excerpt">A long-form conversation with host Layman Pascal on integral thinking, systems, and designing for collective intelligence.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <!-- Evolutionary Leaders -->
+      <a class="pub-item" href="https://www.evolutionaryleaders.net/leaders/james-bolden/" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">Evolutionary Leaders</span>
+          <span class="pub-date">Member Profile</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">Evolutionary Leaders Circle</h3>
+          <p class="pub-excerpt">James's profile in the Evolutionary Leaders circle — a global network of individuals advancing conscious evolution and planetary flourishing.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <!-- Awaken Your Purpose — Holomovement (coming soon) -->
+      <div class="pub-item is-soon">
+        <div class="pub-meta">
+          <span class="pub-outlet">Holomovement · Awaken Your Purpose</span>
+          <span class="pub-date">Podcast</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">James Bolden, IRIS Cocreative</h3>
+          <p class="pub-excerpt">A conversation on purpose, the Holomovement, and building digital spaces for collective awakening.</p>
+        </div>
+        <span class="pub-soon">Coming soon</span>
+      </div>
+
+      <!-- The Daily Orange — parkour (2010) -->
+      <a class="pub-item" href="https://dailyorange.com/2010/09/in-a-single-bound-with-each-leap-parkour-club-turns-campus-into-personal-playground/" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">The Daily Orange</span>
+          <span class="pub-date">Sep 2010</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">In a Single Bound</h3>
+          <p class="pub-excerpt">A feature on the Syracuse University parkour club turning the campus into a playground — from James's parkour years.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <!-- Reuters — parkour -->
+      <a class="pub-item" href="https://www.reuters.com/article/lifestyle/ninja-in-training-parkour-fans-leap-flip-for-sport-idUSTRE67Q3CV/" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">Reuters</span>
+          <span class="pub-date">2010</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">Ninja in Training: Parkour Fans Leap, Flip for Sport</h3>
+          <p class="pub-excerpt">Reuters' feature on the rise of parkour as a sport — from James's parkour years.</p>
         </div>
         <span class="pub-arrow" aria-hidden="true">↗</span>
       </a>
@@ -853,8 +937,12 @@
       <a href="/cv/">CV</a>
       <a href="/blog/">Blog</a>
       <a href="mailto:james@iris-cocreative.com">Get in touch</a>
+    </div>
+    <div class="closing-links social-row">
+      <a href="https://www.behance.net/syn" target="_blank" rel="noopener">Behance</a>
+      <a href="https://www.instagram.com/_earthrise_" target="_blank" rel="noopener">Instagram</a>
       <a href="https://www.linkedin.com/in/james-redenbaugh-51662256/" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="https://www.instagram.com/_earthrise_/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.facebook.com/james.redenbaugh/" target="_blank" rel="noopener">Facebook</a>
     </div>
     <p class="closing-footer">james.today · 2026</p>
   </footer>
