@@ -494,6 +494,75 @@
     margin-top: var(--s2);
   }
 
+  /* ─── Publications ─── */
+  .pub-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pub-item {
+    display: grid;
+    grid-template-columns: 168px 1fr auto;
+    gap: var(--s4);
+    align-items: baseline;
+    padding: var(--s3) 4px;
+    border-top: 1px solid var(--line-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.3s ease, padding-left 0.3s ease;
+  }
+
+  .pub-item:last-child { border-bottom: 1px solid var(--line-soft); }
+  .pub-item:hover { background: var(--bg-card); padding-left: 14px; }
+
+  .pub-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .pub-outlet {
+    font-family: var(--sans);
+    font-size: 0.66rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+  }
+
+  .pub-date {
+    font-size: 0.64rem;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+  }
+
+  .pub-title {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.25;
+    margin-bottom: 7px;
+    letter-spacing: -0.005em;
+  }
+
+  .pub-excerpt {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 56ch;
+  }
+
+  .pub-arrow {
+    align-self: center;
+    color: var(--accent-2);
+    font-size: 1rem;
+    line-height: 1;
+    transition: transform 0.25s ease;
+  }
+
+  .pub-item:hover .pub-arrow { transform: translateX(5px); }
+
   /* ─── Closing ─── */
   .closing {
     margin-top: var(--s7);
@@ -570,6 +639,9 @@
     .topbar-actions { gap: 16px; }
     .page { padding: var(--s5) 22px var(--s6); }
     .work-grid { grid-template-columns: 1fr; }
+    .pub-item { grid-template-columns: 1fr; gap: var(--s2); }
+    .pub-item:hover { padding-left: 4px; }
+    .pub-meta { flex-direction: row; gap: 12px; align-items: baseline; }
     .geometry svg { width: 420px; height: 420px; }
     .geometry { right: -140px; }
   }
@@ -624,6 +696,7 @@
     </p>
     <div class="hero-links">
       <a href="#work">Selected Work</a>
+      <a href="#publications">Publications</a>
       <a href="/cv/">CV</a>
       <a href="/blog/">Blog</a>
       <a href="mailto:james@iris-cocreative.com">Get in touch</a>
@@ -733,6 +806,31 @@
         <p class="project-teaser">A living pattern language for designing humane, regenerative digital spaces — drawn from sacred geometry and living-systems thinking.</p>
         <span class="soon-badge">Coming soon</span>
       </div>
+
+    </div>
+  </section>
+
+  <!-- ─── Publications ─── -->
+  <section id="publications">
+    <div class="section-head">
+      <span class="section-num">ii.</span>
+      <span class="section-title">Publications</span>
+    </div>
+
+    <div class="pub-list">
+
+      <!-- The Artist of Possibility — Emergence Education -->
+      <a class="pub-item" href="https://emergenceeducation.com/articles/james-redenbaugh/" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">The Artist of Possibility</span>
+          <span class="pub-date">Issue 25 · Mar 2026</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">Awakening Together — Featured Artist</h3>
+          <p class="pub-excerpt">A featured profile and artist statement on art as mirror and portal, the illusion of separate selfhood, and AI as part of humanity's collective awakening — published by Emergence Education.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
 
     </div>
   </section>
