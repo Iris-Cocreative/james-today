@@ -370,6 +370,10 @@
             e.stopPropagation();
             var collapsed = containerRef.classList.toggle('wc-collapsed');
             try { localStorage.setItem('wc-collapsed', collapsed ? 'true' : 'false'); } catch (e2) {}
+            // Bars revealed on expand were never painted while display:none
+            // (zero-size canvas), and the daily draw cache would skip them.
+            // Force a redraw on the next frame, once layout has settled.
+            requestAnimationFrame(function () { _drawAll(true); _updateNow(); });
           });
         })(container);
         homeRow.appendChild(hToggle);
