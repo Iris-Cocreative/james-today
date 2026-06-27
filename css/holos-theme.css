@@ -1,0 +1,170 @@
+/* ============================================================
+   holos-theme.css — Holos-styleguide re-skin of the dashboard
+   Loaded AFTER tokens.css + dashboard.css. Remaps the design
+   tokens to the Holos system (teal, dark surfaces, Fraunces +
+   Montserrat, rounder corners) and re-skins the few hardcoded
+   colors / Typekit fonts the base sheet bakes in.
+   Ref: lab.iriscocreative.com/Holos-styleguide
+   ============================================================ */
+
+/* ---- Token remap → Holos palette ---- */
+:root {
+  /* Brand — teal primary */
+  --accent: #279daf;
+  --accent-hover: #34bccf;
+  --accent-subtle: rgba(39, 157, 175, 0.12);
+  --accent-line: rgba(39, 157, 175, 0.22);
+  --accent-ghost: rgba(39, 157, 175, 0.07);
+
+  /* Surfaces (Holos near-black teal) */
+  --bg: #02080a;
+  --bg-raised: #082028;
+  --bg-sunken: #061418;
+  --bg-hover: rgba(225, 235, 237, 0.05);
+  --bg-card: rgba(225, 235, 237, 0.025);
+  --bg-card-hover: rgba(225, 235, 237, 0.05);
+  --bg-input: rgba(225, 235, 237, 0.03);
+
+  /* Text ramp */
+  --text-primary: #fffcfb;
+  --text-default: #e1ebed;
+  --text-secondary: #8c9fa4;
+  --text-tertiary: #486b70;
+  --text-faint: #34555a;
+
+  /* Borders — teal-tinted */
+  --border: rgba(39, 157, 175, 0.28);
+  --border-subtle: rgba(225, 235, 237, 0.06);
+  --border-hover: rgba(39, 157, 175, 0.45);
+
+  /* Semantic — Holos functional */
+  --error: #ce4320;
+  --success: #29a378;
+  --urgent: #ce4320;
+  --importance: #279daf;
+
+  /* Rounder corners (Holos radii) */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Type — Fraunces display, Montserrat UI */
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Montserrat', sans-serif;
+}
+
+/* ---- Ambient teal depth + softer grain ---- */
+html, body {
+  background:
+    radial-gradient(1100px 560px at 82% -12%, rgba(39, 157, 175, 0.07), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(20, 109, 122, 0.06), transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+}
+body::after { opacity: 0.014; }
+
+/* ---- Font remap (mirror every base selector that hard-codes a
+   Typekit family so the later declaration always wins) ---- */
+html, body,
+.task-quick-add input, .quick-add input, .timer-btn, .session-name-input,
+.modal-field textarea, .modal-actions button,
+.project-modal .modal-field input, .project-modal .modal-field select,
+.week-btn, #timeline-summary, .wk-modal-actions button,
+.urgency-flag-option, .wc-collapse-btn {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* Display / quote text → Fraunces */
+.domain-name, .day-question, .modal h2, .week-title-range, .dh-num, .wk-modal h2 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-variation-settings: "opsz" 144, "SOFT" 40, "wght" 460;
+}
+.dh-num { font-variation-settings: "opsz" 144, "SOFT" 30, "wght" 420; }
+
+/* ---- "Now" markers → Holos amber (#f59e0b warm pop vs. teal) ---- */
+.wc-now-line,
+.wc-now-cap,
+.wc-dragged-line,
+.wc-dragged-line .wc-now-cap,
+.timeline-now-marker,
+.timeline-now-marker::before,
+.timeline-now-marker::after,
+.mini-now-line {
+  background: #f59e0b;
+}
+.wc-now-line { box-shadow: 0 0 6px rgba(245, 158, 11, 0.4); }
+.wc-dragged-line { box-shadow: 0 0 8px rgba(245, 158, 11, 0.35), 0 0 18px rgba(245, 158, 11, 0.15); }
+.timeline-now-marker { box-shadow: 0 0 6px rgba(245, 158, 11, 0.4); }
+.mini-now-line { box-shadow: 0 0 4px rgba(245, 158, 11, 0.6); }
+.wc-drag-tooltip { color: #f59e0b; }
+
+/* Date-crossing marker + future region → teal */
+.wc-date-marker { background: #279daf; box-shadow: 0 0 5px rgba(39, 157, 175, 0.45); }
+.wc-date-marker-label { color: rgba(39, 157, 175, 0.85); }
+.wc-drag-overlay.future {
+  background: rgba(39, 157, 175, 0.15);
+  border-left-color: rgba(39, 157, 175, 0.35);
+  border-right-color: rgba(39, 157, 175, 0.35);
+}
+.wc-drag-badge.future { color: #34bccf; border-color: rgba(39, 157, 175, 0.5); }
+.wc-drag-badge { background: rgba(8, 32, 40, 0.92); }
+.drop-target {
+  background: rgba(245, 158, 11, 0.05) !important;
+  outline-color: rgba(245, 158, 11, 0.3);
+}
+
+/* ---- Floating popups → Holos surfaces (drop the hardcoded #222/#333) ---- */
+.status-dropdown, .color-picker-popup, .type-filter-modal {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+.status-option, .type-filter-option { color: var(--text-secondary); border-radius: var(--radius-sm); }
+.status-option:hover, .type-filter-option:hover { background: var(--bg-hover); }
+.project-modal .modal-field select option { background: var(--bg-raised); color: var(--text-default); }
+
+/* ---- World-clock strip → rounded contained card ---- */
+.world-clock {
+  margin: 12px 12px 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* ---- Roundness polish on standalone surfaces ---- */
+.project-card { border-radius: var(--radius-md); }
+.task-group { border-radius: var(--radius-md); }
+.acc-tasks.expanded .task-group { border-radius: var(--radius-md); }
+.day-card { border-radius: var(--radius); }
+.timeline-session { border-radius: var(--radius); }
+.schedule-block { border-radius: var(--radius-sm); }
+.mini-block { border-radius: var(--radius-sm); }
+.toast { border-radius: var(--radius-md); }
+.modal-field textarea,
+.project-modal .modal-field input,
+.project-modal .modal-field select,
+.session-name-input,
+.wk-journal-q textarea { border-radius: var(--radius); }
+
+/* ---- Buttons → Holos pill outline ---- */
+.timer-btn, .week-btn, .tl-summary-toggle,
+.modal-actions button, .wk-modal-actions button {
+  border-radius: var(--radius-pill);
+}
+.type-toggle, .task-status-filter-btn, .day-sort-btn, .wc-collapse-btn { border-radius: var(--radius-sm); }
+.btn-save { color: #02080a; }
+
+/* ---- Frosted timeline summary (Holos glass) ---- */
+#timeline-summary {
+  background: rgba(8, 32, 40, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Selection */
+::selection { background: rgba(39, 157, 175, 0.3); color: var(--text-primary); }
