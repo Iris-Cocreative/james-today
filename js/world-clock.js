@@ -648,6 +648,22 @@
       drawTimeline(canvas, tz, startHour);
       if (canvas.width > 0 && canvas.height > 0) anyDrawn = true;
 
+      // Dynamic label contrast: the label is pinned to the left edge of the
+      // bar, so sample the gradient there and flip text to dark when that
+      // patch is light (e.g. Berlin / Thailand / Bali daytime).
+      var label = wrap.parentNode.querySelector('.wc-bar-label:not(.home)');
+      if (label) {
+        var st = getSunTimes(tz);
+        var lum = 0, samples = [0.2, 0.8, 1.4, 2.0];
+        for (var si = 0; si < samples.length; si++) {
+          var sh = (((startHour + samples[si]) % 24) + 24) % 24;
+          var c = getGradientColor(sh, st.sunrise, st.sunset);
+          lum += 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        }
+        lum /= samples.length;
+        label.classList.toggle('wc-label-dark', lum > 140);
+      }
+
       // Remove old overlays
       var oldIcons = wrap.querySelectorAll('.wc-date-marker');
       for (var j = 0; j < oldIcons.length; j++) oldIcons[j].remove();

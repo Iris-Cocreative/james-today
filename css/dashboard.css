@@ -671,6 +671,11 @@ body::after {
 .wc-bar-label-offset { font-size: 9px; opacity: 0.5; }
 .wc-bar-label-offset.positive { color: rgba(106,196,122,0.7); }
 .wc-bar-label-offset.negative { color: rgba(196,106,106,0.7); }
+/* Dynamic contrast: dark text when the gradient under the label is light */
+.wc-bar-label { transition: color 0.4s ease; }
+.wc-bar-label.wc-label-dark { color: #14130f; }
+.wc-bar-label.wc-label-dark .wc-bar-label-offset.positive { color: rgba(20,90,45,0.9); }
+.wc-bar-label.wc-label-dark .wc-bar-label-offset.negative { color: rgba(120,35,35,0.9); }
 .wc-bar-label-home-tag {
   font-size: 8px;
   letter-spacing: 0.1em;
