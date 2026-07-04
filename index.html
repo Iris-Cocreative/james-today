@@ -582,6 +582,105 @@
     white-space: nowrap;
   }
 
+  /* ─── Schedule ─── */
+  #schedule { margin-top: var(--s7); }
+
+  .schedule-intro {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 52ch;
+    margin-bottom: var(--s4);
+  }
+
+  .schedule-row {
+    display: flex;
+    gap: var(--s3);
+    align-items: stretch;
+  }
+
+  /* Each button's width grows with the call's duration (30 / 60 / 90). */
+  .schedule-btn {
+    flex-grow: var(--minutes);
+    flex-basis: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--s3);
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--s3) var(--s3) var(--s2);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .schedule-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .schedule-btn:hover {
+    border-color: var(--line-hover);
+    background: var(--bg-card-hover);
+  }
+
+  .schedule-btn:hover::before { transform: scaleX(1); }
+
+  .schedule-duration {
+    font-family: var(--serif);
+    color: var(--text-bright);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  /* Type scale steps up with duration too */
+  .schedule-btn[data-length="30"] .schedule-duration { font-size: 1.7rem; }
+  .schedule-btn[data-length="60"] .schedule-duration { font-size: 2.2rem; }
+  .schedule-btn[data-length="90"] .schedule-duration { font-size: 2.7rem; }
+
+  .schedule-duration em {
+    font-style: italic;
+    color: var(--accent);
+    font-size: 0.55em;
+  }
+
+  .schedule-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-family: var(--sans);
+    font-size: 0.66rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-dim);
+    transition: color 0.25s ease;
+  }
+
+  .schedule-btn:hover .schedule-label { color: var(--accent); }
+
+  .schedule-label .arrow {
+    color: var(--accent-2);
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: transform 0.25s ease;
+  }
+
+  .schedule-btn:hover .schedule-label .arrow { transform: translateX(4px); }
+
   /* ─── Closing ─── */
   .closing {
     margin-top: var(--s7);
@@ -665,6 +764,9 @@
     .pub-item { grid-template-columns: 1fr; gap: var(--s2); }
     .pub-item:hover { padding-left: 4px; }
     .pub-meta { flex-direction: row; gap: 12px; align-items: baseline; }
+    /* Stacked on mobile: height stands in for width to keep duration legible */
+    .schedule-row { flex-direction: column; }
+    .schedule-btn { min-height: calc(var(--minutes) * 1.6px + 60px); }
     .geometry svg { width: 420px; height: 420px; }
     .geometry { right: -140px; }
   }
@@ -720,6 +822,7 @@
     <div class="hero-links">
       <a href="#work">Selected Work</a>
       <a href="#publications">Press</a>
+      <a href="#schedule">Schedule a Call</a>
       <a href="/cv/">CV</a>
       <a href="/blog/">Blog</a>
       <a href="mailto:james@iris-cocreative.com">Get in touch</a>
@@ -924,6 +1027,33 @@
     </div>
   </section>
 
+  <!-- ─── Schedule ─── -->
+  <section id="schedule">
+    <div class="section-head">
+      <span class="section-num">iii.</span>
+      <span class="section-title">Schedule a Call</span>
+    </div>
+
+    <p class="schedule-intro">
+      Want to talk through a project, a collaboration, or an idea taking shape? Pick the length that fits the conversation.
+    </p>
+
+    <div class="schedule-row">
+      <a class="schedule-btn" data-length="30" style="--minutes: 30" href="https://app.hellobonsai.com/s/iris-cocreative/james-30" target="_blank" rel="noopener">
+        <span class="schedule-duration">30 <em>min</em></span>
+        <span class="schedule-label">Quick call <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+      <a class="schedule-btn" data-length="60" style="--minutes: 60" href="https://app.hellobonsai.com/s/iris-cocreative/time-with-james" target="_blank" rel="noopener">
+        <span class="schedule-duration">60 <em>min</em></span>
+        <span class="schedule-label">Working session <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+      <a class="schedule-btn" data-length="90" style="--minutes: 90" href="https://app.hellobonsai.com/s/iris-cocreative/james-90" target="_blank" rel="noopener">
+        <span class="schedule-duration">90 <em>min</em></span>
+        <span class="schedule-label">Deep dive <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+    </div>
+  </section>
+
   <!-- ─── Closing ─── -->
   <footer class="closing">
     <svg class="seed-mark" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -941,6 +1071,7 @@
     <div class="closing-links">
       <a href="/cv/">CV</a>
       <a href="/blog/">Blog</a>
+      <a href="#schedule">Schedule a call</a>
       <a href="mailto:james@iris-cocreative.com">Get in touch</a>
     </div>
     <div class="closing-links social-row">
