@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>James Bolden — james.today</title>
+<meta name="description" content="James Bolden — creative technologist working at the intersection of consciousness, community, and living systems. Founder of IRIS Cocreative.">
+
+<!-- Open Graph / Twitter -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://james.today/">
+<meta property="og:title" content="James Bolden — james.today">
+<meta property="og:description" content="Creative technologist building the spaces where consciousness, community, and living systems meet. Founder of IRIS Cocreative.">
+<meta property="og:image" content="https://james.today/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="James Bolden — james.today">
+<meta name="twitter:description" content="Creative technologist building the spaces where consciousness, community, and living systems meet.">
+<meta name="twitter:image" content="https://james.today/og-image.png">
+
+<!-- Person schema: connects James Bolden ↔ James Redenbaugh ↔ IRIS Cocreative -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "James Bolden",
+  "alternateName": "James Redenbaugh",
+  "url": "https://james.today",
+  "image": "https://james.today/cv/portrait.jpg",
+  "jobTitle": "Founder & Creative Director",
+  "worksFor": { "@type": "Organization", "name": "IRIS Cocreative", "url": "https://www.iriscocreative.com" },
+  "sameAs": [
+    "https://www.iriscocreative.com",
+    "https://www.behance.net/syn",
+    "https://www.instagram.com/_earthrise_",
+    "https://www.linkedin.com/in/james-redenbaugh-51662256/",
+    "https://www.facebook.com/james.redenbaugh/"
+  ]
+}
+</script>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  /* ─── Tokens — same chassis as index.html ─── */
+  :root {
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'DM Sans', sans-serif;
+    --s1: 0.5rem;
+    --s2: 0.81rem;
+    --s3: 1.31rem;
+    --s4: 2.12rem;
+    --s5: 3.43rem;
+    --s6: 5.55rem;
+    --s7: 8.98rem;
+  }
+
+  :root,
+  [data-theme="dark"] {
+    --bg: #0b0a0f;
+    --bg-raised: #141319;
+    --bg-card: rgba(255, 255, 255, 0.025);
+    --bg-card-hover: rgba(255, 255, 255, 0.05);
+    --text: #e8e4dc;
+    --text-bright: #f5f0e6;
+    --text-dim: #a8a39b;
+    --text-faint: #706b62;
+    --accent: #c4956a;
+    --accent-soft: rgba(196, 149, 106, 0.55);
+    --accent-2: #3ea691;
+    --accent-2-soft: rgba(62, 166, 145, 0.5);
+    --line: rgba(196, 149, 106, 0.18);
+    --line-soft: rgba(196, 149, 106, 0.08);
+    --line-hover: rgba(196, 149, 106, 0.35);
+    --grain-opacity: 0.025;
+    --geo-opacity: 0.07;
+    --art-bg: #100e16;
+    --logo-invert: 0;
+  }
+
+  [data-theme="light"] {
+    --bg: #f4efe4;
+    --bg-raised: #ede6d6;
+    --bg-card: rgba(28, 27, 25, 0.025);
+    --bg-card-hover: rgba(28, 27, 25, 0.05);
+    --text: #2a2925;
+    --text-bright: #1c1b19;
+    --text-dim: #5c574e;
+    --text-faint: #8a8478;
+    --accent: #a9763f;
+    --accent-soft: rgba(169, 118, 63, 0.6);
+    --accent-2: #2f8678;
+    --accent-2-soft: rgba(47, 134, 120, 0.55);
+    --line: rgba(169, 118, 63, 0.22);
+    --line-soft: rgba(169, 118, 63, 0.12);
+    --line-hover: rgba(169, 118, 63, 0.4);
+    --grain-opacity: 0.018;
+    --geo-opacity: 0.05;
+    --art-bg: #ece5d5;
+    --logo-invert: 1;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    line-height: 1.6;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background 0.4s ease, color 0.4s ease;
+  }
+
+  /* Visible keyboard focus, matching the hover language */
+  :focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* ─── Film grain ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    opacity: var(--grain-opacity);
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ─── Ambient seed-of-life geometry — now alive ─── */
+  .geometry {
+    position: fixed;
+    top: -120px;
+    right: -160px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    animation: geoIn 3s ease 0.4s forwards;
+  }
+
+  .geometry svg { width: 620px; height: 620px; }
+
+  .geometry .rotor {
+    transform-origin: 100px 100px;
+    animation: geoSpin 240s linear infinite;
+  }
+
+  .geometry circle {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 0.4;
+    opacity: var(--geo-opacity);
+  }
+
+  @keyframes geoIn {
+    0% { opacity: 0; transform: scale(0.92) rotate(-24deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes geoSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ─── Top bar ─── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .topbar-inner {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .topbar-home {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    color: var(--text-bright);
+    text-decoration: none;
+  }
+
+  .topbar-home em { font-style: italic; color: var(--accent); }
+
+  .topbar-actions {
+    display: flex;
+    gap: 22px;
+    align-items: center;
+  }
+
+  .topbar-actions a {
+    font-family: var(--sans);
+    font-size: 0.68rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+
+  .topbar-actions a:hover { color: var(--accent); }
+
+  .topbar-actions a.btn-call {
+    color: var(--accent);
+    border: 1px solid var(--accent-soft);
+    border-radius: 20px;
+    padding: 7px 16px;
+    transition: all 0.25s ease;
+  }
+
+  .topbar-actions a.btn-call:hover {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .theme-toggle {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+  }
+
+  .theme-toggle:hover { color: var(--accent-2); border-color: var(--accent-2-soft); }
+  .theme-toggle svg { width: 15px; height: 15px; }
+  .theme-toggle .moon { display: none; }
+  [data-theme="light"] .theme-toggle .sun { display: none; }
+  [data-theme="light"] .theme-toggle .moon { display: block; }
+
+  /* ─── Layout ─── */
+  .page {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: var(--s6) 40px var(--s7);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s5);
+    align-items: center;
+    margin-bottom: var(--s6);
+  }
+
+  .hero-greeting {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--text-dim);
+    margin-bottom: var(--s3);
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 5.4vw, 3.9rem);
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
+    margin-bottom: var(--s4);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.35s forwards;
+  }
+
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero h1 .teal { color: var(--accent-2); font-style: italic; }
+
+  .hero-intro {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text);
+    max-width: 52ch;
+    margin-bottom: var(--s4);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.55s forwards;
+  }
+
+  .hero-intro a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid var(--accent-soft);
+    transition: color 0.25s ease, border-color 0.25s ease;
+  }
+
+  .hero-intro a:hover { color: var(--accent-2); border-color: var(--accent-2-soft); }
+
+  .hero-cta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--s3) var(--s4);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.75s forwards;
+  }
+
+  .btn-primary {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--bg);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 24px;
+    padding: 13px 26px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    transition: all 0.25s ease;
+  }
+
+  .btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .btn-primary .arrow { font-size: 0.9rem; line-height: 1; }
+
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 22px;
+  }
+
+  .hero-links a {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 4px 0;
+    transition: color 0.25s ease;
+  }
+
+  .hero-links a:hover { color: var(--accent); }
+
+  /* Portrait inside a slowly-breathing seed ring */
+  .hero-portrait {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 0.6s forwards;
+  }
+
+  .hero-portrait img {
+    position: absolute;
+    inset: 18px;
+    width: calc(100% - 36px);
+    height: calc(100% - 36px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--line);
+  }
+
+  .hero-portrait svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    animation: portraitSpin 90s linear infinite;
+  }
+
+  .hero-portrait svg circle {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 0.5;
+    opacity: 0.5;
+  }
+
+  @keyframes portraitSpin { to { transform: rotate(360deg); } }
+
+  /* ─── Now — the living part of james.today ─── */
+  #now { margin-bottom: var(--s7); }
+
+  .now-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    gap: var(--s4);
+    align-items: stretch;
+  }
+
+  .now-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--s4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .now-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent-2);
+    margin-bottom: var(--s3);
+  }
+
+  .now-date .pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-2);
+    animation: pulse 2.6s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.75); }
+  }
+
+  .now-list { list-style: none; }
+
+  .now-list li {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text);
+    padding: 10px 0 10px 22px;
+    position: relative;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .now-list li:first-child { border-top: none; padding-top: 0; }
+
+  .now-list li::before {
+    content: '·';
+    position: absolute;
+    left: 4px;
+    color: var(--accent);
+    font-family: var(--serif);
+  }
+
+  .now-list em { font-style: italic; color: var(--accent); }
+
+  /* Featured post — the first story of the Now */
+  .feature-post {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--s3);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .feature-post::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .feature-post:hover { border-color: var(--line-hover); background: var(--bg-card-hover); }
+  .feature-post:hover::before { transform: scaleX(1); }
+
+  .feature-kicker {
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+
+  .feature-post h3 {
+    font-family: var(--serif);
+    font-size: 1.9rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.15;
+    margin-bottom: var(--s2);
+  }
+
+  .feature-post h3 em { font-style: italic; color: var(--accent); }
+
+  .feature-post p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 52ch;
+  }
+
+  .feature-read {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: color 0.25s ease, gap 0.25s ease;
+  }
+
+  .feature-post:hover .feature-read { color: var(--accent-2); gap: 11px; }
+
+  /* ─── Section head ─── */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: var(--s5);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+
+  .section-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--accent-2);
+  }
+
+  .section-title {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: var(--text-dim);
+  }
+
+  .section-note {
+    margin-left: auto;
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+  }
+
+  /* ─── Visual field — the work showcase ───
+     Each frame currently holds generative parametric art (drawn by JS
+     below, seeded per project). To use real work: replace the inner
+     <svg class="showcase-art"> with <img src="..."> — everything else
+     (scroll, captions, controls) keeps working. */
+  .showcase {
+    position: relative;
+    margin-bottom: var(--s5);
+  }
+
+  .showcase-track {
+    display: flex;
+    gap: var(--s3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+  }
+
+  .showcase-track::-webkit-scrollbar { display: none; }
+
+  .showcase-frame {
+    flex: 0 0 min(560px, 82%);
+    scroll-snap-align: start;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .showcase-canvas {
+    position: relative;
+    aspect-ratio: 1.618 / 1;   /* φ, of course */
+    background: var(--art-bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+
+  .showcase-frame:hover .showcase-canvas { border-color: var(--line-hover); }
+
+  .showcase-art { width: 100%; height: 100%; display: block; }
+
+  .showcase-caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 4px 0;
+  }
+
+  .showcase-caption strong {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--text-bright);
+  }
+
+  .showcase-caption span {
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+  }
+
+  .showcase-nav {
+    position: absolute;
+    top: -58px;
+    right: 0;
+    display: flex;
+    gap: 8px;
+  }
+
+  .showcase-nav button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .showcase-nav button:hover { color: var(--accent-2); border-color: var(--accent-2-soft); }
+
+  /* ─── Work grid (condensed cards, as on v1) ─── */
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--s3);
+  }
+
+  .project-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--s4);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .project-card:hover { border-color: var(--line-hover); background: var(--bg-card-hover); }
+  .project-card:hover::before, .project-card[open]::before { transform: scaleX(1); }
+
+  .project-card summary {
+    list-style: none;
+    cursor: pointer;
+    display: block;
+    position: relative;
+    padding-right: 32px;
+  }
+
+  .project-card summary::-webkit-details-marker { display: none; }
+
+  .project-card h3 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .project-role {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: var(--s3);
+  }
+
+  .project-teaser {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--text-dim);
+    margin-bottom: var(--s3);
+  }
+
+  .project-tags { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .project-tags span { font-size: 0.66rem; letter-spacing: 0.08em; color: var(--text-faint); }
+  .project-tags span + span::before { content: '·'; margin-right: 14px; color: var(--accent-2-soft); }
+
+  .card-toggle { position: absolute; top: 2px; right: 0; width: 20px; height: 20px; color: var(--accent-2); }
+  .card-toggle::before, .card-toggle::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 13px; height: 1.5px;
+    background: currentColor;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+  .card-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
+  .project-card[open] .card-toggle::after { opacity: 0; transform: translate(-50%, -50%) rotate(0deg); }
+
+  .project-detail {
+    margin-top: var(--s3);
+    padding-top: var(--s3);
+    border-top: 1px solid var(--line-soft);
+    animation: fadeUp 0.4s ease;
+  }
+
+  .project-detail p { font-size: 0.95rem; line-height: 1.75; color: var(--text); margin-bottom: var(--s2); }
+  .project-detail p:last-of-type { margin-bottom: var(--s3); }
+  .project-detail em { color: var(--accent); font-style: italic; }
+
+  .project-actions { display: flex; flex-wrap: wrap; gap: 14px 22px; }
+  .project-actions a {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: color 0.25s ease, gap 0.25s ease;
+  }
+  .project-actions a:hover { color: var(--accent-2); gap: 11px; }
+
+  .project-card.is-soon { opacity: 0.78; }
+  .project-card.is-soon summary { cursor: default; }
+  .project-card.is-soon .project-role { color: var(--accent-2); }
+  .soon-badge {
+    display: inline-block;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent-2);
+    border: 1px solid var(--accent-2-soft);
+    border-radius: 20px;
+    padding: 3px 10px;
+    margin-top: var(--s2);
+  }
+
+  /* ─── Kind words & collaborators ─── */
+  #trust { margin-top: var(--s7); }
+
+  .quote-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+  }
+
+  .quote-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--s4) var(--s4) var(--s3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    position: relative;
+  }
+
+  .quote-card::before {
+    content: '“';
+    font-family: var(--serif);
+    font-size: 3.4rem;
+    line-height: 0.6;
+    color: var(--accent-soft);
+    display: block;
+  }
+
+  .quote-card blockquote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.06rem;
+    line-height: 1.55;
+    color: var(--text);
+    border: none;
+    flex-grow: 1;
+  }
+
+  .quote-attrib { display: flex; flex-direction: column; gap: 2px; }
+  .quote-attrib strong { font-size: 0.78rem; font-weight: 500; color: var(--text-bright); letter-spacing: 0.04em; }
+  .quote-attrib span { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-faint); }
+
+  /* draft-only marker — delete when real quotes land */
+  .sample-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.52rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 2px 8px;
+  }
+
+  .logo-row-label {
+    text-align: center;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--text-faint);
+    margin-bottom: var(--s3);
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--s4) var(--s5);
+  }
+
+  .logo-row img {
+    height: 26px;
+    width: auto;
+    opacity: 0.6;
+    filter: grayscale(1);
+    transition: opacity 0.3s ease;
+  }
+
+  .logo-row img.logo-white { filter: grayscale(1) invert(var(--logo-invert)); }
+  .logo-row img:hover { opacity: 1; }
+
+  .logo-row .logo-word {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    opacity: 0.75;
+  }
+
+  /* ─── Press & Publications ─── */
+  #publications { margin-top: var(--s7); }
+
+  .pub-list { display: flex; flex-direction: column; }
+
+  .pub-item {
+    display: grid;
+    grid-template-columns: 168px 1fr auto;
+    gap: var(--s4);
+    align-items: baseline;
+    padding: var(--s3) 4px;
+    border-top: 1px solid var(--line-soft);
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.3s ease, padding-left 0.3s ease;
+  }
+
+  .pub-item:last-child { border-bottom: 1px solid var(--line-soft); }
+  .pub-item:hover { background: var(--bg-card); padding-left: 14px; }
+
+  .pub-meta { display: flex; flex-direction: column; gap: 5px; }
+  .pub-outlet { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); }
+  .pub-date { font-size: 0.64rem; letter-spacing: 0.1em; color: var(--text-faint); }
+
+  .pub-title {
+    font-family: var(--serif);
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.25;
+    margin-bottom: 7px;
+  }
+
+  .pub-excerpt { font-size: 0.82rem; line-height: 1.55; color: var(--text-dim); max-width: 60ch; }
+  .pub-excerpt em { font-style: italic; color: var(--text); }
+
+  .pub-arrow { align-self: center; color: var(--accent-2); font-size: 1rem; line-height: 1; transition: transform 0.25s ease; }
+  .pub-item:hover .pub-arrow { transform: translateX(5px); }
+
+  /* ─── Schedule ─── */
+  #schedule { margin-top: var(--s7); }
+
+  .schedule-intro {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 52ch;
+    margin-bottom: var(--s4);
+  }
+
+  .schedule-row { display: flex; gap: var(--s3); align-items: stretch; }
+
+  .schedule-btn {
+    flex-grow: var(--minutes);
+    flex-basis: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--s3);
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--s3) var(--s3) var(--s2);
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .schedule-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .schedule-btn:hover { border-color: var(--line-hover); background: var(--bg-card-hover); }
+  .schedule-btn:hover::before { transform: scaleX(1); }
+
+  .schedule-duration { font-family: var(--serif); color: var(--text-bright); line-height: 1; }
+  .schedule-btn[data-length="30"] .schedule-duration { font-size: 1.7rem; }
+  .schedule-btn[data-length="60"] .schedule-duration { font-size: 2.2rem; }
+  .schedule-btn[data-length="90"] .schedule-duration { font-size: 2.7rem; }
+  .schedule-duration em { font-style: italic; color: var(--accent); font-size: 0.55em; }
+
+  .schedule-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-dim);
+    transition: color 0.25s ease;
+  }
+
+  .schedule-btn:hover .schedule-label { color: var(--accent); }
+  .schedule-label .arrow { color: var(--accent-2); font-size: 0.9rem; line-height: 1; transition: transform 0.25s ease; }
+  .schedule-btn:hover .schedule-label .arrow { transform: translateX(4px); }
+
+  /* ─── Closing — the quote gets its ceremony ─── */
+  .closing {
+    margin-top: var(--s7);
+    padding-top: var(--s6);
+    border-top: 1px solid var(--line-soft);
+    text-align: center;
+  }
+
+  .seed-mark {
+    display: block;
+    margin: 0 auto var(--s4);
+    width: 84px;
+    height: 84px;
+    opacity: 0.6;
+    animation: portraitSpin 120s linear infinite;
+  }
+
+  .seed-mark circle { fill: none; stroke: var(--accent); stroke-width: 0.5; opacity: 0.7; }
+
+  .closing-quote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    color: var(--text);
+    line-height: 1.55;
+    max-width: 30em;
+    margin: 0 auto var(--s5);
+  }
+
+  .closing-quote .mark { color: var(--accent); }
+
+  .closing-links { display: flex; flex-wrap: wrap; gap: 18px 24px; justify-content: center; }
+
+  .closing-links a {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.25s ease;
+  }
+
+  .closing-links a:hover { color: var(--accent-2); }
+
+  .social-row { margin-top: var(--s2); }
+  .social-row a { color: var(--text-dim); }
+  .social-row a:hover { color: var(--accent-2); }
+
+  .closing-footer {
+    margin-top: var(--s5);
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--text-faint);
+  }
+
+  .closing-name-note {
+    margin-top: var(--s2);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    font-style: italic;
+    font-family: var(--serif);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-portrait { order: -1; width: 180px; height: 180px; }
+    .now-grid { grid-template-columns: 1fr; }
+    .quote-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 760px) {
+    .topbar-inner { padding: 12px 22px; }
+    .topbar-actions { gap: 14px; }
+    .topbar-actions a.btn-call { padding: 6px 12px; }
+    .page { padding: var(--s5) 22px var(--s6); }
+    .work-grid { grid-template-columns: 1fr; }
+    .pub-item { grid-template-columns: 1fr; gap: var(--s2); }
+    .pub-item:hover { padding-left: 4px; }
+    .pub-meta { flex-direction: row; gap: 12px; align-items: baseline; }
+    .geometry svg { width: 420px; height: 420px; }
+    .geometry { right: -140px; }
+    .schedule-row { flex-direction: column; }
+    .schedule-btn { min-height: calc(var(--minutes) * 1.6px + 60px); }
+    .showcase-nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ambient seed-of-life geometry -->
+<div class="geometry" aria-hidden="true">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <g class="rotor">
+      <circle cx="100" cy="100" r="30"/>
+      <circle cx="100" cy="70" r="30"/>
+      <circle cx="125.98" cy="85" r="30"/>
+      <circle cx="125.98" cy="115" r="30"/>
+      <circle cx="100" cy="130" r="30"/>
+      <circle cx="74.02" cy="115" r="30"/>
+      <circle cx="74.02" cy="85" r="30"/>
+    </g>
+    <circle cx="100" cy="100" r="60" stroke-width="0.3" opacity="0.04"/>
+    <circle cx="100" cy="100" r="90" stroke-width="0.2" opacity="0.025"/>
+  </svg>
+</div>
+
+<!-- ─── Top bar ─── -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/" class="topbar-home">james<em>.today</em></a>
+    <nav class="topbar-actions">
+      <a href="#work">Work</a>
+      <a href="/cv/">CV</a>
+      <a href="/blog/">Blog</a>
+      <a href="#schedule" class="btn-call">Book a call</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle light / dark theme">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
+        </svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- ─── Hero ─── -->
+  <section class="hero">
+    <div>
+      <p class="hero-greeting">James Bolden</p>
+      <h1>I build the spaces where <em>consciousness</em>, <span class="teal">community</span>, and living systems meet.</h1>
+      <p class="hero-intro">
+        I'm a creative technologist working across parametric geometry, web systems, and human–AI collaboration. Through my studio <a href="https://www.iriscocreative.com" target="_blank" rel="noopener">IRIS Cocreative</a> and a constellation of projects, I collaboratively design and build digital places that change how people think and relate together.
+      </p>
+      <div class="hero-cta">
+        <a href="#schedule" class="btn-primary">Book a call <span class="arrow">→</span></a>
+        <div class="hero-links">
+          <a href="#work">Selected Work</a>
+          <a href="#publications">Press</a>
+          <a href="mailto:james@iris-cocreative.com">Get in touch</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-portrait" aria-hidden="false">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="100" cy="100" r="97"/>
+        <circle cx="100" cy="100" r="88" opacity="0.3"/>
+        <circle cx="100" cy="3" r="3.5"/>
+        <circle cx="184" cy="148.5" r="3.5"/>
+        <circle cx="16" cy="148.5" r="3.5"/>
+      </svg>
+      <img src="cv/portrait.jpg" alt="Portrait of James Bolden">
+    </div>
+  </section>
+
+  <!-- ─── Now — james.today, literally ─── -->
+  <section id="now">
+    <div class="section-head">
+      <span class="section-num">i.</span>
+      <span class="section-title">Now</span>
+      <span class="section-note">the living part of this page</span>
+    </div>
+
+    <div class="now-grid">
+      <div class="now-panel">
+        <span class="now-date"><span class="pulse" aria-hidden="true"></span> July 2026 · Colorado</span>
+        <!-- EDIT ME: keep this list short (3–4 items) and current.
+             It's the "today" in james.today. -->
+        <ul class="now-list">
+          <li>Newly married — and carrying a new name we made together. <em>(story below)</em></li>
+          <li>Developing the <em>Digital Pattern Language</em> toward a first public release.</li>
+          <li>Designing gathering spaces for the Holomovement community.</li>
+          <li>Reading, walking, and letting the mountains do their work.</li>
+        </ul>
+      </div>
+
+      <!-- Featured post — links to the first Journal entry when it's written -->
+      <a class="now-panel feature-post" href="/blog/">
+        <div>
+          <p class="feature-kicker">First entry in the Journal</p>
+          <h3>Two names became <em>one</em>.</h3>
+          <p>
+            This summer I married the love of my life — and instead of one of us taking the other's name, we wove a new one from both. The story of how <em>Bolden</em> came to be: a name neither inherited nor given, but made together, the way we hope to make everything else.
+          </p>
+        </div>
+        <span class="feature-read">Read the story <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ─── Selected Work ─── -->
+  <section id="work">
+    <div class="section-head">
+      <span class="section-num">ii.</span>
+      <span class="section-title">Selected Work</span>
+      <span class="section-note">field studies — replace with project imagery</span>
+    </div>
+
+    <!-- Visual field: generative parametric studies, one per project.
+         Swap any <svg class="showcase-art"> for an <img> of real work. -->
+    <div class="showcase">
+      <div class="showcase-nav" aria-hidden="true">
+        <button type="button" data-dir="-1" aria-label="Previous">←</button>
+        <button type="button" data-dir="1" aria-label="Next">→</button>
+      </div>
+      <div class="showcase-track" tabindex="0" aria-label="Visual work showcase — scroll horizontally">
+
+        <a class="showcase-frame" href="https://www.iriscocreative.com" target="_blank" rel="noopener">
+          <div class="showcase-canvas"><svg class="showcase-art" data-art="phyllotaxis" viewBox="0 0 809 500" xmlns="http://www.w3.org/2000/svg"></svg></div>
+          <div class="showcase-caption"><strong>IRIS Cocreative</strong><span>φ-spiral · golden angle</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://lab.iriscocreative.com" target="_blank" rel="noopener">
+          <div class="showcase-canvas"><svg class="showcase-art" data-art="lattice" viewBox="0 0 809 500" xmlns="http://www.w3.org/2000/svg"></svg></div>
+          <div class="showcase-caption"><strong>IRIS Lab</strong><span>flower-of-life lattice</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://theplacebetween.us" target="_blank" rel="noopener">
+          <div class="showcase-canvas"><svg class="showcase-art" data-art="constellation" viewBox="0 0 809 500" xmlns="http://www.w3.org/2000/svg"></svg></div>
+          <div class="showcase-caption"><strong>Our Awakening World</strong><span>living constellation</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://holos.holomovement.net" target="_blank" rel="noopener">
+          <div class="showcase-canvas"><svg class="showcase-art" data-art="radial" viewBox="0 0 809 500" xmlns="http://www.w3.org/2000/svg"></svg></div>
+          <div class="showcase-caption"><strong>Holos</strong><span>radial commons</span></div>
+        </a>
+
+      </div>
+    </div>
+
+    <div class="work-grid">
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>IRIS Cocreative</h3>
+          <div class="project-role">Founder &amp; Creative Director</div>
+          <p class="project-teaser">An international design &amp; development studio serving organizations working on connection, collaboration, and consciousness.</p>
+          <div class="project-tags"><span>Creative direction</span><span>Brand systems</span><span>Web platforms</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>IRIS is a small, distributed studio — designers and engineers building brand systems, web platforms, and AI-assisted tools for purpose-driven companies, NGOs, and thought leaders. I direct the creative and technical vision and stay close to the build.</p>
+          <p>The studio is the trunk; most of the projects below grow out of it.</p>
+          <div class="project-actions"><a href="https://www.iriscocreative.com" target="_blank" rel="noopener">Visit iriscocreative.com <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>IRIS Lab</h3>
+          <div class="project-role">Research &amp; Development</div>
+          <p class="project-teaser">The studio's experimental arm — prototypes and research into new interface forms for collective intelligence.</p>
+          <div class="project-tags"><span>R&amp;D</span><span>Prototyping</span><span>Collective intelligence</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>IRIS Lab is where we test ideas before they become products: circular and radial interfaces, sensemaking tools, and AI as a genuine thinking partner. It's the home of the <em>Digital Pattern Language</em> (below) and other open experiments.</p>
+          <div class="project-actions"><a href="https://lab.iriscocreative.com" target="_blank" rel="noopener">Explore the lab <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>Our Awakening World</h3>
+          <div class="project-role">Creative project</div>
+          <p class="project-teaser">A living map of creators, thinkers, and communities catalyzing collective awakening across the globe.</p>
+          <div class="project-tags"><span>Living map</span><span>Community</span><span>Collective awakening</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>Our Awakening World is a living, growing atlas of the people and communities catalyzing collective awakening worldwide — a way to see the movement and find each other within it. I designed and built the digital home for the project.</p>
+          <div class="project-actions"><a href="https://theplacebetween.us" target="_blank" rel="noopener">Visit theplacebetween.us <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>Holos</h3>
+          <div class="project-role">Platform Design</div>
+          <p class="project-teaser">A gathering platform for the Holomovement — connecting a global community working toward planetary wholeness.</p>
+          <div class="project-tags"><span>Platform</span><span>Community design</span><span>Movement-building</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>Holos is the digital commons for the Holomovement — a network of people and organizations aligning around the idea that we're part of one interconnected whole. The platform helps members find each other, convene, and act together.</p>
+          <div class="project-actions"><a href="https://holos.holomovement.net" target="_blank" rel="noopener">Visit holos.holomovement.net <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <div class="project-card is-soon">
+        <h3>Digital Pattern Language</h3>
+        <div class="project-role">In Development</div>
+        <p class="project-teaser">A living pattern language for designing humane, regenerative digital spaces — drawn from sacred geometry and living-systems thinking.</p>
+        <span class="soon-badge">Coming soon</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── Kind words & collaborators ─── -->
+  <section id="trust">
+    <div class="section-head">
+      <span class="section-num">iii.</span>
+      <span class="section-title">Kind Words</span>
+      <span class="section-note">sample copy — swap in real quotes</span>
+    </div>
+
+    <!-- MOCKUP: these three are placeholder quotes to show shape & tone.
+         Replace text + attribution with real testimonials, then delete
+         the .sample-tag spans. -->
+    <div class="quote-grid">
+      <figure class="quote-card">
+        <span class="sample-tag">sample</span>
+        <blockquote>James doesn't just design websites — he listens for what a community is trying to become, and builds the room for it.</blockquote>
+        <figcaption class="quote-attrib">
+          <strong>[Client Name]</strong>
+          <span>Executive Director · [Organization]</span>
+        </figcaption>
+      </figure>
+
+      <figure class="quote-card">
+        <span class="sample-tag">sample</span>
+        <blockquote>Working with IRIS felt less like hiring a studio and more like gaining a thinking partner. The result exceeded what we knew how to ask for.</blockquote>
+        <figcaption class="quote-attrib">
+          <strong>[Client Name]</strong>
+          <span>Founder · [Organization]</span>
+        </figcaption>
+      </figure>
+
+      <figure class="quote-card">
+        <span class="sample-tag">sample</span>
+        <blockquote>Rare to find someone fluent in both the sacred and the shipping deadline. James is both, without compromise on either.</blockquote>
+        <figcaption class="quote-attrib">
+          <strong>[Client Name]</strong>
+          <span>Program Lead · [Organization]</span>
+        </figcaption>
+      </figure>
+    </div>
+
+    <p class="logo-row-label">In collaboration with</p>
+    <div class="logo-row">
+      <img class="logo-white" src="cv/logos/being-design.png" alt="Being Design">
+      <img src="cv/logos/evolve-world.png" alt="Evolve World">
+      <img class="logo-white" src="cv/logos/montaia.png" alt="Montaia">
+      <!-- placeholder wordmarks — replace with logo files when gathered -->
+      <span class="logo-word">Holomovement</span>
+      <span class="logo-word">Emergence Education</span>
+    </div>
+  </section>
+
+  <!-- ─── Publications ─── -->
+  <section id="publications">
+    <div class="section-head">
+      <span class="section-num">iv.</span>
+      <span class="section-title">Press &amp; Publications</span>
+    </div>
+
+    <div class="pub-list">
+
+      <a class="pub-item" href="https://emergenceeducation.com/articles/james-redenbaugh/" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">The Artist of Possibility Magazine</span>
+          <span class="pub-date">Issue 25 · Mar 2026</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">Awakening Together — Featured Artist</h3>
+          <p class="pub-excerpt">James was honored to be the featured artist for the spring issue of Artist of Possibility Magazine, published by Emergence Education Press.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="pub-item" href="https://www.youtube.com/watch?v=sHpLCqL2gNs" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">The Integral Stage</span>
+          <span class="pub-date">Video · with Layman Pascal</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">Love the System — Ep. 22</h3>
+          <p class="pub-excerpt">A long-form conversation with host Layman Pascal on integral thinking, systems, and designing for collective intelligence.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="pub-item" href="https://www.evolutionaryleaders.net/leaders/james-bolden/" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">Evolutionary Leaders</span>
+          <span class="pub-date">Profile · May 2026</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">Evolutionary Leaders Circle</h3>
+          <p class="pub-excerpt">James's profile in the Evolutionary Leaders circle — a global network of individuals advancing conscious evolution and planetary flourishing.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="pub-item" href="https://www.holomovement.net/podcasts/james-bolden-iris-cocreative" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">Awaken Your Purpose</span>
+          <span class="pub-date">Podcast · Jun 2026</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">James Bolden, IRIS Cocreative</h3>
+          <p class="pub-excerpt">A conversation on purpose, the Holomovement, and building digital spaces for collective awakening.</p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+      <a class="pub-item" href="https://dailyorange.com/2010/09/in-a-single-bound-with-each-leap-parkour-club-turns-campus-into-personal-playground/" target="_blank" rel="noopener">
+        <div class="pub-meta">
+          <span class="pub-outlet">The Daily Orange</span>
+          <span class="pub-date">Sep 2010</span>
+        </div>
+        <div class="pub-body">
+          <h3 class="pub-title">In a Single Bound</h3>
+          <p class="pub-excerpt">It's just him, open space and a landscape full of possibilities.<br><em>"Loosen up. Don't think — explore," [Bolden] said. "Use what's there in unconventional ways."</em></p>
+        </div>
+        <span class="pub-arrow" aria-hidden="true">↗</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ─── Schedule ─── -->
+  <section id="schedule">
+    <div class="section-head">
+      <span class="section-num">v.</span>
+      <span class="section-title">Schedule a Call</span>
+    </div>
+
+    <p class="schedule-intro">
+      Want to talk through a project, a collaboration, or an idea taking shape? Pick the length that fits the conversation.
+    </p>
+
+    <div class="schedule-row">
+      <a class="schedule-btn" data-length="30" style="--minutes: 30" href="https://app.hellobonsai.com/s/iris-cocreative/james-30" target="_blank" rel="noopener">
+        <span class="schedule-duration">30 <em>min</em></span>
+        <span class="schedule-label">Quick call <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+      <a class="schedule-btn" data-length="60" style="--minutes: 60" href="https://app.hellobonsai.com/s/iris-cocreative/time-with-james" target="_blank" rel="noopener">
+        <span class="schedule-duration">60 <em>min</em></span>
+        <span class="schedule-label">Working session <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+      <a class="schedule-btn" data-length="90" style="--minutes: 90" href="https://app.hellobonsai.com/s/iris-cocreative/james-90" target="_blank" rel="noopener">
+        <span class="schedule-duration">90 <em>min</em></span>
+        <span class="schedule-label">Deep dive <span class="arrow" aria-hidden="true">→</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ─── Closing ─── -->
+  <footer class="closing">
+    <svg class="seed-mark" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="100" cy="100" r="30"/>
+      <circle cx="100" cy="70" r="30"/>
+      <circle cx="125.98" cy="85" r="30"/>
+      <circle cx="125.98" cy="115" r="30"/>
+      <circle cx="100" cy="130" r="30"/>
+      <circle cx="74.02" cy="115" r="30"/>
+      <circle cx="74.02" cy="85" r="30"/>
+    </svg>
+    <p class="closing-quote">
+      <span class="mark">"</span>Design is a practice of making room — for connection, for emergence, for the intelligence that arises in the space between us.<span class="mark">"</span>
+    </p>
+    <div class="closing-links">
+      <a href="/cv/">CV</a>
+      <a href="/blog/">Blog</a>
+      <a href="#schedule">Schedule a call</a>
+      <a href="mailto:james@iris-cocreative.com">Get in touch</a>
+    </div>
+    <div class="closing-links social-row">
+      <a href="https://www.behance.net/syn" target="_blank" rel="noopener">Behance</a>
+      <a href="https://www.instagram.com/_earthrise_" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://www.linkedin.com/in/james-redenbaugh-51662256/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://www.facebook.com/james.redenbaugh/" target="_blank" rel="noopener">Facebook</a>
+    </div>
+    <p class="closing-footer">james.today · <span id="year">2026</span></p>
+    <p class="closing-name-note">James Bolden, formerly James Redenbaugh — a name made, not taken.</p>
+  </footer>
+
+</main>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+
+    /* ── Theme ── */
+    var saved = null;
+    try { saved = localStorage.getItem('jt-theme'); } catch (e) {}
+    if (!saved) saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    root.setAttribute('data-theme', saved);
+
+    var btn = document.querySelector('.theme-toggle');
+    if (btn) btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('jt-theme', next); } catch (e) {}
+    });
+
+    /* ── Live year ── */
+    var y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+
+    /* ── Generative field studies ──
+       Parametric placeholder art for the showcase, seeded per project.
+       Delete this block once real imagery replaces the SVGs. */
+    var NS = 'http://www.w3.org/2000/svg';
+    var W = 809, H = 500, CX = W / 2, CY = H / 2;
+    var GOLDEN = Math.PI * (3 - Math.sqrt(5)); // the golden angle
+
+    function el(name, attrs, parent) {
+      var n = document.createElementNS(NS, name);
+      for (var k in attrs) n.setAttribute(k, attrs[k]);
+      parent.appendChild(n);
+      return n;
+    }
+
+    // deterministic pseudo-random, so every visit renders the same field
+    function rng(seed) {
+      return function () {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      };
+    }
+
+    var art = {
+      // IRIS — phyllotaxis spiral on the golden angle
+      phyllotaxis: function (svg) {
+        var g = el('g', { fill: 'var(--accent)' }, svg);
+        for (var i = 0; i < 480; i++) {
+          var r = 8.4 * Math.sqrt(i);
+          var a = i * GOLDEN;
+          var x = CX + r * Math.cos(a);
+          var y = CY + r * Math.sin(a) * 0.62;
+          if (x < -6 || x > W + 6 || y < -6 || y > H + 6) continue;
+          var size = 1 + (i / 480) * 3.2;
+          var teal = i % 13 === 0;
+          el('circle', {
+            cx: x.toFixed(1), cy: y.toFixed(1), r: size.toFixed(2),
+            fill: teal ? 'var(--accent-2)' : 'var(--accent)',
+            opacity: (0.15 + (i / 480) * 0.5).toFixed(2)
+          }, g);
+        }
+      },
+
+      // IRIS Lab — flower-of-life lattice
+      lattice: function (svg) {
+        var g = el('g', { fill: 'none', stroke: 'var(--accent)', 'stroke-width': 0.55 }, svg);
+        var R = 46, rows = 8, cols = 12;
+        for (var row = -1; row <= rows; row++) {
+          for (var col = -1; col <= cols; col++) {
+            var x = col * R + (row % 2 ? R / 2 : 0);
+            var y = row * R * 0.866;
+            var d = Math.hypot(x - CX, y - CY);
+            var o = Math.max(0.04, 0.5 - d / 620);
+            el('circle', {
+              cx: x, cy: y, r: R,
+              opacity: o.toFixed(2),
+              stroke: (row + col) % 7 === 0 ? 'var(--accent-2)' : 'var(--accent)'
+            }, g);
+          }
+        }
+      },
+
+      // Our Awakening World — a living constellation
+      constellation: function (svg) {
+        var rand = rng(77);
+        var pts = [];
+        for (var i = 0; i < 64; i++) {
+          pts.push({ x: 30 + rand() * (W - 60), y: 30 + rand() * (H - 60) });
+        }
+        var lines = el('g', { stroke: 'var(--accent)', 'stroke-width': 0.4 }, svg);
+        for (var a = 0; a < pts.length; a++) {
+          for (var b = a + 1; b < pts.length; b++) {
+            var d = Math.hypot(pts[a].x - pts[b].x, pts[a].y - pts[b].y);
+            if (d < 105) {
+              el('line', {
+                x1: pts[a].x.toFixed(1), y1: pts[a].y.toFixed(1),
+                x2: pts[b].x.toFixed(1), y2: pts[b].y.toFixed(1),
+                opacity: (0.28 * (1 - d / 105)).toFixed(2)
+              }, lines);
+            }
+          }
+        }
+        var dots = el('g', {}, svg);
+        pts.forEach(function (p, i) {
+          el('circle', {
+            cx: p.x.toFixed(1), cy: p.y.toFixed(1),
+            r: (1.4 + rand() * 2.4).toFixed(2),
+            fill: i % 5 === 0 ? 'var(--accent-2)' : 'var(--accent)',
+            opacity: (0.45 + rand() * 0.4).toFixed(2)
+          }, dots);
+        });
+      },
+
+      // Holos — radial commons
+      radial: function (svg) {
+        var g = el('g', { fill: 'none', 'stroke-width': 0.6 }, svg);
+        var rings = 7;
+        for (var r = 1; r <= rings; r++) {
+          el('circle', {
+            cx: CX, cy: CY, r: r * 34,
+            stroke: 'var(--accent)',
+            opacity: (0.32 - r * 0.03).toFixed(2)
+          }, g);
+        }
+        var spokes = 28;
+        for (var s = 0; s < spokes; s++) {
+          var a = (s / spokes) * Math.PI * 2;
+          var r1 = 34, r2 = rings * 34 + 14;
+          el('line', {
+            x1: (CX + r1 * Math.cos(a)).toFixed(1), y1: (CY + r1 * Math.sin(a)).toFixed(1),
+            x2: (CX + r2 * Math.cos(a)).toFixed(1), y2: (CY + r2 * Math.sin(a)).toFixed(1),
+            stroke: s % 4 === 0 ? 'var(--accent-2)' : 'var(--accent)',
+            opacity: s % 4 === 0 ? 0.35 : 0.14
+          }, g);
+        }
+        var nodes = el('g', {}, svg);
+        for (var n = 0; n < spokes; n += 2) {
+          var na = (n / spokes) * Math.PI * 2;
+          var nr = 34 * (2 + (n % 5));
+          el('circle', {
+            cx: (CX + nr * Math.cos(na)).toFixed(1),
+            cy: (CY + nr * Math.sin(na)).toFixed(1),
+            r: 2.6,
+            fill: n % 4 === 0 ? 'var(--accent-2)' : 'var(--accent)',
+            opacity: 0.65
+          }, nodes);
+        }
+      }
+    };
+
+    document.querySelectorAll('.showcase-art').forEach(function (svg) {
+      var fn = art[svg.getAttribute('data-art')];
+      if (fn) fn(svg);
+    });
+
+    /* ── Showcase controls: arrows + gentle auto-drift ── */
+    var track = document.querySelector('.showcase-track');
+    if (track) {
+      var frameWidth = function () {
+        var f = track.querySelector('.showcase-frame');
+        return f ? f.getBoundingClientRect().width + 21 : 580;
+      };
+
+      document.querySelectorAll('.showcase-nav button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          track.scrollBy({ left: frameWidth() * Number(b.dataset.dir), behavior: 'smooth' });
+        });
+      });
+
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) {
+        var idle = true;
+        var pause = function () { idle = false; };
+        ['pointerenter', 'pointerdown', 'wheel', 'touchstart', 'focusin'].forEach(function (ev) {
+          track.addEventListener(ev, pause, { passive: true });
+        });
+        setInterval(function () {
+          if (!idle) return;
+          var max = track.scrollWidth - track.clientWidth;
+          if (track.scrollLeft >= max - 4) {
+            track.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            track.scrollBy({ left: frameWidth(), behavior: 'smooth' });
+          }
+        }, 5000);
+      }
+    }
+  })();
+</script>
+
+</body>
+</html>
