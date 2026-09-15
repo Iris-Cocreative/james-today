@@ -4,24 +4,52 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>James Bolden — james.today</title>
-<meta name="description" content="James Bolden — creative technologist working at the intersection of consciousness, community, and living systems. Founder of IRIS Cocreative.">
+<meta name="description" content="James Bolden is a creative technologist and founder of IRIS Cocreative. He designs and builds digital places for people working on how we live together: Holos, Collab OS, Weft.">
+
+<!-- Open Graph / Twitter -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://james.today/">
+<meta property="og:title" content="James Bolden — james.today">
+<meta property="og:description" content="Creative technologist. Founder of IRIS Cocreative. Holos, Collab OS, Weft.">
+<meta property="og:image" content="https://james.today/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="James Bolden — james.today">
+<meta name="twitter:description" content="Creative technologist building the spaces where consciousness, community, and living systems meet.">
+<meta name="twitter:image" content="https://james.today/og-image.png">
+
+<!-- Person schema: connects James Bolden ↔ James Redenbaugh ↔ IRIS Cocreative -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "James Bolden",
+  "alternateName": "James Redenbaugh",
+  "url": "https://james.today",
+  "image": "https://james.today/cv/portrait.jpg",
+  "jobTitle": "Founder & Creative Director",
+  "worksFor": { "@type": "Organization", "name": "IRIS Cocreative", "url": "https://www.iriscocreative.com" },
+  "sameAs": [
+    "https://www.iriscocreative.com",
+    "https://www.behance.net/syn",
+    "https://www.instagram.com/_earthrise_",
+    "https://www.linkedin.com/in/james-redenbaugh-51662256/",
+    "https://www.facebook.com/james.redenbaugh/"
+  ]
+}
+</script>
+
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300;1,9..40,400&family=Jost:wght@500&display=swap" rel="stylesheet">
 <style>
-  /* ─── Tokens ───
-     Inherits the /cv chassis (Instrument Serif + DM Sans, copper primary,
-     seed-of-life motif) and adds iris-teal as a secondary accent + a
-     light/dark theme. Spacing follows a golden-ratio (≈1.618) rhythm. */
+  /* ─── Tokens — same chassis as index.html ─── */
   :root {
     --serif: 'Instrument Serif', Georgia, serif;
     --sans: 'DM Sans', sans-serif;
-
-    /* φ-based spacing scale */
     --s1: 0.5rem;
     --s2: 0.81rem;
     --s3: 1.31rem;
@@ -41,15 +69,18 @@
     --text-bright: #f5f0e6;
     --text-dim: #a8a39b;
     --text-faint: #706b62;
-    --accent: #c4956a;                       /* copper — primary */
+    --accent: #c4956a;
     --accent-soft: rgba(196, 149, 106, 0.55);
-    --accent-2: #3ea691;                      /* iris-teal — secondary */
+    --accent-2: #3ea691;
     --accent-2-soft: rgba(62, 166, 145, 0.5);
     --line: rgba(196, 149, 106, 0.18);
     --line-soft: rgba(196, 149, 106, 0.08);
     --line-hover: rgba(196, 149, 106, 0.35);
     --grain-opacity: 0.025;
     --geo-opacity: 0.07;
+    --art-bg: #100e16;
+    --logo-invert: 0;
+    --accent-3: #9b8bd0;                      /* violet — third hero accent */
   }
 
   [data-theme="light"] {
@@ -70,6 +101,9 @@
     --line-hover: rgba(169, 118, 63, 0.4);
     --grain-opacity: 0.018;
     --geo-opacity: 0.05;
+    --art-bg: #ece5d5;
+    --logo-invert: 1;
+    --accent-3: #6b5aa8;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -88,6 +122,13 @@
     transition: background 0.4s ease, color 0.4s ease;
   }
 
+  /* Visible keyboard focus, matching the hover language */
+  :focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
   /* ─── Film grain ─── */
   body::after {
     content: '';
@@ -99,7 +140,7 @@
     background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  /* ─── Ambient seed-of-life geometry ─── */
+  /* ─── Ambient seed-of-life geometry — now alive ─── */
   .geometry {
     position: fixed;
     top: -120px;
@@ -112,6 +153,11 @@
 
   .geometry svg { width: 620px; height: 620px; }
 
+  .geometry .rotor {
+    transform-origin: 100px 100px;
+    animation: geoSpin 240s linear infinite;
+  }
+
   .geometry circle {
     fill: none;
     stroke: var(--accent);
@@ -122,6 +168,10 @@
   @keyframes geoIn {
     0% { opacity: 0; transform: scale(0.92) rotate(-24deg); }
     100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+
+  @keyframes geoSpin {
+    to { transform: rotate(360deg); }
   }
 
   /* ─── Top bar ─── */
@@ -138,7 +188,7 @@
   .topbar-inner {
     max-width: 980px;
     margin: 0 auto;
-    padding: 18px 40px;
+    padding: 14px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -156,7 +206,7 @@
 
   .topbar-actions {
     display: flex;
-    gap: 24px;
+    gap: 22px;
     align-items: center;
   }
 
@@ -173,6 +223,20 @@
 
   .topbar-actions a:hover { color: var(--accent); }
 
+  .topbar-actions a.btn-call {
+    color: var(--accent);
+    border: 1px solid var(--accent-soft);
+    border-radius: 20px;
+    padding: 7px 16px;
+    transition: all 0.25s ease;
+  }
+
+  .topbar-actions a.btn-call:hover {
+    color: var(--bg);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
   .theme-toggle {
     background: transparent;
     border: 1px solid var(--line);
@@ -184,6 +248,7 @@
     display: grid;
     place-items: center;
     transition: all 0.25s ease;
+    flex-shrink: 0;
   }
 
   .theme-toggle:hover { color: var(--accent-2); border-color: var(--accent-2-soft); }
@@ -203,8 +268,11 @@
 
   /* ─── Hero ─── */
   .hero {
-    margin-bottom: var(--s7);
-    max-width: 760px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s5);
+    align-items: center;
+    margin-bottom: var(--s6);
   }
 
   .hero-greeting {
@@ -221,7 +289,7 @@
 
   .hero h1 {
     font-family: var(--serif);
-    font-size: clamp(2.6rem, 6vw, 4.4rem);
+    font-size: clamp(2.4rem, 5.4vw, 3.9rem);
     font-weight: 400;
     color: var(--text-bright);
     line-height: 1.08;
@@ -235,7 +303,7 @@
   .hero h1 .teal { color: var(--accent-2); font-style: italic; }
 
   .hero-intro {
-    font-size: 1.08rem;
+    font-size: 1.05rem;
     line-height: 1.7;
     color: var(--text);
     max-width: 52ch;
@@ -253,42 +321,223 @@
 
   .hero-intro a:hover { color: var(--accent-2); border-color: var(--accent-2-soft); }
 
-  .hero-links {
+  .hero-cta {
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 18px 26px;
+    gap: var(--s3) var(--s4);
     opacity: 0;
     animation: fadeUp 1s ease 0.75s forwards;
   }
 
-  .hero-links a {
+  .btn-primary {
     font-family: var(--sans);
     font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--bg);
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 24px;
+    padding: 13px 26px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    transition: all 0.25s ease;
+  }
+
+  .btn-primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .btn-primary .arrow { font-size: 0.9rem; line-height: 1; }
+
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 22px;
+  }
+
+  .hero-links a {
+    font-family: var(--sans);
+    font-size: 0.7rem;
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.18em;
-    color: var(--accent);
+    color: var(--text-dim);
     text-decoration: none;
     padding: 4px 0;
-    position: relative;
     transition: color 0.25s ease;
   }
 
-  .hero-links a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--accent-2);
+  .hero-links a:hover { color: var(--accent); }
+
+  /* Portrait inside a slowly-breathing seed ring */
+  .hero-portrait {
+    position: relative;
+    width: 250px;
+    height: 250px;
     opacity: 0;
-    transform: scaleX(0.4);
-    transition: all 0.3s ease;
+    animation: fadeUp 1.2s ease 0.6s forwards;
   }
 
-  .hero-links a:hover { color: var(--text-bright); }
-  .hero-links a:hover::after { opacity: 0.7; transform: scaleX(1); }
+  .hero-portrait img {
+    position: absolute;
+    inset: 18px;
+    width: calc(100% - 36px);
+    height: calc(100% - 36px);
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--line);
+  }
+
+  .hero-portrait svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    animation: portraitSpin 90s linear infinite;
+  }
+
+  .hero-portrait svg circle {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 0.5;
+    opacity: 0.5;
+  }
+
+  @keyframes portraitSpin { to { transform: rotate(360deg); } }
+
+  /* ─── Now — the living part of james.today ─── */
+  #now { margin-bottom: var(--s7); }
+
+  .now-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    gap: var(--s4);
+    align-items: stretch;
+  }
+
+  .now-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--s4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .now-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent-2);
+    margin-bottom: var(--s3);
+  }
+
+  .now-date .pulse {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-2);
+    animation: pulse 2.6s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.75); }
+  }
+
+  .now-list { list-style: none; }
+
+  .now-list li {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text);
+    padding: 10px 0 10px 22px;
+    position: relative;
+    border-top: 1px solid var(--line-soft);
+  }
+
+  .now-list li:first-child { border-top: none; padding-top: 0; }
+
+  .now-list li::before {
+    content: '·';
+    position: absolute;
+    left: 4px;
+    color: var(--accent);
+    font-family: var(--serif);
+  }
+
+  .now-list em { font-style: italic; color: var(--accent); }
+
+  /* Featured post — the first story of the Now */
+  .feature-post {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--s3);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.3s ease, background 0.3s ease;
+  }
+
+  .feature-post::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-2);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .feature-post:hover { border-color: var(--line-hover); background: var(--bg-card-hover); }
+  .feature-post:hover::before { transform: scaleX(1); }
+
+  .feature-kicker {
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: var(--s2);
+  }
+
+  .feature-post h3 {
+    font-family: var(--serif);
+    font-size: 1.9rem;
+    font-weight: 400;
+    color: var(--text-bright);
+    line-height: 1.15;
+    margin-bottom: var(--s2);
+  }
+
+  .feature-post h3 em { font-style: italic; color: var(--accent); }
+
+  .feature-post p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+    max-width: 52ch;
+  }
+
+  .feature-read {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: color 0.25s ease, gap 0.25s ease;
+  }
+
+  .feature-post:hover .feature-read { color: var(--accent-2); gap: 11px; }
 
   /* ─── Section head ─── */
   .section-head {
@@ -316,7 +565,100 @@
     color: var(--text-dim);
   }
 
-  /* ─── Selected Work grid ─── */
+  .section-note {
+    margin-left: auto;
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+  }
+
+  /* ─── Visual field — the work showcase ───
+     Each frame currently holds generative parametric art (drawn by JS
+     below, seeded per project). To use real work: replace the inner
+     <svg class="showcase-art"> with <img src="..."> — everything else
+     (scroll, captions, controls) keeps working. */
+  .showcase {
+    position: relative;
+    margin-bottom: var(--s5);
+  }
+
+  .showcase-track {
+    display: flex;
+    gap: var(--s3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 6px;
+  }
+
+  .showcase-track::-webkit-scrollbar { display: none; }
+
+  .showcase-frame {
+    flex: 0 0 min(560px, 82%);
+    scroll-snap-align: start;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .showcase-canvas {
+    position: relative;
+    aspect-ratio: 1.618 / 1;   /* φ, of course */
+    background: var(--art-bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+  }
+
+  .showcase-frame:hover .showcase-canvas { border-color: var(--line-hover); }
+
+  .showcase-art { width: 100%; height: 100%; display: block; }
+
+  .showcase-caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 4px 0;
+  }
+
+  .showcase-caption strong {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: var(--text-bright);
+  }
+
+  .showcase-caption span {
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+  }
+
+  .showcase-nav {
+    position: absolute;
+    top: -58px;
+    right: 0;
+    display: flex;
+    gap: 8px;
+  }
+
+  .showcase-nav button {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .showcase-nav button:hover { color: var(--accent-2); border-color: var(--accent-2-soft); }
+
+  /* ─── Work grid (condensed cards, as on v1) ─── */
   .work-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -330,10 +672,9 @@
     padding: var(--s4);
     position: relative;
     overflow: hidden;
-    transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease;
+    transition: border-color 0.3s ease, background 0.3s ease;
   }
 
-  /* iris-teal hairline that wipes in on hover/open */
   .project-card::before {
     content: '';
     position: absolute;
@@ -347,13 +688,8 @@
     transition: transform 0.4s ease;
   }
 
-  .project-card:hover {
-    border-color: var(--line-hover);
-    background: var(--bg-card-hover);
-  }
-
-  .project-card:hover::before,
-  .project-card[open]::before { transform: scaleX(1); }
+  .project-card:hover { border-color: var(--line-hover); background: var(--bg-card-hover); }
+  .project-card:hover::before, .project-card[open]::before { transform: scaleX(1); }
 
   .project-card summary {
     list-style: none;
@@ -372,13 +708,10 @@
     color: var(--text-bright);
     line-height: 1.2;
     margin-bottom: 6px;
-    letter-spacing: -0.005em;
   }
 
   .project-role {
-    font-family: var(--sans);
     font-size: 0.68rem;
-    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.2em;
     color: var(--accent);
@@ -392,51 +725,23 @@
     margin-bottom: var(--s3);
   }
 
-  .project-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 14px;
-  }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .project-tags span { font-size: 0.66rem; letter-spacing: 0.08em; color: var(--text-faint); }
+  .project-tags span + span::before { content: '·'; margin-right: 14px; color: var(--accent-2-soft); }
 
-  .project-tags span {
-    font-size: 0.66rem;
-    letter-spacing: 0.08em;
-    color: var(--text-faint);
-  }
-
-  .project-tags span + span::before {
-    content: '·';
-    margin-right: 14px;
-    color: var(--accent-2-soft);
-  }
-
-  /* expand indicator */
-  .card-toggle {
-    position: absolute;
-    top: 2px;
-    right: 0;
-    width: 20px;
-    height: 20px;
-    color: var(--accent-2);
-  }
-
-  .card-toggle::before,
-  .card-toggle::after {
+  .card-toggle { position: absolute; top: 2px; right: 0; width: 20px; height: 20px; color: var(--accent-2); }
+  .card-toggle::before, .card-toggle::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 13px;
-    height: 1.5px;
+    top: 50%; left: 50%;
+    width: 13px; height: 1.5px;
     background: currentColor;
     transform: translate(-50%, -50%);
     transition: transform 0.3s ease, opacity 0.3s ease;
   }
-
   .card-toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
   .project-card[open] .card-toggle::after { opacity: 0; transform: translate(-50%, -50%) rotate(0deg); }
 
-  /* revealed depth */
   .project-detail {
     margin-top: var(--s3);
     padding-top: var(--s3);
@@ -444,27 +749,13 @@
     animation: fadeUp 0.4s ease;
   }
 
-  .project-detail p {
-    font-size: 0.95rem;
-    line-height: 1.75;
-    color: var(--text);
-    margin-bottom: var(--s2);
-  }
-
+  .project-detail p { font-size: 0.95rem; line-height: 1.75; color: var(--text); margin-bottom: var(--s2); }
   .project-detail p:last-of-type { margin-bottom: var(--s3); }
-
   .project-detail em { color: var(--accent); font-style: italic; }
 
-  .project-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px 22px;
-  }
-
+  .project-actions { display: flex; flex-wrap: wrap; gap: 14px 22px; }
   .project-actions a {
-    font-family: var(--sans);
     font-size: 0.7rem;
-    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.16em;
     color: var(--accent);
@@ -474,11 +765,8 @@
     gap: 7px;
     transition: color 0.25s ease, gap 0.25s ease;
   }
-
   .project-actions a:hover { color: var(--accent-2); gap: 11px; }
-  .project-actions a .arrow { font-size: 0.85rem; line-height: 1; }
 
-  /* "coming soon" card */
   .project-card.is-soon { opacity: 0.78; }
   .project-card.is-soon summary { cursor: default; }
   .project-card.is-soon .project-role { color: var(--accent-2); }
@@ -494,13 +782,104 @@
     margin-top: var(--s2);
   }
 
+  /* ─── Kind words & collaborators ─── */
+  #trust { margin-top: var(--s7); }
+
+  .quote-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s3);
+    margin-bottom: var(--s5);
+  }
+
+  .quote-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line-soft);
+    border-radius: 6px;
+    padding: var(--s4) var(--s4) var(--s3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s3);
+    position: relative;
+  }
+
+  .quote-card::before {
+    content: '“';
+    font-family: var(--serif);
+    font-size: 3.4rem;
+    line-height: 0.6;
+    color: var(--accent-soft);
+    display: block;
+  }
+
+  .quote-card blockquote {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.06rem;
+    line-height: 1.55;
+    color: var(--text);
+    border: none;
+    flex-grow: 1;
+  }
+
+  .quote-attrib { display: flex; flex-direction: column; gap: 2px; }
+  .quote-attrib strong { font-size: 0.78rem; font-weight: 500; color: var(--text-bright); letter-spacing: 0.04em; }
+  .quote-attrib span { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-faint); }
+
+  /* draft-only marker — delete when real quotes land */
+  .sample-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.52rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--text-faint);
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 2px 8px;
+  }
+
+  .logo-row-label {
+    text-align: center;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--text-faint);
+    margin-bottom: var(--s3);
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--s4) var(--s5);
+  }
+
+  .logo-row img {
+    height: 26px;
+    width: auto;
+    opacity: 0.6;
+    filter: grayscale(1);
+    transition: opacity 0.3s ease;
+  }
+
+  .logo-row img.logo-white { filter: grayscale(1) invert(var(--logo-invert)); }
+  .logo-row img:hover { opacity: 1; }
+
+  .logo-row .logo-word {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--text-dim);
+    opacity: 0.75;
+  }
+
   /* ─── Press & Publications ─── */
   #publications { margin-top: var(--s7); }
 
-  .pub-list {
-    display: flex;
-    flex-direction: column;
-  }
+  .pub-list { display: flex; flex-direction: column; }
 
   .pub-item {
     display: grid;
@@ -517,26 +896,9 @@
   .pub-item:last-child { border-bottom: 1px solid var(--line-soft); }
   .pub-item:hover { background: var(--bg-card); padding-left: 14px; }
 
-  .pub-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .pub-outlet {
-    font-family: var(--sans);
-    font-size: 0.66rem;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--accent);
-  }
-
-  .pub-date {
-    font-size: 0.64rem;
-    letter-spacing: 0.1em;
-    color: var(--text-faint);
-  }
+  .pub-meta { display: flex; flex-direction: column; gap: 5px; }
+  .pub-outlet { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--accent); }
+  .pub-date { font-size: 0.64rem; letter-spacing: 0.1em; color: var(--text-faint); }
 
   .pub-title {
     font-family: var(--serif);
@@ -545,42 +907,13 @@
     color: var(--text-bright);
     line-height: 1.25;
     margin-bottom: 7px;
-    letter-spacing: -0.005em;
   }
 
-  .pub-excerpt {
-    font-size: 0.82rem;
-    line-height: 1.55;
-    color: var(--text-dim);
-    max-width: 60ch;
-  }
-
+  .pub-excerpt { font-size: 0.82rem; line-height: 1.55; color: var(--text-dim); max-width: 60ch; }
   .pub-excerpt em { font-style: italic; color: var(--text); }
 
-  .pub-arrow {
-    align-self: center;
-    color: var(--accent-2);
-    font-size: 1rem;
-    line-height: 1;
-    transition: transform 0.25s ease;
-  }
-
+  .pub-arrow { align-self: center; color: var(--accent-2); font-size: 1rem; line-height: 1; transition: transform 0.25s ease; }
   .pub-item:hover .pub-arrow { transform: translateX(5px); }
-
-  .pub-item.is-soon { opacity: 0.72; }
-  .pub-item.is-soon:hover { background: none; padding-left: 4px; cursor: default; }
-
-  .pub-soon {
-    align-self: center;
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--accent-2);
-    border: 1px solid var(--accent-2-soft);
-    border-radius: 20px;
-    padding: 3px 10px;
-    white-space: nowrap;
-  }
 
   /* ─── Schedule ─── */
   #schedule { margin-top: var(--s7); }
@@ -593,13 +926,8 @@
     margin-bottom: var(--s4);
   }
 
-  .schedule-row {
-    display: flex;
-    gap: var(--s3);
-    align-items: stretch;
-  }
+  .schedule-row { display: flex; gap: var(--s3); align-items: stretch; }
 
-  /* Each button's width grows with the call's duration (30 / 60 / 90). */
   .schedule-btn {
     flex-grow: var(--minutes);
     flex-basis: 0;
@@ -621,9 +949,7 @@
   .schedule-btn::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     height: 2px;
     background: var(--accent-2);
     transform: scaleX(0);
@@ -631,39 +957,21 @@
     transition: transform 0.4s ease;
   }
 
-  .schedule-btn:hover {
-    border-color: var(--line-hover);
-    background: var(--bg-card-hover);
-  }
-
+  .schedule-btn:hover { border-color: var(--line-hover); background: var(--bg-card-hover); }
   .schedule-btn:hover::before { transform: scaleX(1); }
 
-  .schedule-duration {
-    font-family: var(--serif);
-    color: var(--text-bright);
-    line-height: 1;
-    letter-spacing: -0.01em;
-  }
-
-  /* Type scale steps up with duration too */
+  .schedule-duration { font-family: var(--serif); color: var(--text-bright); line-height: 1; }
   .schedule-btn[data-length="30"] .schedule-duration { font-size: 1.7rem; }
   .schedule-btn[data-length="60"] .schedule-duration { font-size: 2.2rem; }
   .schedule-btn[data-length="90"] .schedule-duration { font-size: 2.7rem; }
-
-  .schedule-duration em {
-    font-style: italic;
-    color: var(--accent);
-    font-size: 0.55em;
-  }
+  .schedule-duration em { font-style: italic; color: var(--accent); font-size: 0.55em; }
 
   .schedule-label {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    font-family: var(--sans);
     font-size: 0.66rem;
-    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.16em;
     color: var(--text-dim);
@@ -671,20 +979,13 @@
   }
 
   .schedule-btn:hover .schedule-label { color: var(--accent); }
-
-  .schedule-label .arrow {
-    color: var(--accent-2);
-    font-size: 0.9rem;
-    line-height: 1;
-    transition: transform 0.25s ease;
-  }
-
+  .schedule-label .arrow { color: var(--accent-2); font-size: 0.9rem; line-height: 1; transition: transform 0.25s ease; }
   .schedule-btn:hover .schedule-label .arrow { transform: translateX(4px); }
 
-  /* ─── Closing ─── */
+  /* ─── Closing — the quote gets its ceremony ─── */
   .closing {
     margin-top: var(--s7);
-    padding-top: var(--s5);
+    padding-top: var(--s6);
     border-top: 1px solid var(--line-soft);
     text-align: center;
   }
@@ -692,39 +993,30 @@
   .seed-mark {
     display: block;
     margin: 0 auto var(--s4);
-    width: 64px;
-    height: 64px;
-    opacity: 0.55;
+    width: 84px;
+    height: 84px;
+    opacity: 0.6;
+    animation: portraitSpin 120s linear infinite;
   }
 
-  .seed-mark circle {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 0.5;
-    opacity: 0.7;
-  }
+  .seed-mark circle { fill: none; stroke: var(--accent); stroke-width: 0.5; opacity: 0.7; }
 
   .closing-quote {
     font-family: var(--serif);
     font-style: italic;
-    font-size: 1.3rem;
-    color: var(--text-dim);
-    line-height: 1.6;
-    max-width: 34em;
-    margin: 0 auto var(--s4);
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    color: var(--text);
+    line-height: 1.55;
+    max-width: 30em;
+    margin: 0 auto var(--s5);
   }
 
-  .closing-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 18px 24px;
-    justify-content: center;
-  }
+  .closing-quote .mark { color: var(--accent); }
+
+  .closing-links { display: flex; flex-wrap: wrap; gap: 18px 24px; justify-content: center; }
 
   .closing-links a {
-    font-family: var(--sans);
     font-size: 0.72rem;
-    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.18em;
     color: var(--accent);
@@ -746,6 +1038,15 @@
     color: var(--text-faint);
   }
 
+  .closing-name-note {
+    margin-top: var(--s2);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--text-faint);
+    font-style: italic;
+    font-family: var(--serif);
+  }
+
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
@@ -756,23 +1057,155 @@
   }
 
   /* ─── Responsive ─── */
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-portrait { order: -1; width: 180px; height: 180px; }
+    .now-grid { grid-template-columns: 1fr; }
+    .quote-grid { grid-template-columns: 1fr; }
+  }
+
   @media (max-width: 760px) {
-    .topbar-inner { padding: 14px 22px; }
-    .topbar-actions { gap: 16px; }
+    .topbar-inner { padding: 12px 22px; }
+    .topbar-actions { gap: 14px; }
+    .topbar-actions a.btn-call { padding: 6px 12px; }
     .page { padding: var(--s5) 22px var(--s6); }
     .work-grid { grid-template-columns: 1fr; }
     .pub-item { grid-template-columns: 1fr; gap: var(--s2); }
     .pub-item:hover { padding-left: 4px; }
     .pub-meta { flex-direction: row; gap: 12px; align-items: baseline; }
-    /* Stacked on mobile: height stands in for width to keep duration legible */
-    .schedule-row { flex-direction: column; }
-    .schedule-btn { min-height: calc(var(--minutes) * 1.6px + 60px); }
     .geometry svg { width: 420px; height: 420px; }
     .geometry { right: -140px; }
+    .schedule-row { flex-direction: column; }
+    .schedule-btn { min-height: calc(var(--minutes) * 1.6px + 60px); }
+    .showcase-nav { display: none; }
+  }
+
+  /* ═══ v3 additions ═══
+     Real imagery replaces the generative placeholders; the Weft lattice
+     becomes the ambient ground; the hero portrait grows because it is
+     the only photograph above the fold. */
+
+  /* The base color must live on <html>, not just <body>: with a composited
+     fixed canvas + backdrop-filter in play, Chrome drops body-propagated
+     backgrounds from the backdrop root and the page renders white. */
+  html { background: var(--bg); transition: background 0.4s ease; }
+  body { background: transparent; }
+
+  /* ─── Ambient weft lattice (js/weft-field.js) ─── */
+  canvas[data-weft] {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    -webkit-mask-image: radial-gradient(ellipse 58% 52% at 50% 40%,
+      rgba(0,0,0,0.16) 0%, rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.9) 78%, #000 100%);
+    mask-image: radial-gradient(ellipse 58% 52% at 50% 40%,
+      rgba(0,0,0,0.16) 0%, rgba(0,0,0,0.55) 48%, rgba(0,0,0,0.9) 78%, #000 100%);
+  }
+
+  /* No backdrop-filter on the cards, on purpose: blurring a dozen elements over
+     an animating canvas made the compositor re-blur all of them every frame
+     and dragged the whole machine. A partly opaque card ground does the job. */
+  .project-card, .now-panel, .schedule-btn {
+    background: linear-gradient(var(--bg-card), var(--bg-card)),
+                color-mix(in srgb, var(--bg) 60%, transparent);
+  }
+  .project-card:hover, .feature-post:hover, .schedule-btn:hover {
+    background: linear-gradient(var(--bg-card-hover), var(--bg-card-hover)),
+                color-mix(in srgb, var(--bg) 60%, transparent);
+  }
+
+  /* ─── Hero portrait, larger ─── */
+  .hero h1 { font-size: clamp(2.4rem, 5vw, 3.55rem); }   /* keeps the headline on three lines beside the portrait */
+  .hero h1 .violet { color: var(--accent-3); font-style: italic; }
+  .hero-portrait { width: 280px; height: 280px; }
+  .hero-portrait img {
+    inset: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+  }
+  .hero-kicker-role { color: var(--accent); }
+
+  /* ─── Now: date line carries the month ─── */
+  .now-date .sep { color: var(--text-faint); margin: 0 2px; }
+
+  /* ─── Showcase: photographs and line studies ─── */
+  .showcase-canvas { display: grid; place-items: center; }
+
+  .showcase-canvas img.art-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.6s ease;
+  }
+  .showcase-frame:hover img.art-photo { transform: scale(1.03); }
+
+  /* ─── Collaborators band (replaces the sample-quote grid) ─── */
+  .collab-band {
+    margin-top: var(--s5);
+    padding-top: var(--s4);
+    border-top: 1px solid var(--line-soft);
+  }
+  .logo-row {
+    justify-content: space-between;       /* edge to edge of the container */
+    gap: var(--s3) var(--s3);
+  }
+  .logo-row a, .logo-row .logo-item { display: flex; align-items: center; text-decoration: none; }
+  .logo-row img { height: 28px; }
+  .logo-row a:hover img { opacity: 1; }
+  /* Collab OS: inline mark + text, as on collab-os.com (neue-kabel there, Jost here) */
+  .logo-lockup {
+    gap: 9px;
+    font-family: 'Jost', var(--sans);
+    font-weight: 500;
+    font-size: 19px;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    opacity: 0.6;
+    filter: grayscale(1);
+    transition: opacity 0.3s ease;
+  }
+  .logo-lockup svg { width: 28px; height: 28px; flex: none; }
+  .logo-lockup:hover { opacity: 1; }
+  /* dark-ink logos need the opposite of .logo-white: invert in the dark theme only */
+  .logo-row img.logo-dark { filter: grayscale(1) invert(calc(1 - var(--logo-invert))); }
+
+  /* ─── Press item with a photograph ─── */
+  .pub-item.has-photo {
+    grid-template-columns: 168px 1fr 128px auto;
+    align-items: center;
+  }
+  .pub-photo {
+    width: 128px;
+    height: 128px;
+    border-radius: 6px;
+    object-fit: cover;
+    border: 1px solid var(--line-soft);
+    filter: sepia(0.28) contrast(1.04);
+    opacity: 0.88;
+    transition: opacity 0.3s ease, filter 0.3s ease;
+  }
+  .pub-item.has-photo:hover .pub-photo { opacity: 1; filter: sepia(0.1) contrast(1.04); }
+
+  /* ─── Responsive tweaks for the additions ─── */
+  @media (max-width: 860px) {
+    .hero-portrait { width: 210px; height: 210px; }
+  }
+  @media (max-width: 760px) {
+    .pub-item.has-photo { grid-template-columns: 1fr; }
+    .pub-photo { width: 100%; height: 200px; }
+    .section-note { display: none; }
+    .logo-row { justify-content: center; gap: var(--s3) var(--s4); }
   }
 </style>
 </head>
 <body>
+
+<!-- Ambient weft lattice: iso lattice + three-phase breath + cursor bloom -->
+<canvas data-weft aria-hidden="true"></canvas>
 
 <!-- Ambient seed-of-life geometry -->
 <div class="geometry" aria-hidden="true">
@@ -794,10 +1227,10 @@
   <div class="topbar-inner">
     <a href="/" class="topbar-home">james<em>.today</em></a>
     <nav class="topbar-actions">
+      <a href="#work">Work</a>
+      <a href="#now">Now</a>
       <a href="/cv/">CV</a>
-      <a href="/blog/">Blog</a>
-      <a href="#schedule">Schedule</a>
-      <a href="mailto:james@iris-cocreative.com">Reach out</a>
+      <a href="#schedule" class="btn-call">Book a call</a>
       <button class="theme-toggle" type="button" aria-label="Toggle light / dark theme">
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
           <circle cx="12" cy="12" r="4"/>
@@ -815,177 +1248,294 @@
 
   <!-- ─── Hero ─── -->
   <section class="hero">
-    <p class="hero-greeting">James Bolden</p>
-    <h1>I build the spaces where <em>consciousness</em>, <span class="teal">community</span>, and living systems meet.</h1>
-    <p class="hero-intro">
-      I'm a creative technologist working across parametric geometry, web systems, and human–AI collaboration. Through my studio <a href="https://www.iriscocreative.com" target="_blank" rel="noopener">IRIS Cocreative</a> and a constellation of projects, I collaboratively design and build digital places that change how people think and relate together.
-    </p>
-    <div class="hero-links">
-      <a href="#work">Selected Work</a>
-      <a href="#publications">Press</a>
-      <a href="#schedule">Schedule a Call</a>
-      <a href="/cv/">CV</a>
-      <a href="/blog/">Blog</a>
-      <a href="mailto:james@iris-cocreative.com">Get in touch</a>
+    <div>
+      <p class="hero-greeting">James Bolden <span class="hero-kicker-role">· Creative technologist</span></p>
+      <h1>I build the spaces where <em>consciousness</em>, <span class="teal">community</span>, and <span class="violet">living systems</span> meet.</h1>
+      <p class="hero-intro">
+        I'm a creative technologist working across parametric geometry, web systems, and human–AI collaboration. Through my studio <a href="https://www.iriscocreative.com" target="_blank" rel="noopener">IRIS Cocreative</a> and a constellation of projects, I collaboratively design and build digital places that change how people think and relate together.
+      </p>
+      <div class="hero-cta">
+        <a href="#schedule" class="btn-primary">Book a call <span class="arrow">→</span></a>
+        <div class="hero-links">
+          <a href="#work">See the work</a>
+          <a href="mailto:connect@iris-cocreative.com">Connect</a>
+        </div>
+      </div>
+    </div>
+    <div class="hero-portrait">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="100" cy="100" r="97"/>
+        <circle cx="100" cy="100" r="88" opacity="0.3"/>
+        <circle cx="100" cy="3" r="3.5"/>
+        <circle cx="184" cy="148.5" r="3.5"/>
+        <circle cx="16" cy="148.5" r="3.5"/>
+      </svg>
+      <img src="img/portrait.webp" width="900" height="900" alt="James Bolden in the mountains" loading="eager" fetchpriority="high">
+    </div>
+  </section>
+
+  <!-- ─── Now: james.today, literally ─── -->
+  <section id="now">
+    <div class="section-head">
+      <span class="section-num">i.</span>
+      <span class="section-title">Now</span>
+    </div>
+
+    <div class="now-grid">
+      <div class="now-panel">
+        <span class="now-date"><span class="pulse" aria-hidden="true"></span> September 2026 <span class="sep">·</span> updated by hand</span>
+        <ul class="now-list">
+          <li>Turning <em>37</em> today, September 15.</li>
+          <li>Building <em>Collab OS</em>, a shared surface where distributed teams see their work as a landscape instead of a list.</li>
+          <li>Shipping <em>Weft</em>, a node-based design tool. The lattice breathing behind this page was drawn in it.</li>
+          <li>Designing <em>Holos</em> with the Holomovement: a member globe, events, and live rooms for a community working toward wholeness.</li>
+          <li>Writing the first entries of the Journal, starting with how two names became one.</li>
+        </ul>
+      </div>
+
+      <div class="now-panel feature-post">
+        <div>
+          <p class="feature-kicker">First entry in the Journal</p>
+          <h3>Two names became <em>one</em>.</h3>
+          <p>
+            Last September I married the love of my life. Instead of one of us taking the other's name, we wove a new one from both. The story of how <em>Bolden</em> came to be: a name neither inherited nor given, but made together, the way we hope to make everything else.
+          </p>
+        </div>
+        <span><span class="soon-badge">Coming soon</span></span>
+      </div>
     </div>
   </section>
 
   <!-- ─── Selected Work ─── -->
   <section id="work">
     <div class="section-head">
-      <span class="section-num">i.</span>
+      <span class="section-num">ii.</span>
       <span class="section-title">Selected Work</span>
+    </div>
+
+    <div class="showcase">
+      <div class="showcase-nav" aria-hidden="true">
+        <button type="button" data-dir="-1" aria-label="Previous">←</button>
+        <button type="button" data-dir="1" aria-label="Next">→</button>
+      </div>
+      <div class="showcase-track" tabindex="0" aria-label="Visual work showcase, scroll horizontally">
+
+        <a class="showcase-frame" href="https://www.iriscocreative.com" target="_blank" rel="noopener">
+          <div class="showcase-canvas">
+            <img class="art-photo" src="img/work-iris.webp" width="1400" height="871" alt="IRIS Cocreative: Let's create amazing things together, ringed by a spectrum burst" loading="lazy">
+          </div>
+          <div class="showcase-caption"><strong>IRIS Cocreative</strong><span>studio · brand system</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://holos.holomovement.net" target="_blank" rel="noopener">
+          <div class="showcase-canvas">
+            <img class="art-photo" src="img/work-holos.webp" width="910" height="509" alt="Holos wordmark with a glowing globe" loading="lazy">
+          </div>
+          <div class="showcase-caption"><strong>Holos</strong><span>platform · holomovement</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://www.collab-os.com/" target="_blank" rel="noopener">
+          <div class="showcase-canvas">
+            <img class="art-photo" src="img/work-collab-os.webp" width="1200" height="630" alt="Collab OS: an action landscape for distributed teams" loading="lazy">
+          </div>
+          <div class="showcase-caption"><strong>Collab OS</strong><span>action landscape · teams</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://www.collab-os.com/commons/lines-of-thought" target="_blank" rel="noopener">
+          <div class="showcase-canvas">
+            <img class="art-photo" src="img/lines-of-thought.webp" width="1200" height="630" alt="Colored lines tracing where public figures stand across questions about AI" loading="lazy">
+          </div>
+          <div class="showcase-caption"><strong>Lines of Thought</strong><span>the commons · collab os</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://iris-cocreative.github.io/weft/" target="_blank" rel="noopener">
+          <div class="showcase-canvas">
+            <img class="art-photo" src="img/work-weft.webp" width="1400" height="748" alt="A Weft node graph beside the hexagonal pattern it generates" loading="lazy">
+          </div>
+          <div class="showcase-caption"><strong>Weft</strong><span>node editor · live patch</span></div>
+        </a>
+
+        <a class="showcase-frame" href="https://theplacebetween.us" target="_blank" rel="noopener">
+          <div class="showcase-canvas">
+            <img class="art-photo" src="img/work-awakening-world.webp" width="1400" height="912" alt="Our Awakening World: a painted world map dotted with community portraits" loading="lazy">
+          </div>
+          <div class="showcase-caption"><strong>Our Awakening World</strong><span>living map</span></div>
+        </a>
+
+      </div>
     </div>
 
     <div class="work-grid">
 
-      <!-- IRIS Cocreative -->
       <details class="project-card">
         <summary>
           <span class="card-toggle" aria-hidden="true"></span>
           <h3>IRIS Cocreative</h3>
           <div class="project-role">Founder &amp; Creative Director</div>
-          <p class="project-teaser">An international design &amp; development studio serving organizations working on connection, collaboration, and consciousness.</p>
-          <div class="project-tags">
-            <span>Creative direction</span><span>Brand systems</span><span>Web platforms</span>
-          </div>
+          <p class="project-teaser">A small, distributed studio building brand systems, web platforms, and AI-assisted tools for purpose-driven organizations.</p>
+          <div class="project-tags"><span>Creative direction</span><span>Brand systems</span><span>Web platforms</span></div>
         </summary>
         <div class="project-detail">
-          <p>
-            IRIS is a small, distributed studio — designers and engineers building brand systems, web platforms, and AI-assisted tools for purpose-driven companies, NGOs, and thought leaders. I direct the creative and technical vision and stay close to the build.
-          </p>
-          <p>
-            The studio is the trunk; most of the projects below grow out of it.
-          </p>
-          <div class="project-actions">
-            <a href="https://www.iriscocreative.com" target="_blank" rel="noopener">Visit iriscocreative.com <span class="arrow">→</span></a>
-          </div>
+          <p>Designers and engineers working with NGOs, thought leaders, and companies whose work is about connection. I direct the creative and technical vision and stay close to the build.</p>
+          <p>The studio is the trunk. Most of what follows grows out of it.</p>
+          <div class="project-actions"><a href="https://www.iriscocreative.com" target="_blank" rel="noopener">Visit iriscocreative.com <span class="arrow">→</span></a></div>
         </div>
       </details>
 
-      <!-- IRIS Lab -->
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>Holos</h3>
+          <div class="project-role">Platform design &amp; build</div>
+          <p class="project-teaser">The digital commons for the Holomovement: a member globe, events, live video rooms, and a working surface for every circle.</p>
+          <div class="project-tags"><span>Community platform</span><span>Events</span><span>Live video</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>Holos helps a global network of people and organizations find each other, convene, and act together around the idea that we are part of one interconnected whole.</p>
+          <p>Designed and built end to end, from the signup flow to the map, on Webflow and Supabase with a custom component layer.</p>
+          <div class="project-actions"><a href="https://holos.holomovement.net" target="_blank" rel="noopener">Visit holos.holomovement.net <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>Collab OS</h3>
+          <div class="project-role">Product design &amp; engineering</div>
+          <p class="project-teaser">An action landscape for distributed teams: initiatives, actions, documents, and sheets on one shared, spatial surface.</p>
+          <div class="project-tags"><span>Next.js</span><span>Supabase</span><span>Spatial UI</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>Collab OS sits over the tools teams already use and shows the work as a map over time. Zoom in for the detail of a single action; zoom out for the arcs of many processes running side by side.</p>
+          <p>In use across IRIS client engagements, and the place where this site's original dashboard was always heading.</p>
+          <div class="project-actions"><a href="https://collab-os.com" target="_blank" rel="noopener">Visit collab-os.com <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>Lines of Thought</h3>
+          <div class="project-role">Research map · The Commons</div>
+          <p class="project-teaser">A sourced map of public statements on AI: 39 public figures across 19 spectrums of opinion on policy, possibility, risk, and reward.</p>
+          <div class="project-tags"><span>Sensemaking</span><span>Data design</span><span>Human–AI collaboration</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>Every line is a person, every column a question. Positions are coded from direct statements, with the evidence and its history one click away inside each profile. Built with Claude as research partner and published in the Collab OS Commons.</p>
+          <div class="project-actions"><a href="https://www.collab-os.com/commons/lines-of-thought" target="_blank" rel="noopener">Explore the map <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>Weft</h3>
+          <div class="project-role">Tool design</div>
+          <p class="project-teaser">A node-based parametric design tool for geometry, motion, and sound, running entirely in the browser.</p>
+          <div class="project-tags"><span>Parametric</span><span>Generative</span><span>Open tool</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>Over 180 nodes, live audio in, SVG and JavaScript export, and a gallery of patches from phyllotaxis to Stonehenge. Eighteen years of parametric practice, finally as a tool other people can pick up.</p>
+          <p>The ambient lattice on this page is a Weft graph, hand-compiled so it costs almost nothing to leave running.</p>
+          <div class="project-actions"><a href="https://iris-cocreative.github.io/weft/" target="_blank" rel="noopener">Open Weft <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
+      <details class="project-card">
+        <summary>
+          <span class="card-toggle" aria-hidden="true"></span>
+          <h3>Motion Library</h3>
+          <div class="project-role">Research index · The Commons</div>
+          <p class="project-teaser">15 studies of motion on the web, each rebuilt from scratch and reduced to the primitives it runs on.</p>
+          <div class="project-tags"><span>Motion</span><span>Canvas</span><span>Primitives</span></div>
+        </summary>
+        <div class="project-detail">
+          <p>Each study takes one piece of motion on the web that stopped us, rebuilds it in plain canvas, and names the primitives it runs on. Twelve are full pages with figures you can drive, and every card runs a live scrap of its own study rather than a picture of one.</p>
+          <div class="project-actions"><a href="https://www.collab-os.com/commons/motion-library" target="_blank" rel="noopener">Open the library <span class="arrow">→</span></a></div>
+        </div>
+      </details>
+
       <details class="project-card">
         <summary>
           <span class="card-toggle" aria-hidden="true"></span>
           <h3>IRIS Lab</h3>
           <div class="project-role">Research &amp; Development</div>
-          <p class="project-teaser">The studio's experimental arm — prototypes and research into new interface forms for collective intelligence.</p>
-          <div class="project-tags">
-            <span>R&amp;D</span><span>Prototyping</span><span>Collective intelligence</span>
-          </div>
+          <p class="project-teaser">The studio's experimental arm: prototypes and research into new interface forms for collective intelligence.</p>
+          <div class="project-tags"><span>R&amp;D</span><span>Prototyping</span><span>Collective intelligence</span></div>
         </summary>
         <div class="project-detail">
-          <p>
-            IRIS Lab is where we test ideas before they become products: circular and radial interfaces, sensemaking tools, and AI as a genuine thinking partner. It's the home of the <em>Digital Pattern Language</em> (below) and other open experiments.
-          </p>
-          <div class="project-actions">
-            <a href="https://lab.iriscocreative.com" target="_blank" rel="noopener">Explore the lab <span class="arrow">→</span></a>
-          </div>
+          <p>Circular and radial interfaces, sensemaking tools, AI as a genuine thinking partner, and the <em>Digital Pattern Language</em>, a living pattern language for humane, regenerative digital spaces, now in development.</p>
+          <div class="project-actions"><a href="https://lab.iriscocreative.com" target="_blank" rel="noopener">Explore the lab <span class="arrow">→</span></a></div>
         </div>
       </details>
 
-      <!-- Our Awakening World -->
       <details class="project-card">
         <summary>
           <span class="card-toggle" aria-hidden="true"></span>
           <h3>Our Awakening World</h3>
           <div class="project-role">Creative project</div>
           <p class="project-teaser">A living map of creators, thinkers, and communities catalyzing collective awakening across the globe.</p>
-          <div class="project-tags">
-            <span>Living map</span><span>Community</span><span>Collective awakening</span>
-          </div>
+          <div class="project-tags"><span>Living map</span><span>Community</span><span>Collective awakening</span></div>
         </summary>
         <div class="project-detail">
-          <p>
-            Our Awakening World is a living, growing atlas of the people and communities catalyzing collective awakening worldwide — a way to see the movement and find each other within it. I designed and built the digital home for the project.
-          </p>
-          <div class="project-actions">
-            <a href="https://theplacebetween.us" target="_blank" rel="noopener">Visit theplacebetween.us <span class="arrow">→</span></a>
-          </div>
+          <p>A growing atlas of the people and communities catalyzing collective awakening worldwide: a way to see the movement and find each other within it. I designed and built the digital home for the project.</p>
+          <div class="project-actions"><a href="https://theplacebetween.us" target="_blank" rel="noopener">Visit theplacebetween.us <span class="arrow">→</span></a></div>
         </div>
       </details>
 
-      <!-- Holos -->
-      <details class="project-card">
-        <summary>
-          <span class="card-toggle" aria-hidden="true"></span>
-          <h3>Holos</h3>
-          <div class="project-role">Platform Design</div>
-          <p class="project-teaser">A gathering platform for the Holomovement — connecting a global community working toward planetary wholeness.</p>
-          <div class="project-tags">
-            <span>Platform</span><span>Community design</span><span>Movement-building</span>
-          </div>
-        </summary>
-        <div class="project-detail">
-          <p>
-            Holos is the digital commons for the Holomovement — a network of people and organizations aligning around the idea that we're part of one interconnected whole. The platform helps members find each other, convene, and act together.
-          </p>
-          <div class="project-actions">
-            <a href="https://holos.holomovement.net" target="_blank" rel="noopener">Visit holos.holomovement.net <span class="arrow">→</span></a>
-          </div>
-        </div>
-      </details>
+    </div>
 
-      <!-- Digital Pattern Language — coming soon -->
-      <div class="project-card is-soon">
-        <h3>Digital Pattern Language</h3>
-        <div class="project-role">In Development</div>
-        <p class="project-teaser">A living pattern language for designing humane, regenerative digital spaces — drawn from sacred geometry and living-systems thinking.</p>
-        <span class="soon-badge">Coming soon</span>
+    <div class="collab-band">
+      <p class="logo-row-label">In collaboration with</p>
+      <div class="logo-row">
+        <a href="https://www.holomovement.net" target="_blank" rel="noopener"><img src="img/logos/holomovement.svg" alt="Holomovement" loading="lazy"></a>
+        <a class="logo-lockup" href="https://www.collab-os.com/" target="_blank" rel="noopener" aria-label="Collab OS">
+          <!-- the same mark + wordmark the Collab OS homepage renders inline -->
+          <svg viewBox="-150 -150 300 300" aria-hidden="true"><circle cx="36.89" cy="-105.71" r="30.62" fill="#32cd32"/><circle cx="91.9" cy="-67.29" r="28.68" fill="#1e90ff"/><circle cx="105.6" cy="4.78" r="36.87" fill="#9370db"/><circle cx="36.51" cy="78.28" r="56.21" fill="#add8e6"/><circle cx="-76.75" cy="20.47" r="63.15" fill="#ffd700"/><circle cx="-43.36" cy="-89.05" r="43.54" fill="#ffa500"/><circle cx="25.36" cy="-26.63" r="41.49" fill="currentColor"/></svg>
+          <span>Collab OS</span>
+        </a>
+        <a href="https://flourishproject.net/" target="_blank" rel="noopener"><img class="logo-white" src="img/logos/flourish-project.svg" alt="Flourish Project" loading="lazy"></a>
+        <a href="https://ilali.global/" target="_blank" rel="noopener"><img class="logo-white" src="img/logos/ilali.svg" alt="ILALI" loading="lazy"></a>
+        <span class="logo-item"><img class="logo-white" src="cv/logos/being-design.png" alt="Being Design" loading="lazy"></span>
+        <span class="logo-item"><img class="logo-dark" src="cv/logos/evolve-world.png" alt="Evolve World" loading="lazy"></span>
+        <a href="https://montaia.com" target="_blank" rel="noopener"><img class="logo-white" src="cv/logos/montaia.png" alt="Montaia" loading="lazy"></a>
       </div>
-
     </div>
   </section>
 
-  <!-- ─── Publications ─── -->
+  <!-- ─── Press & Publications ─── -->
   <section id="publications">
     <div class="section-head">
-      <span class="section-num">ii.</span>
+      <span class="section-num">iii.</span>
       <span class="section-title">Press &amp; Publications</span>
     </div>
 
     <div class="pub-list">
 
-      <!-- The Artist of Possibility Magazine — Emergence Education Press -->
       <a class="pub-item" href="https://emergenceeducation.com/articles/james-redenbaugh/" target="_blank" rel="noopener">
         <div class="pub-meta">
           <span class="pub-outlet">The Artist of Possibility Magazine</span>
           <span class="pub-date">Issue 25 · Mar 2026</span>
         </div>
         <div class="pub-body">
-          <h3 class="pub-title">Awakening Together — Featured Artist</h3>
-          <p class="pub-excerpt">James was honored to be the featured artist for the spring issue of Artist of Possibility Magazine, published by Emergence Education Press.</p>
+          <h3 class="pub-title">Awakening Together: Featured Artist</h3>
+          <p class="pub-excerpt">Featured artist for the spring issue of Artist of Possibility Magazine, published by Emergence Education Press.</p>
         </div>
         <span class="pub-arrow" aria-hidden="true">↗</span>
       </a>
 
-      <!-- The Integral Stage — Layman Pascal -->
       <a class="pub-item" href="https://www.youtube.com/watch?v=sHpLCqL2gNs" target="_blank" rel="noopener">
         <div class="pub-meta">
           <span class="pub-outlet">The Integral Stage</span>
           <span class="pub-date">Video · with Layman Pascal</span>
         </div>
         <div class="pub-body">
-          <h3 class="pub-title">Love the System — Ep. 22</h3>
+          <h3 class="pub-title">Love the System, Ep. 22</h3>
           <p class="pub-excerpt">A long-form conversation with host Layman Pascal on integral thinking, systems, and designing for collective intelligence.</p>
         </div>
         <span class="pub-arrow" aria-hidden="true">↗</span>
       </a>
 
-      <!-- Evolutionary Leaders -->
-      <a class="pub-item" href="https://www.evolutionaryleaders.net/leaders/james-bolden/" target="_blank" rel="noopener">
-        <div class="pub-meta">
-          <span class="pub-outlet">Evolutionary Leaders</span>
-          <span class="pub-date">Profile · May 2026</span>
-        </div>
-        <div class="pub-body">
-          <h3 class="pub-title">Evolutionary Leaders Circle</h3>
-          <p class="pub-excerpt">James's profile in the Evolutionary Leaders circle — a global network of individuals advancing conscious evolution and planetary flourishing.</p>
-        </div>
-        <span class="pub-arrow" aria-hidden="true">↗</span>
-      </a>
-
-      <!-- Awaken Your Purpose — Holomovement -->
       <a class="pub-item" href="https://www.holomovement.net/podcasts/james-bolden-iris-cocreative" target="_blank" rel="noopener">
         <div class="pub-meta">
           <span class="pub-outlet">Awaken Your Purpose</span>
@@ -998,32 +1548,30 @@
         <span class="pub-arrow" aria-hidden="true">↗</span>
       </a>
 
-      <!-- The Daily Orange — parkour (2010) -->
-      <a class="pub-item" href="https://dailyorange.com/2010/09/in-a-single-bound-with-each-leap-parkour-club-turns-campus-into-personal-playground/" target="_blank" rel="noopener">
+      <a class="pub-item" href="https://www.evolutionaryleaders.net/leaders/james-bolden/" target="_blank" rel="noopener">
         <div class="pub-meta">
-          <span class="pub-outlet">The Daily Orange</span>
-          <span class="pub-date">Sep 2010</span>
+          <span class="pub-outlet">Evolutionary Leaders</span>
+          <span class="pub-date">Profile · May 2026</span>
         </div>
         <div class="pub-body">
-          <h3 class="pub-title">In a Single Bound</h3>
-          <p class="pub-excerpt">It's just him, open space and a landscape full of possibilities.<br><em>"Loosen up. Don't think — explore," [Bolden] said. "Use what's there in unconventional ways."</em></p>
+          <h3 class="pub-title">Evolutionary Leaders Circle</h3>
+          <p class="pub-excerpt">Profile in the Evolutionary Leaders circle, a global network of individuals advancing conscious evolution and planetary flourishing.</p>
         </div>
         <span class="pub-arrow" aria-hidden="true">↗</span>
       </a>
 
-      <!-- Reuters — parkour. Hidden from display per request; kept for later use.
-      <a class="pub-item" href="https://www.reuters.com/article/lifestyle/ninja-in-training-parkour-fans-leap-flip-for-sport-idUSTRE67Q3CV/" target="_blank" rel="noopener">
+      <a class="pub-item has-photo" href="https://dailyorange.com/2010/09/in-a-single-bound-with-each-leap-parkour-club-turns-campus-into-personal-playground/" target="_blank" rel="noopener">
         <div class="pub-meta">
-          <span class="pub-outlet">Reuters</span>
-          <span class="pub-date">2010</span>
+          <span class="pub-outlet">The Daily Orange</span>
+          <span class="pub-date">Sep 2010 · before the studio</span>
         </div>
         <div class="pub-body">
-          <h3 class="pub-title">Ninja in Training: Parkour Fans Leap, Flip for Sport</h3>
-          <p class="pub-excerpt">Reuters' feature on the rise of parkour as a sport — from James's parkour years.</p>
+          <h3 class="pub-title">In a Single Bound</h3>
+          <p class="pub-excerpt">It's just him, open space and a landscape full of possibilities.<br><em>"Loosen up. Don't think. Explore," [Bolden] said. "Use what's there in unconventional ways."</em></p>
         </div>
+        <img class="pub-photo" src="img/parkour.webp" width="800" height="800" alt="James balancing on a rail at night, lit by a single beam" loading="lazy">
         <span class="pub-arrow" aria-hidden="true">↗</span>
       </a>
-      -->
 
     </div>
   </section>
@@ -1031,7 +1579,7 @@
   <!-- ─── Schedule ─── -->
   <section id="schedule">
     <div class="section-head">
-      <span class="section-num">iii.</span>
+      <span class="section-num">iv.</span>
       <span class="section-title">Schedule a Call</span>
     </div>
 
@@ -1067,13 +1615,13 @@
       <circle cx="74.02" cy="85" r="30"/>
     </svg>
     <p class="closing-quote">
-      "Design is a practice of making room — for connection, for emergence, for the intelligence that arises in the space between us."
+      <span class="mark">"</span>Design is a practice of making room: for connection, for emergence, for the intelligence that arises in the space between us.<span class="mark">"</span>
     </p>
     <div class="closing-links">
       <a href="/cv/">CV</a>
-      <a href="/blog/">Blog</a>
+      <a href="/blog/">Journal</a>
       <a href="#schedule">Schedule a call</a>
-      <a href="mailto:james@iris-cocreative.com">Get in touch</a>
+      <a href="mailto:connect@iris-cocreative.com">Connect</a>
     </div>
     <div class="closing-links social-row">
       <a href="https://www.behance.net/syn" target="_blank" rel="noopener">Behance</a>
@@ -1081,7 +1629,8 @@
       <a href="https://www.linkedin.com/in/james-redenbaugh-51662256/" target="_blank" rel="noopener">LinkedIn</a>
       <a href="https://www.facebook.com/james.redenbaugh/" target="_blank" rel="noopener">Facebook</a>
     </div>
-    <p class="closing-footer">james.today · 2026</p>
+    <p class="closing-footer">james.today · <span id="year">2026</span></p>
+    <p class="closing-name-note">James Bolden, formerly James Redenbaugh.</p>
   </footer>
 
 </main>
@@ -1089,23 +1638,44 @@
 <script>
   (function () {
     var root = document.documentElement;
+
+    /* ── Theme: ?theme=light|dark wins (for previews), then saved choice, then OS ── */
+    var forced = null;
+    try { forced = new URLSearchParams(location.search).get('theme'); } catch (e) {}
     var saved = null;
     try { saved = localStorage.getItem('jt-theme'); } catch (e) {}
-    if (!saved) {
-      saved = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    }
-    root.setAttribute('data-theme', saved);
+    var theme = forced || saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+    root.setAttribute('data-theme', theme);
 
     var btn = document.querySelector('.theme-toggle');
-    if (btn) {
-      btn.addEventListener('click', function () {
-        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        root.setAttribute('data-theme', next);
-        try { localStorage.setItem('jt-theme', next); } catch (e) {}
+    if (btn) btn.addEventListener('click', function () {
+      var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('jt-theme', next); } catch (e) {}
+    });
+
+    /* ── Live year ── */
+    var y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+
+    /* ── Showcase controls: arrows only, the strip never moves on its own ── */
+    var track = document.querySelector('.showcase-track');
+    if (track) {
+      var frameWidth = function () {
+        var f = track.querySelector('.showcase-frame');
+        return f ? f.getBoundingClientRect().width + 21 : 580;
+      };
+
+      document.querySelectorAll('.showcase-nav button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          track.scrollBy({ left: frameWidth() * Number(b.dataset.dir), behavior: 'smooth' });
+        });
       });
     }
   })();
 </script>
+
+<script src="js/weft-field.js" defer></script>
 
 </body>
 </html>
