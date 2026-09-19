@@ -2,7 +2,8 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0a0f">
 <title>James Bolden — james.today</title>
 <meta name="description" content="James Bolden is a creative technologist and founder of IRIS Cocreative. He designs and builds digital places for people working on how we live together: Holos, Collab OS, Weft.">
 
@@ -11,11 +12,11 @@
 <meta property="og:url" content="https://james.today/">
 <meta property="og:title" content="James Bolden — james.today">
 <meta property="og:description" content="Creative technologist. Founder of IRIS Cocreative. Holos, Collab OS, Weft.">
-<meta property="og:image" content="https://james.today/og-image.png">
+<meta property="og:image" content="https://james.today/og-image.png?v=2">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="James Bolden — james.today">
 <meta name="twitter:description" content="Creative technologist building the spaces where consciousness, community, and living systems meet.">
-<meta name="twitter:image" content="https://james.today/og-image.png">
+<meta name="twitter:image" content="https://james.today/og-image.png?v=2">
 
 <!-- Person schema: connects James Bolden ↔ James Redenbaugh ↔ IRIS Cocreative -->
 <script type="application/ld+json">
@@ -183,6 +184,9 @@
     -webkit-backdrop-filter: blur(12px);
     background: color-mix(in srgb, var(--bg) 72%, transparent);
     border-bottom: 1px solid var(--line-soft);
+    /* Extend the blurred bar under the status bar / Dynamic Island so the
+       phone UI sits on the same material instead of on scrolling content. */
+    padding-top: env(safe-area-inset-top, 0px);
   }
 
   .topbar-inner {
@@ -912,8 +916,9 @@
   .pub-excerpt { font-size: 0.82rem; line-height: 1.55; color: var(--text-dim); max-width: 60ch; }
   .pub-excerpt em { font-style: italic; color: var(--text); }
 
-  .pub-arrow { align-self: center; color: var(--accent-2); font-size: 1rem; line-height: 1; transition: transform 0.25s ease; }
-  .pub-item:hover .pub-arrow { transform: translateX(5px); }
+  .pub-arrow { align-self: center; color: var(--accent-2); line-height: 0; transition: transform 0.25s ease; }
+  .pub-arrow svg { width: 18px; height: 18px; display: block; }
+  .pub-item:hover .pub-arrow { transform: translate(3px, -3px); }
 
   /* ─── Schedule ─── */
   #schedule { margin-top: var(--s7); }
@@ -1065,14 +1070,25 @@
   }
 
   @media (max-width: 760px) {
-    .topbar-inner { padding: 12px 22px; }
-    .topbar-actions { gap: 14px; }
+    .topbar-inner { padding: 12px 22px; gap: 14px; }
+    .topbar-actions { gap: 12px; }
+    .topbar-actions a { white-space: nowrap; }
     .topbar-actions a.btn-call { padding: 6px 12px; }
     .page { padding: var(--s5) 22px var(--s6); }
     .work-grid { grid-template-columns: 1fr; }
-    .pub-item { grid-template-columns: 1fr; gap: var(--s2); }
+    .pub-item { grid-template-columns: 1fr; gap: var(--s2); position: relative; }
     .pub-item:hover { padding-left: 4px; }
-    .pub-meta { flex-direction: row; gap: 12px; align-items: baseline; }
+    .pub-meta { flex-direction: row; gap: 12px; align-items: baseline; padding-right: 28px; }
+    .pub-arrow { position: absolute; top: var(--s3); right: 0; }
+  }
+
+  @media (max-width: 480px) {
+    /* Not enough width for five items: drop the in-page anchors, keep CV + call + theme. */
+    .topbar-actions a[href="#work"], .topbar-actions a[href="#now"] { display: none; }
+    .topbar-inner { padding: 12px 18px; }
+  }
+
+  @media (max-width: 760px) {
     .geometry svg { width: 420px; height: 420px; }
     .geometry { right: -140px; }
     .schedule-row { flex-direction: column; }
@@ -1222,6 +1238,13 @@
   </svg>
 </div>
 
+<!-- Shared icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="icon-arrow-up-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 17 17 7M8 7h9v9"/>
+  </symbol>
+</svg>
+
 <!-- ─── Top bar ─── -->
 <header class="topbar">
   <div class="topbar-inner">
@@ -1283,13 +1306,11 @@
 
     <div class="now-grid">
       <div class="now-panel">
-        <span class="now-date"><span class="pulse" aria-hidden="true"></span> September 2026 <span class="sep">·</span> updated by hand</span>
+        <span class="now-date"><span class="pulse" aria-hidden="true"></span> September 2026</span>
         <ul class="now-list">
-          <li>Turning <em>37</em> today, September 15.</li>
           <li>Building <em>Collab OS</em>, a shared surface where distributed teams see their work as a landscape instead of a list.</li>
           <li>Shipping <em>Weft</em>, a node-based design tool. The lattice breathing behind this page was drawn in it.</li>
           <li>Designing <em>Holos</em> with the Holomovement: a member globe, events, and live rooms for a community working toward wholeness.</li>
-          <li>Writing the first entries of the Journal, starting with how two names became one.</li>
         </ul>
       </div>
 
@@ -1521,7 +1542,7 @@
           <h3 class="pub-title">Awakening Together: Featured Artist</h3>
           <p class="pub-excerpt">Featured artist for the spring issue of Artist of Possibility Magazine, published by Emergence Education Press.</p>
         </div>
-        <span class="pub-arrow" aria-hidden="true">↗</span>
+        <span class="pub-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#icon-arrow-up-right"/></svg></span>
       </a>
 
       <a class="pub-item" href="https://www.youtube.com/watch?v=sHpLCqL2gNs" target="_blank" rel="noopener">
@@ -1533,7 +1554,7 @@
           <h3 class="pub-title">Love the System, Ep. 22</h3>
           <p class="pub-excerpt">A long-form conversation with host Layman Pascal on integral thinking, systems, and designing for collective intelligence.</p>
         </div>
-        <span class="pub-arrow" aria-hidden="true">↗</span>
+        <span class="pub-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#icon-arrow-up-right"/></svg></span>
       </a>
 
       <a class="pub-item" href="https://www.holomovement.net/podcasts/james-bolden-iris-cocreative" target="_blank" rel="noopener">
@@ -1545,7 +1566,7 @@
           <h3 class="pub-title">James Bolden, IRIS Cocreative</h3>
           <p class="pub-excerpt">A conversation on purpose, the Holomovement, and building digital spaces for collective awakening.</p>
         </div>
-        <span class="pub-arrow" aria-hidden="true">↗</span>
+        <span class="pub-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#icon-arrow-up-right"/></svg></span>
       </a>
 
       <a class="pub-item" href="https://www.evolutionaryleaders.net/leaders/james-bolden/" target="_blank" rel="noopener">
@@ -1557,7 +1578,7 @@
           <h3 class="pub-title">Evolutionary Leaders Circle</h3>
           <p class="pub-excerpt">Profile in the Evolutionary Leaders circle, a global network of individuals advancing conscious evolution and planetary flourishing.</p>
         </div>
-        <span class="pub-arrow" aria-hidden="true">↗</span>
+        <span class="pub-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#icon-arrow-up-right"/></svg></span>
       </a>
 
       <a class="pub-item has-photo" href="https://dailyorange.com/2010/09/in-a-single-bound-with-each-leap-parkour-club-turns-campus-into-personal-playground/" target="_blank" rel="noopener">
@@ -1570,7 +1591,7 @@
           <p class="pub-excerpt">It's just him, open space and a landscape full of possibilities.<br><em>"Loosen up. Don't think. Explore," [Bolden] said. "Use what's there in unconventional ways."</em></p>
         </div>
         <img class="pub-photo" src="img/parkour.webp" width="800" height="800" alt="James balancing on a rail at night, lit by a single beam" loading="lazy">
-        <span class="pub-arrow" aria-hidden="true">↗</span>
+        <span class="pub-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#icon-arrow-up-right"/></svg></span>
       </a>
 
     </div>
@@ -1645,12 +1666,20 @@
     var saved = null;
     try { saved = localStorage.getItem('jt-theme'); } catch (e) {}
     var theme = forced || saved || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-    root.setAttribute('data-theme', theme);
+    /* theme-color tints the browser chrome (iOS status bar, Android toolbar)
+       to match --bg, so the phone UI reads as part of the top bar. */
+    var themeColors = { dark: '#0b0a0f', light: '#f4efe4' };
+    var themeMeta = document.querySelector('meta[name="theme-color"]');
+    var applyTheme = function (t) {
+      root.setAttribute('data-theme', t);
+      if (themeMeta) themeMeta.setAttribute('content', themeColors[t] || themeColors.dark);
+    };
+    applyTheme(theme);
 
     var btn = document.querySelector('.theme-toggle');
     if (btn) btn.addEventListener('click', function () {
       var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
+      applyTheme(next);
       try { localStorage.setItem('jt-theme', next); } catch (e) {}
     });
 
